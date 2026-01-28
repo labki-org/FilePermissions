@@ -30,11 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Extension validates configuration on load and fails closed on invalid config
   4. A file's permission level can be stored and retrieved from PageProps
   5. Default permission levels resolve correctly (global default, namespace override, fallback)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md - Extension skeleton & configuration system
+- [ ] 01-02-PLAN.md - Permission service & PageProps storage
 
 ### Phase 2: Core Enforcement
 **Goal**: Unauthorized users cannot access protected files through any content path
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Infrastructure | 0/? | Not started | - |
+| 1. Foundation & Infrastructure | 0/2 | Planned | - |
 | 2. Core Enforcement | 0/? | Not started | - |
 | 3. Upload Integration | 0/? | Not started | - |
 | 4. Display & Management | 0/? | Not started | - |
