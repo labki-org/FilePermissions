@@ -89,14 +89,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERM-01 | Phase 1 | Pending |
-| PERM-02 | Phase 1 | Pending |
-| PERM-03 | Phase 1 | Pending |
-| PERM-04 | Phase 1 | Pending |
-| PERM-05 | Phase 1 | Pending |
-| PERM-06 | Phase 1 | Pending |
-| PERM-07 | Phase 1 | Pending |
-| PERM-08 | Phase 1 | Pending |
+| PERM-01 | Phase 1 | Complete |
+| PERM-02 | Phase 1 | Complete |
+| PERM-03 | Phase 1 | Complete |
+| PERM-04 | Phase 1 | Complete |
+| PERM-05 | Phase 1 | Complete |
+| PERM-06 | Phase 1 | Complete |
+| PERM-07 | Phase 1 | Complete |
+| PERM-08 | Phase 1 | Complete |
 | ENFC-01 | Phase 2 | Pending |
 | ENFC-02 | Phase 2 | Pending |
 | ENFC-03 | Phase 2 | Pending |
@@ -114,8 +114,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FPUI-01 | Phase 4 | Pending |
 | FPUI-02 | Phase 4 | Pending |
 | FPUI-03 | Phase 4 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 27 total
