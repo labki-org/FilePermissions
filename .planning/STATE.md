@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 2 of 5 (Core Enforcement)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-28 - Phase 1 verified and complete
+Plan: 1 of ? in current phase
+Status: In progress
+Last activity: 2026-01-28 - Completed 02-01-PLAN.md (Enforcement Hooks)
 
-Progress: [##........] 20%
+Progress: [###.......] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 1.5 min
-- Total execution time: 3 min
+- Total plans completed: 3
+- Average duration: 1.7 min
+- Total execution time: 5 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 2/2 | 3 min | 1.5 min |
+| 2 | 1/? | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min)
-- Trend: -
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -50,6 +51,9 @@ Recent decisions affecting current work:
 - [01-01]: Fail-closed via global flag rather than exception
 - [01-02]: Fail-closed in canUserAccessLevel when Config::isInvalidConfig() is true
 - [01-02]: Grandfathered files (no level, no default) treated as unrestricted
+- [02-01]: Generic error messages (do not reveal required permission level)
+- [02-01]: Non-clickable placeholder to reduce discoverability
+- [02-01]: Placeholder sized to match dimensions (fallback 220px)
 
 ### Research Flags
 
@@ -61,11 +65,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Infrastructure validation required before Phase 2: web server must block direct /images/ access
+- Infrastructure validation required: web server must block direct /images/ access (img_auth.php must be configured)
 - Caching strategy TBD: may need CACHE_NONE for File: namespace if parser cache variants don't work
 
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Phase 1 verified and complete
+Stopped at: Completed 02-01-PLAN.md (Enforcement Hooks)
 Resume file: None
