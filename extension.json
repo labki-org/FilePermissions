@@ -1,0 +1,55 @@
+{
+	"name": "FilePermissions",
+	"version": "1.0.0",
+	"author": [
+		"FilePermissions Contributors"
+	],
+	"license-name": "GPL-2.0-or-later",
+	"description": "Group-based file permission system",
+	"descriptionmsg": "filepermissions-desc",
+	"requires": {
+		"MediaWiki": ">= 1.44.0"
+	},
+	"AutoloadNamespaces": {
+		"FilePermissions\\": "includes/"
+	},
+	"callback": "FilePermissions\\Hooks\\RegistrationHooks::onRegistration",
+	"ServiceWiringFiles": [
+		"includes/ServiceWiring.php"
+	],
+	"config": {
+		"FilePermLevels": {
+			"value": [
+				"public",
+				"internal",
+				"confidential"
+			],
+			"description": "Available permission levels for files"
+		},
+		"FilePermGroupGrants": {
+			"value": {
+				"sysop": [
+					"*"
+				],
+				"user": [
+					"public",
+					"internal"
+				]
+			},
+			"description": "Map of user groups to granted permission levels"
+		},
+		"FilePermDefaultLevel": {
+			"value": null,
+			"description": "Default permission level for new uploads (null = require explicit selection)"
+		},
+		"FilePermNamespaceDefaults": {
+			"value": {},
+			"description": "Map of namespace IDs to default permission levels"
+		},
+		"FilePermInvalidConfig": {
+			"value": false,
+			"description": "Internal flag set when configuration validation fails (fail-closed behavior)"
+		}
+	},
+	"manifest_version": 2
+}

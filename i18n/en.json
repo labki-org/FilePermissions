@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"FilePermissions Contributors"
+		]
+	},
+	"filepermissions-desc": "Group-based file permission system"
+}
