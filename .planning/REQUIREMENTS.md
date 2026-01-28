@@ -89,39 +89,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERM-01 | TBD | Pending |
-| PERM-02 | TBD | Pending |
-| PERM-03 | TBD | Pending |
-| PERM-04 | TBD | Pending |
-| PERM-05 | TBD | Pending |
-| PERM-06 | TBD | Pending |
-| PERM-07 | TBD | Pending |
-| PERM-08 | TBD | Pending |
-| ENFC-01 | TBD | Pending |
-| ENFC-02 | TBD | Pending |
-| ENFC-03 | TBD | Pending |
-| ENFC-04 | TBD | Pending |
-| ENFC-05 | TBD | Pending |
-| UPLD-01 | TBD | Pending |
-| UPLD-02 | TBD | Pending |
-| UPLD-03 | TBD | Pending |
-| UPLD-04 | TBD | Pending |
-| MSUP-01 | TBD | Pending |
-| MSUP-02 | TBD | Pending |
-| MSUP-03 | TBD | Pending |
-| MSUP-04 | TBD | Pending |
-| MSUP-05 | TBD | Pending |
-| FPUI-01 | TBD | Pending |
-| FPUI-02 | TBD | Pending |
-| FPUI-03 | TBD | Pending |
-| CONF-01 | TBD | Pending |
-| CONF-02 | TBD | Pending |
+| PERM-01 | Phase 1 | Pending |
+| PERM-02 | Phase 1 | Pending |
+| PERM-03 | Phase 1 | Pending |
+| PERM-04 | Phase 1 | Pending |
+| PERM-05 | Phase 1 | Pending |
+| PERM-06 | Phase 1 | Pending |
+| PERM-07 | Phase 1 | Pending |
+| PERM-08 | Phase 1 | Pending |
+| ENFC-01 | Phase 2 | Pending |
+| ENFC-02 | Phase 2 | Pending |
+| ENFC-03 | Phase 2 | Pending |
+| ENFC-04 | Phase 2 | Pending |
+| ENFC-05 | Phase 2 | Pending |
+| UPLD-01 | Phase 3 | Pending |
+| UPLD-02 | Phase 3 | Pending |
+| UPLD-03 | Phase 3 | Pending |
+| UPLD-04 | Phase 3 | Pending |
+| MSUP-01 | Phase 5 | Pending |
+| MSUP-02 | Phase 5 | Pending |
+| MSUP-03 | Phase 5 | Pending |
+| MSUP-04 | Phase 5 | Pending |
+| MSUP-05 | Phase 5 | Pending |
+| FPUI-01 | Phase 4 | Pending |
+| FPUI-02 | Phase 4 | Pending |
+| FPUI-03 | Phase 4 | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total
-- Mapped to phases: 0
-- Unmapped: 27 (pending roadmap)
+- Mapped to phases: 27
+- Unmapped: 0
 
 ---
 *Requirements defined: 2025-01-28*
-*Last updated: 2025-01-28 after initial definition*
+*Last updated: 2026-01-28 after roadmap creation*
