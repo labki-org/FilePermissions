@@ -4,5 +4,7 @@
 			"FilePermissions Contributors"
 		]
 	},
-	"filepermissions-desc": "Group-based file permission system"
+	"filepermissions-desc": "Group-based file permission system",
+	"filepermissions-access-denied": "You do not have permission to view this file.",
+	"filepermissions-img-denied": "You do not have permission to access this file."
 }
