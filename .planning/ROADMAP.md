@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md - Extension skeleton & configuration system
+- [x] 01-01-PLAN.md - Extension skeleton & configuration system
 - [ ] 01-02-PLAN.md - Permission service & PageProps storage
 
 ### Phase 2: Core Enforcement
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Infrastructure | 0/2 | Planned | - |
+| 1. Foundation & Infrastructure | 1/2 | In progress | - |
 | 2. Core Enforcement | 0/? | Not started | - |
 | 3. Upload Integration | 0/? | Not started | - |
 | 4. Display & Management | 0/? | Not started | - |
