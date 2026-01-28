@@ -9,13 +9,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Permission Model
 
-- [ ] **PERM-01**: Extension stores one permission level per file in PageProps (`mwfileperm_level`)
+- [ ] **PERM-01**: Extension stores one permission level per file in PageProps (`fileperm_level`)
 - [ ] **PERM-02**: Permission levels configurable via `$wgFilePermLevels` array
 - [ ] **PERM-03**: Group-to-level mapping via `$wgFilePermGroupGrants` configuration
 - [ ] **PERM-04**: Wildcard `'*'` in grants means access to all permission levels
 - [ ] **PERM-05**: User's effective permissions = union of all their group grants
 - [ ] **PERM-06**: Global default level via `$wgFilePermDefaultLevel`
-- [ ] **PERM-07**: Namespace-based defaults via `$wgFilePermByNamespaceDefault`
+- [ ] **PERM-07**: Namespace-based defaults via `$wgFilePermNamespaceDefaults`
 - [ ] **PERM-08**: Invalid/missing permissions treated as global default
 
 ### Enforcement
