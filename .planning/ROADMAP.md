@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Upload Integration** - Permission selection during Special:Upload
 - [x] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
 - [x] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
-- [ ] **Phase 6: VisualEditor Upload Integration** - Extend permission level upload functionality to VisualEditor
+- [x] **Phase 6: VisualEditor Upload Integration** - Extend permission level upload functionality to VisualEditor
 
 ## Phase Details
 
@@ -111,8 +111,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Server-side hooks, VE bridge module registration, and i18n messages
-- [ ] 06-02-PLAN.md — Client-side VE bridge JS/CSS (BookletLayout monkey-patch, XHR interception, verification)
+- [x] 06-01-PLAN.md — Server-side hooks, VE bridge module registration, and i18n messages
+- [x] 06-02-PLAN.md — Client-side VE bridge JS/CSS (BookletLayout monkey-patch, XHR interception, verification)
 
 ## Progress
 
@@ -126,7 +126,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Upload Integration | 1/1 | Complete | 2026-01-29 |
 | 4. Display & Management | 2/2 | Complete | 2026-01-29 |
 | 5. MsUpload Integration | 2/2 | Complete | 2026-01-29 |
-| 6. VisualEditor Upload Integration | 0/2 | Planned | — |
+| 6. VisualEditor Upload Integration | 2/2 | Complete | 2026-01-29 |
 
 ---
 *Roadmap created: 2026-01-28*
