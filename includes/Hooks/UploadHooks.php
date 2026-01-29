@@ -7,12 +7,14 @@ namespace FilePermissions\Hooks;
 use FilePermissions\Config;
 use FilePermissions\PermissionService;
 use MediaWiki\Context\RequestContext;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Hook\UploadCompleteHook;
 use MediaWiki\Hook\UploadFormInitDescriptorHook;
 use MediaWiki\Hook\UploadVerifyUploadHook;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use UploadBase;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * Upload hooks for FilePermissions extension.
@@ -108,6 +110,10 @@ class UploadHooks implements
 	/**
 	 * Store the selected permission level on upload completion.
 	 *
+	 * Page creation is deferred in LocalFile::upload() via AutoCommitUpdate,
+	 * so the file page may not exist yet when this hook fires. We defer
+	 * the permission storage to run after the current transaction commits.
+	 *
 	 * @param UploadBase $uploadBase The completed upload
 	 * @return bool
 	 */
@@ -118,19 +124,32 @@ class UploadHooks implements
 		}
 
 		$title = $localFile->getTitle();
-		if ( $title === null || $title->getArticleID() === 0 ) {
+		if ( $title === null ) {
 			return true;
 		}
 
-		// Read the selected level from the form submission
 		$level = RequestContext::getMain()->getRequest()->getVal( 'wpFilePermLevel' );
 
-		// Defense in depth: validation-callback should have caught this
+		// Defense in depth: UploadVerifyUpload should have caught this
 		if ( $level === null || $level === '' || !Config::isValidLevel( $level ) ) {
 			return true;
 		}
 
-		$this->permissionService->setLevel( $title, $level );
+		// Defer storage — the file page may not be committed yet
+		$dbKey = $title->getDBkey();
+		$ns = $title->getNamespace();
+		$permissionService = $this->permissionService;
+
+		DeferredUpdates::addCallableUpdate(
+			static function () use ( $dbKey, $ns, $level, $permissionService ) {
+				// Fresh Title avoids cached articleID=0 from before page creation
+				$freshTitle = Title::makeTitle( $ns, $dbKey );
+				if ( $freshTitle->getArticleID( IDBAccessObject::READ_LATEST ) === 0 ) {
+					return;
+				}
+				$permissionService->setLevel( $freshTitle, $level );
+			}
+		);
 
 		return true;
 	}
