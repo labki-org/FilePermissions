@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** Phase 4 - Display & Management
+**Current focus:** Phase 5 - MsUpload Integration
 
 ## Current Position
 
-Phase: 4 of 5 (Display & Management)
+Phase: 5 of 5 (MsUpload Integration)
 Plan: 1 of 2 in current phase
 Status: In progress
-Last activity: 2026-01-29 - Completed 04-01-PLAN.md
+Last activity: 2026-01-29 - Completed 05-01-PLAN.md
 
-Progress: [#######...] 70%
+Progress: [#########.] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 9
 - Total execution time: multi-session
 
 **By Phase:**
@@ -29,10 +29,11 @@ Progress: [#######...] 70%
 | 1 | 2/2 | Complete |
 | 2 | 2/2 | Complete |
 | 3 | 1/1 | Complete |
-| 4 | 1/2 | In progress |
+| 4 | 2/2 | Complete |
+| 5 | 1/2 | In progress |
 
 **Recent Trend:**
-- Phase 4 Plan 1 executed in 116s with 0 deviations (2 tasks, 2 commits)
+- Phase 5 Plan 1 executed cleanly with no deviations (2 tasks, 4 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -64,10 +65,16 @@ Recent decisions affecting current work:
 - [04-01]: OOUI server-side rendering for edit controls (not Codex/Vue)
 - [04-01]: ManualLogEntry audit logging for permission changes
 - [04-01]: Custom edit-fileperm right (not group membership check)
+- [04-02]: OOUI widgets require 'infusable' => true for client-side infusion
+- [04-02]: mw.notify() available as base stub in MW 1.44 — no explicit RL dependency needed
+- [05-01]: Detect Special:Upload form context via wpUploadFile/wpUploadFileURL request params
+- [05-01]: API uploads without wpFilePermLevel allowed with resolved default or grandfathered
+- [05-01]: ExtensionRegistry::isLoaded for conditional MsUpload bridge loading (silent no-op when absent)
+- [05-01]: No hard ext.MsUpload dependency in ResourceLoader module registration
 
 ### Research Flags
 
-- Phase 5 (MsUpload Integration): NEEDS RESEARCH - MsUpload JavaScript API is undocumented
+- Phase 5 (MsUpload Integration): RESEARCH COMPLETE - MsUpload source reviewed (see 05-RESEARCH.md)
 
 ### Pending Todos
 
@@ -82,5 +89,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
