@@ -34,6 +34,12 @@
 			"services": [
 				"FilePermissions.PermissionService"
 			]
+		},
+		"display": {
+			"class": "FilePermissions\\Hooks\\DisplayHooks",
+			"services": [
+				"FilePermissions.PermissionService"
+			]
 		}
 	},
 	"Hooks": {
@@ -42,7 +48,62 @@
 		"ImageBeforeProduceHTML": "enforcement",
 		"UploadFormInitDescriptor": "upload",
 		"UploadVerifyUpload": "upload",
-		"UploadComplete": "upload"
+		"UploadComplete": "upload",
+		"ImagePageAfterImageLinks": "display",
+		"BeforePageDisplay": "display"
+	},
+	"APIModules": {
+		"fileperm-set-level": {
+			"class": "FilePermissions\\Api\\ApiFilePermSetLevel",
+			"services": [
+				"FilePermissions.PermissionService"
+			]
+		}
+	},
+	"AvailableRights": [
+		"edit-fileperm"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"edit-fileperm": true
+		}
+	},
+	"LogTypes": [
+		"fileperm"
+	],
+	"LogNames": {
+		"fileperm": "filepermissions-log-name"
+	},
+	"LogHeaders": {
+		"fileperm": "filepermissions-log-header"
+	},
+	"LogActionsHandlers": {
+		"fileperm/*": "LogFormatter"
+	},
+	"ResourceModules": {
+		"ext.FilePermissions.indicator": {
+			"localBasePath": "modules",
+			"remoteExtPath": "FilePermissions/modules",
+			"styles": [
+				"ext.FilePermissions.edit.css"
+			]
+		},
+		"ext.FilePermissions.edit": {
+			"localBasePath": "modules",
+			"remoteExtPath": "FilePermissions/modules",
+			"packageFiles": [
+				"ext.FilePermissions.edit.js"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.notify",
+				"oojs-ui-core"
+			],
+			"messages": [
+				"filepermissions-edit-success",
+				"filepermissions-edit-error"
+			]
+		}
 	},
 	"config": {
 		"FilePermLevels": {

@@ -11,5 +11,14 @@
 	"filepermissions-upload-help": "Controls which groups can view this file.",
 	"filepermissions-upload-choose": "-- Choose --",
 	"filepermissions-upload-required": "You must select a permission level.",
-	"filepermissions-upload-invalid": "The selected permission level is not valid."
+	"filepermissions-upload-invalid": "The selected permission level is not valid.",
+	"filepermissions-level-label": "Permission level:",
+	"filepermissions-edit-save": "Save",
+	"filepermissions-edit-success": "Permission level updated.",
+	"filepermissions-edit-error": "Failed to update permission level.",
+	"filepermissions-log-name": "File permission log",
+	"filepermissions-log-header": "This log tracks changes to file permission levels.",
+	"logentry-fileperm-change": "$1 {{GENDER:$2|changed}} the permission level of $3 from $4 to $5",
+	"filepermissions-api-nosuchpage": "The specified file page does not exist.",
+	"right-edit-fileperm": "Change file permission levels"
 }
