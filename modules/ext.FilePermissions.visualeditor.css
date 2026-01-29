@@ -1,0 +1,23 @@
+/**
+ * FilePermissions VisualEditor bridge styles.
+ *
+ * Minimal styling for the OOUI DropdownInputWidget injected into VE's
+ * upload dialog. OOUI widgets provide extensive built-in styling, so
+ * only spacing and width constraints are needed here.
+ */
+
+/* Dropdown widget container - spacing within VE dialog fieldset */
+.fileperm-ve-dropdown {
+	margin-top: 0.5em;
+	max-width: 300px;
+}
+
+/* Ensure field layout label is consistent with VE dialog styling */
+.fileperm-ve-dropdown .oo-ui-dropdownInputWidget {
+	width: 100%;
+}
+
+/* Disabled state during upload - reinforce visual feedback */
+.fileperm-ve-dropdown.oo-ui-widget-disabled {
+	opacity: 0.6;
+}
