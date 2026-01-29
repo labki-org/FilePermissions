@@ -128,12 +128,19 @@
 	//   Phase 2 (publish): finishStashUpload -> uploadFromStash -> postWithEditToken (NO filtering)
 	//
 	// We ONLY inject wpFilePermLevel during Phase 2, identified by:
-	//   action=upload AND filekey present in FormData.
+	//   action=upload AND filekey present in the request body.
+	//
+	// Body format varies by caller:
+	//   - MsUpload (plupload): sends FormData directly via native XHR
+	//   - VE (mw.Api): serializes as URL-encoded string via jQuery.ajax
+	//     (uploadFromStash calls postWithEditToken without contentType:'multipart/form-data',
+	//      so mw.Api.ajax() uses $.param() producing a string, not FormData)
+	//
+	// Both formats are handled below.
 	//
 	// Coexistence with MsUpload bridge: Both bridges wrap XMLHttpRequest
 	// prototype methods. Standard monkey-patching chains correctly because
-	// each stores and calls the previous version. The !body.get('wpFilePermLevel')
-	// guard prevents double-injection.
+	// each stores and calls the previous version. Guards prevent double-injection.
 
 	// Patch open() to tag API POST requests
 	var origOpen = XMLHttpRequest.prototype.open;
@@ -144,19 +151,31 @@
 		return origOpen.apply( this, arguments );
 	};
 
-	// Patch send() to inject wpFilePermLevel on publish-from-stash requests
+	// Patch send() to inject wpFilePermLevel on publish-from-stash requests.
+	// Handles both FormData (MsUpload/plupload) and URL-encoded string (VE/mw.Api) bodies.
 	var origSend = XMLHttpRequest.prototype.send;
 	XMLHttpRequest.prototype.send = function ( body ) {
-		if ( this._filePermIsApiPost && body instanceof FormData ) {
-			var isUpload = ( typeof body.get === 'function' ) &&
-				body.get( 'action' ) === 'upload';
-			var hasFilekey = ( typeof body.get === 'function' ) &&
-				!!body.get( 'filekey' );
+		if ( this._filePermIsApiPost ) {
+			if ( body instanceof FormData ) {
+				// FormData path (MsUpload/plupload sends FormData directly)
+				var isUpload = ( typeof body.get === 'function' ) &&
+					body.get( 'action' ) === 'upload';
+				var hasFilekey = ( typeof body.get === 'function' ) &&
+					!!body.get( 'filekey' );
 
-			// CRITICAL: Only inject on publish-from-stash (action=upload + filekey present).
-			// This distinguishes VE's publish step from the initial stash upload.
-			if ( isUpload && hasFilekey && !body.get( 'wpFilePermLevel' ) ) {
-				body.append( 'wpFilePermLevel', getSelectedPermLevel() );
+				if ( isUpload && hasFilekey && !body.get( 'wpFilePermLevel' ) ) {
+					body.append( 'wpFilePermLevel', getSelectedPermLevel() );
+				}
+			} else if ( typeof body === 'string' ) {
+				// URL-encoded string path (VE/mw.Api serializes via $.param())
+				var params = new URLSearchParams( body );
+				if ( params.get( 'action' ) === 'upload' &&
+					params.has( 'filekey' ) &&
+					!params.has( 'wpFilePermLevel' ) ) {
+					params.set( 'wpFilePermLevel', getSelectedPermLevel() );
+					body = params.toString();
+					return origSend.call( this, body );
+				}
 			}
 		}
 
