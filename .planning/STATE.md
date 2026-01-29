@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** Phase 5 - MsUpload Integration
+**Current focus:** All phases complete
 
 ## Current Position
 
 Phase: 5 of 5 (MsUpload Integration)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-29 - Completed 05-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-01-29 - Completed 05-02-PLAN.md
 
-Progress: [#########.] 90%
+Progress: [##########] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Total execution time: multi-session
 
 **By Phase:**
@@ -30,10 +30,11 @@ Progress: [#########.] 90%
 | 2 | 2/2 | Complete |
 | 3 | 1/1 | Complete |
 | 4 | 2/2 | Complete |
-| 5 | 1/2 | In progress |
+| 5 | 2/2 | Complete |
 
 **Recent Trend:**
-- Phase 5 Plan 1 executed cleanly with no deviations (2 tasks, 4 min)
+- Phase 5 Plan 2 executed cleanly with no deviations (2 tasks, 2 min)
+- All 5 phases complete, 10 plans total
 - Trend: stable
 
 *Updated after each plan completion*
@@ -71,6 +72,10 @@ Recent decisions affecting current work:
 - [05-01]: API uploads without wpFilePermLevel allowed with resolved default or grandfathered
 - [05-01]: ExtensionRegistry::isLoaded for conditional MsUpload bridge loading (silent no-op when absent)
 - [05-01]: No hard ext.MsUpload dependency in ResourceLoader module registration
+- [05-02]: Plain HTML select (not OOUI) for MsUpload bridge dropdown — matches MsUpload's DOM style
+- [05-02]: Direct uploader.settings.multipart_params mutation — setOption would overwrite MsUpload's params
+- [05-02]: Post-upload PageProps API query for verification — server cannot signal save failure in upload response
+- [05-02]: autoHide: false on error notifications — errors require manual dismissal
 
 ### Research Flags
 
@@ -89,5 +94,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 05-02-PLAN.md (all phases complete)
 Resume file: None
