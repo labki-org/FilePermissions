@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Permission Model
 
-- [ ] **PERM-01**: Extension stores one permission level per file in PageProps (`fileperm_level`)
-- [ ] **PERM-02**: Permission levels configurable via `$wgFilePermLevels` array
-- [ ] **PERM-03**: Group-to-level mapping via `$wgFilePermGroupGrants` configuration
-- [ ] **PERM-04**: Wildcard `'*'` in grants means access to all permission levels
-- [ ] **PERM-05**: User's effective permissions = union of all their group grants
-- [ ] **PERM-06**: Global default level via `$wgFilePermDefaultLevel`
-- [ ] **PERM-07**: Namespace-based defaults via `$wgFilePermNamespaceDefaults`
-- [ ] **PERM-08**: Invalid/missing permissions treated as global default
+- [x] **PERM-01**: Extension stores one permission level per file in PageProps (`fileperm_level`)
+- [x] **PERM-02**: Permission levels configurable via `$wgFilePermLevels` array
+- [x] **PERM-03**: Group-to-level mapping via `$wgFilePermGroupGrants` configuration
+- [x] **PERM-04**: Wildcard `'*'` in grants means access to all permission levels
+- [x] **PERM-05**: User's effective permissions = union of all their group grants
+- [x] **PERM-06**: Global default level via `$wgFilePermDefaultLevel`
+- [x] **PERM-07**: Namespace-based defaults via `$wgFilePermNamespaceDefaults`
+- [x] **PERM-08**: Invalid/missing permissions treated as global default
 
 ### Enforcement
 
@@ -28,29 +28,29 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Upload Integration — Special:Upload
 
-- [ ] **UPLD-01**: Permission dropdown added to Special:Upload form
-- [ ] **UPLD-02**: Dropdown options populated from `$wgFilePermLevels`
-- [ ] **UPLD-03**: Default selection based on namespace context or global default
-- [ ] **UPLD-04**: `UploadComplete` hook stores selected permission level in PageProps
+- [x] **UPLD-01**: Permission dropdown added to Special:Upload form
+- [x] **UPLD-02**: Dropdown options populated from `$wgFilePermLevels`
+- [x] **UPLD-03**: Default selection based on namespace context or global default
+- [x] **UPLD-04**: `UploadComplete` hook stores selected permission level in PageProps
 
 ### Upload Integration — MsUpload
 
-- [ ] **MSUP-01**: JS bridge module loads when MsUpload is present
-- [ ] **MSUP-02**: Permission dropdown injected into MsUpload toolbar
-- [ ] **MSUP-03**: Dropdown defaults based on current page namespace
-- [ ] **MSUP-04**: Selected permission level appended to upload FormData
-- [ ] **MSUP-05**: Server-side hook captures `fileperm_level` from request
+- [x] **MSUP-01**: JS bridge module loads when MsUpload is present
+- [x] **MSUP-02**: Permission dropdown injected into MsUpload toolbar
+- [x] **MSUP-03**: Dropdown defaults based on current page namespace
+- [x] **MSUP-04**: Selected permission level appended to upload FormData
+- [x] **MSUP-05**: Server-side hook captures `fileperm_level` from request
 
 ### File Page UI
 
-- [ ] **FPUI-01**: Permission level displayed on File: description pages (badge/indicator)
-- [ ] **FPUI-02**: Privileged users (sysop) can edit permission level directly on File: page
-- [ ] **FPUI-03**: Permission edit interface (dropdown + save) accessible via action tab or inline
+- [x] **FPUI-01**: Permission level displayed on File: description pages (badge/indicator)
+- [x] **FPUI-02**: Privileged users (sysop) can edit permission level directly on File: page
+- [x] **FPUI-03**: Permission edit interface (dropdown + save) accessible via action tab or inline
 
 ### Configuration
 
-- [ ] **CONF-01**: Static `Config.php` class provides typed access to all config variables
-- [ ] **CONF-02**: Configuration validation on extension load (fail closed on invalid config)
+- [x] **CONF-01**: Static `Config.php` class provides typed access to all config variables
+- [x] **CONF-02**: Configuration validation on extension load (fail closed on invalid config)
 
 ## v2 Requirements
 
@@ -102,18 +102,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENFC-03 | Phase 2 | Complete |
 | ENFC-04 | Phase 2 | Complete |
 | ENFC-05 | Phase 2 | Complete |
-| UPLD-01 | Phase 3 | Pending |
-| UPLD-02 | Phase 3 | Pending |
-| UPLD-03 | Phase 3 | Pending |
-| UPLD-04 | Phase 3 | Pending |
-| MSUP-01 | Phase 5 | Pending |
-| MSUP-02 | Phase 5 | Pending |
-| MSUP-03 | Phase 5 | Pending |
-| MSUP-04 | Phase 5 | Pending |
-| MSUP-05 | Phase 5 | Pending |
-| FPUI-01 | Phase 4 | Pending |
-| FPUI-02 | Phase 4 | Pending |
-| FPUI-03 | Phase 4 | Pending |
+| UPLD-01 | Phase 3 | Complete |
+| UPLD-02 | Phase 3 | Complete |
+| UPLD-03 | Phase 3 | Complete |
+| UPLD-04 | Phase 3 | Complete |
+| MSUP-01 | Phase 5 | Complete |
+| MSUP-02 | Phase 5 | Complete |
+| MSUP-03 | Phase 5 | Complete |
+| MSUP-04 | Phase 5 | Complete |
+| MSUP-05 | Phase 5 | Complete |
+| FPUI-01 | Phase 4 | Complete |
+| FPUI-02 | Phase 4 | Complete |
+| FPUI-03 | Phase 4 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
 
@@ -124,4 +124,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2025-01-28*
-*Last updated: 2026-01-28 after roadmap creation*
+*Last updated: 2026-01-29 — all v1 requirements complete*

@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Core Enforcement** - Hook-based access control for all content paths
 - [x] **Phase 3: Upload Integration** - Permission selection during Special:Upload
 - [x] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
-- [ ] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
+- [x] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
 
 ## Phase Details
 
@@ -94,8 +94,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Server-side fix (UploadVerifyUpload tolerance) + MsUpload hook handler + module registration + i18n
-- [ ] 05-02-PLAN.md — Client-side MsUpload bridge JS/CSS (dropdown, plupload event binding, verification)
+- [x] 05-01-PLAN.md — Server-side fix (UploadVerifyUpload tolerance) + MsUpload hook handler + module registration + i18n
+- [x] 05-02-PLAN.md — Client-side MsUpload bridge JS/CSS (dropdown, plupload event binding, verification)
 
 ## Progress
 
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
 | 3. Upload Integration | 1/1 | Complete | 2026-01-29 |
 | 4. Display & Management | 2/2 | Complete | 2026-01-29 |
-| 5. MsUpload Integration | 0/2 | Planned | - |
+| 5. MsUpload Integration | 2/2 | Complete | 2026-01-29 |
 
 ---
 *Roadmap created: 2026-01-28*
