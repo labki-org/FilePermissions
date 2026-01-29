@@ -82,6 +82,13 @@ Key capabilities:
    }
    ```
 
+   For Caddy:
+
+   ```caddy
+   @images path /images/*
+   respond @images 403
+   ```
+
 ## Configuration Reference
 
 All configuration variables are set in `LocalSettings.php` after the `wfLoadExtension` call.
