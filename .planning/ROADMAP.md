@@ -13,7 +13,7 @@ FilePermissions delivers group-based, byte-level access control for MediaWiki up
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Infrastructure** - Permission model, storage, and configuration
-- [ ] **Phase 2: Core Enforcement** - Hook-based access control for all content paths
+- [x] **Phase 2: Core Enforcement** - Hook-based access control for all content paths
 - [ ] **Phase 3: Upload Integration** - Permission selection during Special:Upload
 - [ ] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
 - [ ] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
@@ -49,8 +49,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Enforcement hooks (getUserPermissionsErrors, ImgAuthBeforeStream, ImageBeforeProduceHTML)
-- [ ] 02-02-PLAN.md - Human verification of all access paths
+- [x] 02-01-PLAN.md - Enforcement hooks (getUserPermissionsErrors, ImgAuthBeforeStream, ImageBeforeProduceHTML)
+- [x] 02-02-PLAN.md - Human verification of all access paths
 
 ### Phase 3: Upload Integration
 **Goal**: Users can set permission level when uploading files via Special:Upload
@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Infrastructure | 2/2 | Complete | 2026-01-28 |
-| 2. Core Enforcement | 0/2 | Planned | - |
+| 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
 | 3. Upload Integration | 0/? | Not started | - |
 | 4. Display & Management | 0/? | Not started | - |
 | 5. MsUpload Integration | 0/? | Not started | - |

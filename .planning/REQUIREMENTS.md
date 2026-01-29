@@ -20,11 +20,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Enforcement
 
-- [ ] **ENFC-01**: `getUserPermissionsErrors` hook denies File: page access to unauthorized users
-- [ ] **ENFC-02**: `ImgAuthBeforeStream` hook denies raw file downloads to unauthorized users
-- [ ] **ENFC-03**: Thumbnail access denied to unauthorized users (via ImgAuthBeforeStream)
-- [ ] **ENFC-04**: Embedded images fail to render for unauthorized users
-- [ ] **ENFC-05**: Permission check fetches level from PageProps with default fallback
+- [x] **ENFC-01**: `getUserPermissionsErrors` hook denies File: page access to unauthorized users
+- [x] **ENFC-02**: `ImgAuthBeforeStream` hook denies raw file downloads to unauthorized users
+- [x] **ENFC-03**: Thumbnail access denied to unauthorized users (via ImgAuthBeforeStream)
+- [x] **ENFC-04**: Embedded images fail to render for unauthorized users
+- [x] **ENFC-05**: Permission check fetches level from PageProps with default fallback
 
 ### Upload Integration — Special:Upload
 
@@ -97,11 +97,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERM-06 | Phase 1 | Complete |
 | PERM-07 | Phase 1 | Complete |
 | PERM-08 | Phase 1 | Complete |
-| ENFC-01 | Phase 2 | Pending |
-| ENFC-02 | Phase 2 | Pending |
-| ENFC-03 | Phase 2 | Pending |
-| ENFC-04 | Phase 2 | Pending |
-| ENFC-05 | Phase 2 | Pending |
+| ENFC-01 | Phase 2 | Complete |
+| ENFC-02 | Phase 2 | Complete |
+| ENFC-03 | Phase 2 | Complete |
+| ENFC-04 | Phase 2 | Complete |
+| ENFC-05 | Phase 2 | Complete |
 | UPLD-01 | Phase 3 | Pending |
 | UPLD-02 | Phase 3 | Pending |
 | UPLD-03 | Phase 3 | Pending |

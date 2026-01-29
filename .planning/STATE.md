@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** Phase 2 - Core Enforcement
+**Current focus:** Phase 3 - Upload Integration
 
 ## Current Position
 
-Phase: 2 of 5 (Core Enforcement)
-Plan: 1 of ? in current phase
-Status: In progress
-Last activity: 2026-01-28 - Completed 02-01-PLAN.md (Enforcement Hooks)
+Phase: 3 of 5 (Upload Integration)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-01-28 - Phase 2 verified and complete
 
-Progress: [###.......] 30%
+Progress: [####......] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 1.7 min
-- Total execution time: 5 min
+- Total plans completed: 4
+- Average duration: 1.8 min
+- Total execution time: 7 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 2/2 | 3 min | 1.5 min |
-| 2 | 1/? | 2 min | 2 min |
+| 2 | 2/2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min), 02-02 (manual)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -54,6 +54,9 @@ Recent decisions affecting current work:
 - [02-01]: Generic error messages (do not reveal required permission level)
 - [02-01]: Non-clickable placeholder to reduce discoverability
 - [02-01]: Placeholder sized to match dimensions (fallback 220px)
+- [02-02]: img_auth.php requires $wgGroupPermissions['*']['read'] = false
+- [02-02]: Parser cache disabled for pages embedding protected images
+- [02-02]: Base64-encoded SVG for data URI reliability
 
 ### Research Flags
 
@@ -65,11 +68,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- Infrastructure validation required: web server must block direct /images/ access (img_auth.php must be configured)
-- Caching strategy TBD: may need CACHE_NONE for File: namespace if parser cache variants don't work
+- Deployment requires $wgGroupPermissions['*']['read'] = false (private wiki) for img_auth.php enforcement
+- Deployment requires web server blocking direct /images/ access
+- Parser cache disabled for pages with protected embedded images (performance tradeoff)
 
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 02-01-PLAN.md (Enforcement Hooks)
+Stopped at: Phase 2 verified and complete
 Resume file: None
