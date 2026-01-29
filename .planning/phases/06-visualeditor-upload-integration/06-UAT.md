@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-visualeditor-upload-integration
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md]
 started: 2026-01-29T12:00:00Z
@@ -65,17 +65,23 @@ skipped: 2
   reason: "User reported: The file permission does not show up on the uploaded File: page. My guess is the file gets uploaded to wiki when clicking the 'upload' button which happens on the first form, not after the info form"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "XHR interceptor checks `body instanceof FormData` (line 150) but VE publish-from-stash sends URL-encoded string via jQuery.ajax. mw.Api.uploadFromStash() calls postWithEditToken(data) without contentType:'multipart/form-data', so mw.Api.ajax() serializes via $.param() producing a string, not FormData. The instanceof FormData check silently fails."
+  artifacts:
+    - path: "modules/ext.FilePermissions.visualeditor.js"
+      issue: "line 150: body instanceof FormData is false for VE publish requests"
+  missing:
+    - "Handle URL-encoded string body in XHR interceptor, OR monkey-patch mw.Upload.prototype.finishStashUpload to inject wpFilePermLevel into the data object before mw.Api serializes it"
+  debug_session: ".planning/debug/ve-bridge-perm-level-not-stored.md"
 
 - truth: "Upload without explicit selection uses namespace/global default"
   status: failed
   reason: "User reported: Same issue as test 4. The permission level doesn't show up on the File: page once uploaded so I cannot test this"
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Same root cause as test 4 — XHR interceptor body type mismatch"
+  artifacts:
+    - path: "modules/ext.FilePermissions.visualeditor.js"
+      issue: "Same as test 4"
+  missing:
+    - "Same fix as test 4"
+  debug_session: ".planning/debug/ve-bridge-perm-level-not-stored.md"
