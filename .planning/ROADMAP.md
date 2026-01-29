@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Infrastructure** - Permission model, storage, and configuration
 - [x] **Phase 2: Core Enforcement** - Hook-based access control for all content paths
 - [x] **Phase 3: Upload Integration** - Permission selection during Special:Upload
-- [ ] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
+- [x] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
 - [ ] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
 
 ## Phase Details
@@ -77,8 +77,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Backend hooks, API module, extension registration, and i18n
-- [ ] 04-02-PLAN.md — Frontend JS/CSS and human verification
+- [x] 04-01-PLAN.md — Backend hooks, API module, extension registration, and i18n
+- [x] 04-02-PLAN.md — Frontend JS/CSS and human verification
 
 ### Phase 5: MsUpload Integration
 **Goal**: Users can set permission level when uploading files via MsUpload drag-drop
@@ -91,11 +91,11 @@ Plans:
   3. Selected permission level is transmitted with upload request
   4. Uploaded file has selected permission level stored in PageProps
   5. Upload without selection uses namespace/global default
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Server-side fix (UploadVerifyUpload tolerance) + MsUpload hook handler + module registration + i18n
+- [ ] 05-02-PLAN.md — Client-side MsUpload bridge JS/CSS (dropdown, plupload event binding, verification)
 
 ## Progress
 
@@ -107,8 +107,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Foundation & Infrastructure | 2/2 | Complete | 2026-01-28 |
 | 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
 | 3. Upload Integration | 1/1 | Complete | 2026-01-29 |
-| 4. Display & Management | 0/2 | Planned | - |
-| 5. MsUpload Integration | 0/? | Not started | - |
+| 4. Display & Management | 2/2 | Complete | 2026-01-29 |
+| 5. MsUpload Integration | 0/2 | Planned | - |
 
 ---
 *Roadmap created: 2026-01-28*
