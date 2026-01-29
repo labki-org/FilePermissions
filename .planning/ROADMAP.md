@@ -74,10 +74,11 @@ Plans:
   1. Permission level badge/indicator visible on File: description pages
   2. Sysop users see permission edit interface (dropdown + save) on File pages
   3. Sysop can change permission level and change persists to PageProps
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Backend hooks, API module, extension registration, and i18n
+- [ ] 04-02-PLAN.md — Frontend JS/CSS and human verification
 
 ### Phase 5: MsUpload Integration
 **Goal**: Users can set permission level when uploading files via MsUpload drag-drop
@@ -106,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Foundation & Infrastructure | 2/2 | Complete | 2026-01-28 |
 | 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
 | 3. Upload Integration | 1/1 | Complete | 2026-01-29 |
-| 4. Display & Management | 0/? | Not started | - |
+| 4. Display & Management | 0/2 | Planned | - |
 | 5. MsUpload Integration | 0/? | Not started | - |
 
 ---
