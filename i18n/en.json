@@ -20,5 +20,8 @@
 	"filepermissions-log-header": "This log tracks changes to file permission levels.",
 	"logentry-fileperm-change": "$1 {{GENDER:$2|changed}} the permission level of $3 from $4 to $5",
 	"filepermissions-api-nosuchpage": "The specified file page does not exist.",
-	"right-edit-fileperm": "Change file permission levels"
+	"right-edit-fileperm": "Change file permission levels",
+	"filepermissions-msupload-label": "Permission level:",
+	"filepermissions-msupload-error-nolevels": "Error: Permission levels could not be loaded.",
+	"filepermissions-msupload-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page."
 }

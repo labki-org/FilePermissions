@@ -40,6 +40,9 @@
 			"services": [
 				"FilePermissions.PermissionService"
 			]
+		},
+		"msupload": {
+			"class": "FilePermissions\\Hooks\\MsUploadHooks"
 		}
 	},
 	"Hooks": {
@@ -50,7 +53,8 @@
 		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload",
 		"ImagePageAfterImageLinks": "display",
-		"BeforePageDisplay": "display"
+		"BeforePageDisplay": "display",
+		"EditPage::showEditForm:initial": "msupload"
 	},
 	"APIModules": {
 		"fileperm-set-level": {
@@ -101,6 +105,24 @@
 			"messages": [
 				"filepermissions-edit-success",
 				"filepermissions-edit-error"
+			]
+		},
+		"ext.FilePermissions.msupload": {
+			"localBasePath": "modules",
+			"remoteExtPath": "FilePermissions/modules",
+			"packageFiles": [
+				"ext.FilePermissions.msupload.js"
+			],
+			"styles": [
+				"ext.FilePermissions.msupload.css"
+			],
+			"dependencies": [
+				"mediawiki.api"
+			],
+			"messages": [
+				"filepermissions-msupload-label",
+				"filepermissions-msupload-error-nolevels",
+				"filepermissions-msupload-error-save"
 			]
 		}
 	},
