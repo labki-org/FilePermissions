@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-28)
 ## Current Position
 
 Phase: 4 of 5 (Display & Management)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-29 - Phase 3 verified and complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-29 - Completed 04-01-PLAN.md
 
-Progress: [######....] 60%
+Progress: [#######...] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Total execution time: multi-session
 
 **By Phase:**
@@ -29,9 +29,10 @@ Progress: [######....] 60%
 | 1 | 2/2 | Complete |
 | 2 | 2/2 | Complete |
 | 3 | 1/1 | Complete |
+| 4 | 1/2 | In progress |
 
 **Recent Trend:**
-- Phase 3 required 4 commits (1 feat + 3 fixes) during human verification
+- Phase 4 Plan 1 executed in 116s with 0 deviations (2 tasks, 2 commits)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -60,6 +61,9 @@ Recent decisions affecting current work:
 - [03-01]: UploadVerifyUploadHook for server-side validation (UploadForm bypasses HTMLForm validation)
 - [03-01]: DeferredUpdates for storage timing (page not committed when UploadComplete fires)
 - [03-01]: array_unique in Config::getLevels() to handle MW array config merging
+- [04-01]: OOUI server-side rendering for edit controls (not Codex/Vue)
+- [04-01]: ManualLogEntry audit logging for permission changes
+- [04-01]: Custom edit-fileperm right (not group membership check)
 
 ### Research Flags
 
@@ -67,7 +71,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
@@ -78,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Phase 3 verified and complete
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
