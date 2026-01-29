@@ -2,7 +2,7 @@
 	"name": "FilePermissions",
 	"version": "1.0.0",
 	"author": [
-		"FilePermissions Contributors"
+		"Daniel Aharoni"
 	],
 	"license-name": "GPL-2.0-or-later",
 	"description": "Group-based file permission system",
