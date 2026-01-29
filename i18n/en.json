@@ -6,5 +6,10 @@
 	},
 	"filepermissions-desc": "Group-based file permission system",
 	"filepermissions-access-denied": "You do not have permission to view this file.",
-	"filepermissions-img-denied": "You do not have permission to access this file."
+	"filepermissions-img-denied": "You do not have permission to access this file.",
+	"filepermissions-upload-label": "Permission level",
+	"filepermissions-upload-help": "Controls which groups can view this file.",
+	"filepermissions-upload-choose": "-- Choose --",
+	"filepermissions-upload-required": "You must select a permission level.",
+	"filepermissions-upload-invalid": "The selected permission level is not valid."
 }

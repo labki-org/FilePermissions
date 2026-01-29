@@ -28,12 +28,20 @@
 			"services": [
 				"FilePermissions.PermissionService"
 			]
+		},
+		"upload": {
+			"class": "FilePermissions\\Hooks\\UploadHooks",
+			"services": [
+				"FilePermissions.PermissionService"
+			]
 		}
 	},
 	"Hooks": {
 		"getUserPermissionsErrors": "enforcement",
 		"ImgAuthBeforeStream": "enforcement",
-		"ImageBeforeProduceHTML": "enforcement"
+		"ImageBeforeProduceHTML": "enforcement",
+		"UploadFormInitDescriptor": "upload",
+		"UploadComplete": "upload"
 	},
 	"config": {
 		"FilePermLevels": {
