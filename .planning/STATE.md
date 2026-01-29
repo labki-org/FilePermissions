@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** Phase 6 (VisualEditor Upload Integration) - Plan 01 complete, Plan 02 next
+**Current focus:** PROJECT COMPLETE - All 6 phases, 12 plans executed
 
 ## Current Position
 
 Phase: 6 of 6 (VisualEditor Upload Integration)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-29 - Completed 06-01-PLAN.md (VE server-side foundation)
+Plan: 2 of 2 in current phase
+Status: COMPLETE
+Last activity: 2026-01-29 - Completed 06-02-PLAN.md (VE bridge client module)
 
-Progress: [###########-] ~92% (11/12 plans)
+Progress: [############] 100% (12/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Total execution time: multi-session
 
 **By Phase:**
@@ -31,11 +31,11 @@ Progress: [###########-] ~92% (11/12 plans)
 | 3 | 1/1 | Complete |
 | 4 | 2/2 | Complete |
 | 5 | 2/2 | Complete |
-| 6 | 1/2 | In progress |
+| 6 | 2/2 | Complete |
 
 **Recent Trend:**
-- Phase 6 Plan 1 executed cleanly with no deviations (2 tasks, ~2 min)
-- Trend: stable
+- Phase 6 Plan 2 executed cleanly with no deviations (2 tasks, ~2 min)
+- All 12 plans complete. Project finished.
 
 *Updated after each plan completion*
 
@@ -81,6 +81,10 @@ Recent decisions affecting current work:
 - [06-01]: ForeignStructuredUpload.BookletLayout as hard RL dependency (core module, always available)
 - [06-01]: No hard ext.visualEditor RL dependency — conditional loading via ExtensionRegistry only
 - [06-01]: Distinct wgFilePermVEDefault config var (separate from wgFilePermMsUploadDefault)
+- [06-02]: Module-level activeDropdown variable for XHR interceptor (not DOM query)
+- [06-02]: saveFile monkey-patch for post-upload verification (not XHR response listener)
+- [06-02]: OOUI DropdownInputWidget with FieldLayout for VE dialog consistency
+- [06-02]: hasFilekey guard to distinguish publish-from-stash from stash upload
 
 ### Research Flags
 
@@ -100,7 +104,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 06-01-PLAN.md. Next: execute 06-02-PLAN.md (VE bridge client module)
+Stopped at: PROJECT COMPLETE. All 12 plans across 6 phases executed.
 Resume file: None
 
 ## Roadmap Evolution
