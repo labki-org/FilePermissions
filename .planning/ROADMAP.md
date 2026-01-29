@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Infrastructure** - Permission model, storage, and configuration
 - [x] **Phase 2: Core Enforcement** - Hook-based access control for all content paths
-- [ ] **Phase 3: Upload Integration** - Permission selection during Special:Upload
+- [x] **Phase 3: Upload Integration** - Permission selection during Special:Upload
 - [ ] **Phase 4: Display & Management** - Permission visibility and admin editing on File pages
 - [ ] **Phase 5: MsUpload Integration** - JavaScript bridge for drag-drop upload permissions
 
@@ -64,7 +64,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 03-01-PLAN.md - Upload form dropdown + permission storage on upload
+- [x] 03-01-PLAN.md - Upload form dropdown + permission storage on upload
 
 ### Phase 4: Display & Management
 **Goal**: Users can see file permissions and admins can change them on File pages
@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Infrastructure | 2/2 | Complete | 2026-01-28 |
 | 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
-| 3. Upload Integration | 0/1 | Planned | - |
+| 3. Upload Integration | 1/1 | Complete | 2026-01-29 |
 | 4. Display & Management | 0/? | Not started | - |
 | 5. MsUpload Integration | 0/? | Not started | - |
 
