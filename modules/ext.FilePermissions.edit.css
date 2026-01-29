@@ -1,0 +1,32 @@
+/**
+ * FilePermissions indicator and edit control styles.
+ *
+ * Provides clean, minimal styling consistent with MediaWiki's visual
+ * language for the permission level indicator badge and sysop edit
+ * controls on File: description pages.
+ */
+
+.fileperm-section {
+	margin-top: 1em;
+	padding: 0.5em 0;
+	border-top: 1px solid #a7d7f9;
+}
+
+.fileperm-indicator {
+	margin-bottom: 0.5em;
+}
+
+.fileperm-level-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	background-color: #eaf3fb;
+	border: 1px solid #a7d7f9;
+	border-radius: 3px;
+	font-weight: bold;
+}
+
+.fileperm-edit-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
