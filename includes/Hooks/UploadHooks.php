@@ -66,11 +66,11 @@ class UploadHooks implements
 	/**
 	 * Store the selected permission level on upload completion.
 	 *
-	 * @param \UploadBase &$upload The completed upload
+	 * @param \UploadBase $uploadBase The completed upload
 	 * @return bool
 	 */
-	public function onUploadComplete( &$upload ) {
-		$localFile = $upload->getLocalFile();
+	public function onUploadComplete( $uploadBase ) {
+		$localFile = $uploadBase->getLocalFile();
 		if ( $localFile === null ) {
 			return true;
 		}
