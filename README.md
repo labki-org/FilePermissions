@@ -51,6 +51,37 @@ Key capabilities:
 
    Without this, direct URLs to files in the upload directory bypass enforcement.
 
+4. **Disable anonymous read access.** MediaWiki's `img_auth.php` skips **all** permission hooks (including `ImgAuthBeforeStream`) when the wiki is public. The extension's file access control will not work unless the wiki is private:
+
+   ```php
+   // Required: img_auth.php only enforces hooks on private wikis
+   $wgGroupPermissions['*']['read'] = false;
+
+   // Allow all logged-in users to read wiki pages
+   $wgGroupPermissions['user']['read'] = true;
+
+   // Whitelist pages that anonymous users need (login, etc.)
+   $wgWhitelistRead = [ 'Special:UserLogin', 'Special:CreateAccount', 'Main Page' ];
+   ```
+
+   This is a MediaWiki core limitation, not specific to this extension. Without this setting, `img_auth.php` treats the wiki as public and streams all files without calling any authorization hooks.
+
+5. **Block direct access to the upload directory.** Configure your web server to deny requests to the upload directory (typically `/images/`), so files can only be served through `img_auth.php`. For Apache:
+
+   ```apache
+   <Directory "/path/to/mediawiki/images">
+       Require all denied
+   </Directory>
+   ```
+
+   For Nginx:
+
+   ```nginx
+   location /images/ {
+       deny all;
+   }
+   ```
+
 ## Configuration Reference
 
 All configuration variables are set in `LocalSettings.php` after the `wfLoadExtension` call.
