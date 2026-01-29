@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 06-visualeditor-upload-integration
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md]
 started: 2026-01-29T12:00:00Z
-updated: 2026-01-29T12:15:00Z
+updated: 2026-01-29T12:30:00Z
 ---
 
 ## Current Test
@@ -26,15 +26,14 @@ result: pass
 
 ### 4. Permission level stored after VE upload
 expected: Upload a file through VisualEditor with a specific permission level selected (e.g., "confidential"). After upload completes, visit the File: page. The permission level indicator should show the level you selected ("confidential").
-result: issue
-reported: "The file permission does not show up on the uploaded File: page. My guess is the file gets uploaded to wiki when clicking the 'upload' button which happens on the first form, not after the info form"
-severity: major
+result: pass (after fix 06-03)
+previously: issue — XHR interceptor only handled FormData, not URL-encoded string body
+fix: 15f4cf7 — added URLSearchParams string body handling
 
 ### 5. Upload without explicit selection uses default
 expected: If a namespace or global default is configured, upload a file through VE without changing the dropdown from its default. The file should have the default permission level stored. Verify on the File: page.
-result: issue
-reported: "Same issue as test 4. The permission level doesn't show up on the File: page once uploaded so I cannot test this"
-severity: major
+result: pass (after fix 06-03)
+previously: issue — same root cause as test 4
 
 ### 6. Dropdown resets on dialog reuse
 expected: Upload one file via VE with "confidential" selected. Close the dialog. Open Insert → Media → Upload again. The dropdown should reset to the default level (not remain on "confidential" from the previous upload).
@@ -53,35 +52,11 @@ reason: Skipped for now
 ## Summary
 
 total: 8
-passed: 4
-issues: 2
+passed: 6
+issues: 0
 pending: 0
 skipped: 2
 
 ## Gaps
 
-- truth: "Uploaded file has selected permission level stored in PageProps after VE upload"
-  status: failed
-  reason: "User reported: The file permission does not show up on the uploaded File: page. My guess is the file gets uploaded to wiki when clicking the 'upload' button which happens on the first form, not after the info form"
-  severity: major
-  test: 4
-  root_cause: "XHR interceptor checks `body instanceof FormData` (line 150) but VE publish-from-stash sends URL-encoded string via jQuery.ajax. mw.Api.uploadFromStash() calls postWithEditToken(data) without contentType:'multipart/form-data', so mw.Api.ajax() serializes via $.param() producing a string, not FormData. The instanceof FormData check silently fails."
-  artifacts:
-    - path: "modules/ext.FilePermissions.visualeditor.js"
-      issue: "line 150: body instanceof FormData is false for VE publish requests"
-  missing:
-    - "Handle URL-encoded string body in XHR interceptor, OR monkey-patch mw.Upload.prototype.finishStashUpload to inject wpFilePermLevel into the data object before mw.Api serializes it"
-  debug_session: ".planning/debug/ve-bridge-perm-level-not-stored.md"
-
-- truth: "Upload without explicit selection uses namespace/global default"
-  status: failed
-  reason: "User reported: Same issue as test 4. The permission level doesn't show up on the File: page once uploaded so I cannot test this"
-  severity: major
-  test: 5
-  root_cause: "Same root cause as test 4 — XHR interceptor body type mismatch"
-  artifacts:
-    - path: "modules/ext.FilePermissions.visualeditor.js"
-      issue: "Same as test 4"
-  missing:
-    - "Same fix as test 4"
-  debug_session: ".planning/debug/ve-bridge-perm-level-not-stored.md"
+[all gaps resolved by fix 06-03 — commit 15f4cf7]

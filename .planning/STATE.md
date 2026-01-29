@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** PROJECT COMPLETE - All 6 phases, 12 plans executed
+**Current focus:** PROJECT COMPLETE - All 6 phases, 13 plans executed (incl. 1 gap closure). UAT passed.
 
 ## Current Position
 
 Phase: 6 of 6 (VisualEditor Upload Integration)
 Plan: 2 of 2 in current phase
-Status: COMPLETE
-Last activity: 2026-01-29 - Completed 06-02-PLAN.md (VE bridge client module)
+Status: UAT PASSED (6/6 passed, 2 skipped)
+Last activity: 2026-01-29 - UAT passed after gap closure fix (06-03)
 
-Progress: [############] 100% (12/12 plans)
+Progress: [############] 100% (13/13 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Total execution time: multi-session
 
 **By Phase:**
@@ -31,11 +31,11 @@ Progress: [############] 100% (12/12 plans)
 | 3 | 1/1 | Complete |
 | 4 | 2/2 | Complete |
 | 5 | 2/2 | Complete |
-| 6 | 2/2 | Complete |
+| 6 | 3/3 | Complete (UAT passed) |
 
 **Recent Trend:**
-- Phase 6 Plan 2 executed cleanly with no deviations (2 tasks, ~2 min)
-- All 12 plans complete. Project finished.
+- Phase 6 UAT found XHR body type mismatch, fixed in plan 06-03
+- All 13 plans complete. UAT passed. Project finished.
 
 *Updated after each plan completion*
 
@@ -85,6 +85,7 @@ Recent decisions affecting current work:
 - [06-02]: saveFile monkey-patch for post-upload verification (not XHR response listener)
 - [06-02]: OOUI DropdownInputWidget with FieldLayout for VE dialog consistency
 - [06-02]: hasFilekey guard to distinguish publish-from-stash from stash upload
+- [06-03]: URLSearchParams for string body parsing — mw.Api serializes publish-from-stash as URL-encoded string, not FormData
 
 ### Research Flags
 
@@ -104,7 +105,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: PROJECT COMPLETE. All 12 plans across 6 phases executed.
+Stopped at: PROJECT COMPLETE. All 13 plans across 6 phases executed. Phase 6 UAT passed (6/6, 2 skipped).
 Resume file: None
 
 ## Roadmap Evolution
