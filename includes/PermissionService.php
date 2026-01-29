@@ -23,6 +23,9 @@ class PermissionService {
 	private IConnectionProvider $dbProvider;
 	private UserGroupManager $userGroupManager;
 
+	/** @var array<int, ?string> In-process cache of page ID → permission level */
+	private array $levelCache = [];
+
 	/**
 	 * @param IConnectionProvider $dbProvider Database connection provider
 	 * @param UserGroupManager $userGroupManager User group manager
@@ -53,6 +56,10 @@ class PermissionService {
 			return null;
 		}
 
+		if ( array_key_exists( $pageId, $this->levelCache ) ) {
+			return $this->levelCache[$pageId];
+		}
+
 		// Query page_props for the permission level
 		$dbr = $this->dbProvider->getReplicaDatabase();
 		$row = $dbr->newSelectQueryBuilder()
@@ -65,11 +72,10 @@ class PermissionService {
 			->caller( __METHOD__ )
 			->fetchRow();
 
-		if ( $row === false ) {
-			return null;
-		}
+		$level = $row === false ? null : $row->pp_value;
+		$this->levelCache[$pageId] = $level;
 
-		return $row->pp_value;
+		return $level;
 	}
 
 	/**
@@ -104,6 +110,8 @@ class PermissionService {
 			] )
 			->caller( __METHOD__ )
 			->execute();
+
+		$this->levelCache[$pageId] = $level;
 	}
 
 	/**
@@ -127,6 +135,8 @@ class PermissionService {
 			] )
 			->caller( __METHOD__ )
 			->execute();
+
+		$this->levelCache[$pageId] = null;
 	}
 
 	/**
