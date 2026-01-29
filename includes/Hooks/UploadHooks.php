@@ -92,11 +92,31 @@ class UploadHooks implements
 		$pageText,
 		&$error
 	) {
-		$level = RequestContext::getMain()->getRequest()->getVal( 'wpFilePermLevel' );
+		$request = RequestContext::getMain()->getRequest();
+		$level = $request->getVal( 'wpFilePermLevel' );
 
 		if ( $level === null || $level === '' ) {
-			$error = [ 'filepermissions-upload-required' ];
-			return false;
+			// Attempt to resolve a namespace/global default
+			$default = Config::resolveDefaultLevel( NS_FILE );
+			if ( $default !== null ) {
+				// A default is available — allow the upload to proceed.
+				// onUploadComplete will apply the resolved default.
+				return true;
+			}
+
+			// No default configured. Only reject if this is a Special:Upload
+			// form submission where the user had a dropdown to choose.
+			// wpUploadFile is an HTMLForm field specific to Special:Upload.
+			if ( $request->getVal( 'wpUploadFile' ) !== null
+				|| $request->getVal( 'wpUploadFileURL' ) !== null
+			) {
+				$error = [ 'filepermissions-upload-required' ];
+				return false;
+			}
+
+			// API upload with no default configured — allow without level
+			// (grandfathered: file will have no level, treated as unrestricted)
+			return true;
 		}
 
 		if ( !Config::isValidLevel( $level ) ) {
@@ -130,8 +150,13 @@ class UploadHooks implements
 
 		$level = RequestContext::getMain()->getRequest()->getVal( 'wpFilePermLevel' );
 
-		// Defense in depth: UploadVerifyUpload should have caught this
-		if ( $level === null || $level === '' || !Config::isValidLevel( $level ) ) {
+		// If no explicit level provided, resolve namespace/global default
+		if ( $level === null || $level === '' ) {
+			$level = Config::resolveDefaultLevel( NS_FILE );
+		}
+
+		// No level available (neither explicit nor default) — nothing to store
+		if ( $level === null || !Config::isValidLevel( $level ) ) {
 			return true;
 		}
 
