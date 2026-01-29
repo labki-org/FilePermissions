@@ -1,0 +1,47 @@
+/**
+ * FilePermissions MsUpload bridge styles.
+ *
+ * Styles for the permission dropdown controls injected into MsUpload's
+ * toolbar area. Uses plain DOM styling to match MsUpload's utilitarian
+ * visual style (not OOUI).
+ */
+
+/* Container for label + select dropdown */
+.fileperm-msupload-controls {
+	padding: 6px 8px;
+	border-bottom: 1px solid #c8ccd1;
+	background: #f8f9fa;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* Label styling */
+.fileperm-msupload-controls label {
+	font-weight: bold;
+	white-space: nowrap;
+	font-size: 0.9em;
+}
+
+/* Permission level select dropdown */
+#fileperm-msupload-select {
+	padding: 4px 8px;
+	border: 1px solid #a2a9b1;
+	border-radius: 2px;
+	font-size: 0.9em;
+	background: #fff;
+}
+
+/* Disabled state during upload */
+#fileperm-msupload-select:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Error state when permission levels cannot be loaded */
+.fileperm-msupload-error {
+	padding: 8px;
+	color: #d33;
+	font-size: 0.9em;
+	border-bottom: 1px solid #c8ccd1;
+}
