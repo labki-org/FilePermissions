@@ -41,6 +41,7 @@
 		"ImgAuthBeforeStream": "enforcement",
 		"ImageBeforeProduceHTML": "enforcement",
 		"UploadFormInitDescriptor": "upload",
+		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload"
 	},
 	"config": {

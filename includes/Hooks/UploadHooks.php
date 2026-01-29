@@ -9,7 +9,10 @@ use FilePermissions\PermissionService;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\Hook\UploadCompleteHook;
 use MediaWiki\Hook\UploadFormInitDescriptorHook;
+use MediaWiki\Hook\UploadVerifyUploadHook;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use UploadBase;
 
 /**
  * Upload hooks for FilePermissions extension.
@@ -25,6 +28,7 @@ use MediaWiki\Title\Title;
  */
 class UploadHooks implements
 	UploadFormInitDescriptorHook,
+	UploadVerifyUploadHook,
 	UploadCompleteHook
 {
 	private PermissionService $permissionService;
@@ -64,9 +68,47 @@ class UploadHooks implements
 	}
 
 	/**
+	 * Validate permission level selection before upload is stored.
+	 *
+	 * UploadForm bypasses HTMLForm validation, so validation-callback
+	 * on the descriptor is never invoked. This hook enforces the
+	 * requirement server-side.
+	 *
+	 * @param UploadBase $upload
+	 * @param User $user
+	 * @param ?array $props
+	 * @param string $comment
+	 * @param string $pageText
+	 * @param array|null &$error
+	 * @return bool
+	 */
+	public function onUploadVerifyUpload(
+		UploadBase $upload,
+		User $user,
+		?array $props,
+		$comment,
+		$pageText,
+		&$error
+	) {
+		$level = RequestContext::getMain()->getRequest()->getVal( 'wpFilePermLevel' );
+
+		if ( $level === null || $level === '' ) {
+			$error = [ 'filepermissions-upload-required' ];
+			return false;
+		}
+
+		if ( !Config::isValidLevel( $level ) ) {
+			$error = [ 'filepermissions-upload-invalid' ];
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Store the selected permission level on upload completion.
 	 *
-	 * @param \UploadBase $uploadBase The completed upload
+	 * @param UploadBase $uploadBase The completed upload
 	 * @return bool
 	 */
 	public function onUploadComplete( $uploadBase ) {

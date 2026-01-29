@@ -18,7 +18,8 @@ class Config {
 	 */
 	public static function getLevels(): array {
 		global $wgFilePermLevels;
-		return $wgFilePermLevels ?? [ 'public' ];
+		// array_unique: MW merges extension.json defaults with LocalSettings values
+		return array_values( array_unique( $wgFilePermLevels ?? [ 'public' ] ) );
 	}
 
 	/**
