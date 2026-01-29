@@ -35,8 +35,14 @@ $wgWhitelistRead = [ 'Special:UserLogin', 'Special:CreateAccount', 'Main Page' ]
 $wgWhitelistReadRegexp = [ '/^[^:]*$/' ];
 
 // =============================================================================
-// Load FilePermissions Extension
+// Load Extensions
 // =============================================================================
+wfLoadExtension( 'WikiEditor' );
+wfLoadExtension( 'VisualEditor' );
+$wgDefaultUserOptions['visualeditor-editor'] = 'visualeditor';
+
+wfLoadExtension( 'MsUpload' );
+
 wfLoadExtension( 'FilePermissions', '/mw-user-extensions/FilePermissions/extension.json' );
 
 // =============================================================================
