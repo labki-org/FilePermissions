@@ -33,6 +33,15 @@ class ApiFilePermSetLevel extends ApiBase {
 		$this->permissionService = $permissionService;
 	}
 
+	/**
+	 * Execute the API action: validate inputs, update the permission level, and log the change.
+	 *
+	 * Requires the `edit-fileperm` user right. Stores the new level in PageProps
+	 * via PermissionService and publishes an audit log entry to Special:Log/fileperm.
+	 *
+	 * @throws \MediaWiki\Api\ApiUsageException If the user lacks `edit-fileperm`,
+	 *   the title does not exist, or the level is not in $wgFilePermLevels.
+	 */
 	public function execute() {
 		$this->checkUserRightsAny( 'edit-fileperm' );
 

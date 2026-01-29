@@ -75,6 +75,15 @@
 	// Patch renderInfoForm to inject OOUI DropdownInputWidget into the
 	// upload dialog's info form panel.
 	var origRenderInfoForm = mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm;
+	/**
+	 * Override of BookletLayout#renderInfoForm.
+	 *
+	 * Calls the original method, then appends an OOUI DropdownInputWidget
+	 * for permission level selection to the info form fieldset. Skips
+	 * injection for foreign upload targets (e.g. Commons).
+	 *
+	 * @return {OO.ui.PageLayout} The info form page with the dropdown appended
+	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm = function () {
 		var form = origRenderInfoForm.call( this );
 
@@ -114,6 +123,13 @@
 	// VE reuses the BookletLayout instance across multiple upload operations,
 	// so the dropdown must reset to the default value.
 	var origClear = mw.ForeignStructuredUpload.BookletLayout.prototype.clear;
+	/**
+	 * Override of BookletLayout#clear.
+	 *
+	 * Calls the original method, then resets the permission dropdown to the
+	 * default value. VE reuses the BookletLayout instance across multiple
+	 * upload operations, so the dropdown must be reset each time.
+	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.clear = function () {
 		origClear.call( this );
 		if ( this.filePermDropdown ) {
@@ -154,6 +170,16 @@
 	// Patch send() to inject wpFilePermLevel on publish-from-stash requests.
 	// Handles both FormData (MsUpload/plupload) and URL-encoded string (VE/mw.Api) bodies.
 	var origSend = XMLHttpRequest.prototype.send;
+	/**
+	 * Override of XMLHttpRequest#send.
+	 *
+	 * Intercepts outgoing XHR requests to the MediaWiki API. On publish-from-stash
+	 * requests (action=upload with filekey), appends wpFilePermLevel with the
+	 * currently selected permission level. Handles both FormData bodies
+	 * (MsUpload/plupload) and URL-encoded string bodies (VE/mw.Api).
+	 *
+	 * @param {FormData|string|null} body The request body
+	 */
 	XMLHttpRequest.prototype.send = function ( body ) {
 		if ( this._filePermIsApiPost ) {
 			if ( body instanceof FormData ) {

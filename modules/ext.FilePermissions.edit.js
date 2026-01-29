@@ -1,4 +1,6 @@
 /**
+ * @module ext.FilePermissions.edit
+ *
  * FilePermissions edit module.
  *
  * Infuses server-rendered OOUI widgets and handles save button clicks
