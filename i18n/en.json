@@ -23,5 +23,8 @@
 	"right-edit-fileperm": "Change file permission levels",
 	"filepermissions-msupload-label": "Permission level:",
 	"filepermissions-msupload-error-nolevels": "Error: Permission levels could not be loaded.",
-	"filepermissions-msupload-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page."
+	"filepermissions-msupload-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page.",
+	"filepermissions-ve-label": "Permission level:",
+	"filepermissions-ve-error-nolevels": "Error: Permission levels could not be loaded.",
+	"filepermissions-ve-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page."
 }
