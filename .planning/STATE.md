@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** Phase 5 UAT complete, adding Phase 6 (VisualEditor Upload Integration)
+**Current focus:** Phase 6 (VisualEditor Upload Integration) - Plan 01 complete, Plan 02 next
 
 ## Current Position
 
-Phase: 5 of 5 (MsUpload Integration)
-Plan: 2 of 2 in current phase
-Status: UAT Complete (6/6 passed)
-Last activity: 2026-01-29 - Phase 5 UAT passed, race condition fix committed
+Phase: 6 of 6 (VisualEditor Upload Integration)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-29 - Completed 06-01-PLAN.md (VE server-side foundation)
 
-Progress: [##########] 100%
+Progress: [###########-] ~92% (11/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Total execution time: multi-session
 
 **By Phase:**
@@ -31,10 +31,10 @@ Progress: [##########] 100%
 | 3 | 1/1 | Complete |
 | 4 | 2/2 | Complete |
 | 5 | 2/2 | Complete |
+| 6 | 1/2 | In progress |
 
 **Recent Trend:**
-- Phase 5 Plan 2 executed cleanly with no deviations (2 tasks, 2 min)
-- All 5 phases complete, 10 plans total
+- Phase 6 Plan 1 executed cleanly with no deviations (2 tasks, ~2 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -76,10 +76,16 @@ Recent decisions affecting current work:
 - [05-02]: Direct uploader.settings.multipart_params mutation — setOption would overwrite MsUpload's params
 - [05-02]: Post-upload PageProps API query for verification — server cannot signal save failure in upload response
 - [05-02]: autoHide: false on error notifications — errors require manual dismissal
+- [06-01]: BeforePageDisplayHook (not EditPage hook) because VE opens on any content page
+- [06-01]: Array format for BeforePageDisplay to support both display and visualeditor handlers
+- [06-01]: ForeignStructuredUpload.BookletLayout as hard RL dependency (core module, always available)
+- [06-01]: No hard ext.visualEditor RL dependency — conditional loading via ExtensionRegistry only
+- [06-01]: Distinct wgFilePermVEDefault config var (separate from wgFilePermMsUploadDefault)
 
 ### Research Flags
 
 - Phase 5 (MsUpload Integration): RESEARCH COMPLETE - MsUpload source reviewed (see 05-RESEARCH.md)
+- Phase 6 (VisualEditor Upload Integration): RESEARCH COMPLETE - VE upload dialog reviewed (see 06-RESEARCH.md)
 
 ### Pending Todos
 
@@ -94,5 +100,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Phase 5 UAT complete. Next: add Phase 6 (VisualEditor Upload Integration)
+Stopped at: Completed 06-01-PLAN.md. Next: execute 06-02-PLAN.md (VE bridge client module)
 Resume file: None
+
+## Roadmap Evolution
+
+- Phase 6 added: VisualEditor Upload Integration — extend permission level upload functionality to VisualEditor
