@@ -43,6 +43,9 @@
 		},
 		"msupload": {
 			"class": "FilePermissions\\Hooks\\MsUploadHooks"
+		},
+		"visualeditor": {
+			"class": "FilePermissions\\Hooks\\VisualEditorHooks"
 		}
 	},
 	"Hooks": {
@@ -53,7 +56,7 @@
 		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload",
 		"ImagePageAfterImageLinks": "display",
-		"BeforePageDisplay": "display",
+		"BeforePageDisplay": [ "display", "visualeditor" ],
 		"EditPage::showEditForm:initial": "msupload"
 	},
 	"APIModules": {
@@ -123,6 +126,26 @@
 				"filepermissions-msupload-label",
 				"filepermissions-msupload-error-nolevels",
 				"filepermissions-msupload-error-save"
+			]
+		},
+		"ext.FilePermissions.visualeditor": {
+			"localBasePath": "modules",
+			"remoteExtPath": "FilePermissions/modules",
+			"packageFiles": [
+				"ext.FilePermissions.visualeditor.js"
+			],
+			"styles": [
+				"ext.FilePermissions.visualeditor.css"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"oojs-ui-core",
+				"mediawiki.ForeignStructuredUpload.BookletLayout"
+			],
+			"messages": [
+				"filepermissions-ve-label",
+				"filepermissions-ve-error-nolevels",
+				"filepermissions-ve-error-save"
 			]
 		}
 	},
