@@ -2,7 +2,7 @@
 
 Group-based file access control for MediaWiki.
 
-**Version:** 1.0.0 | **License:** GPL-2.0-or-later
+**Version:** 1.0.0 | **License:** GPL-3.0-or-later
 
 ## Overview
 
@@ -256,4 +256,4 @@ All permission level changes are logged to `Special:Log/fileperm`. Log entries i
 
 ## License
 
-GPL-2.0-or-later
+GPL-3.0-or-later. See [LICENSE](LICENSE) for the full text.
