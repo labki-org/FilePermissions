@@ -13,6 +13,11 @@
 	"AutoloadNamespaces": {
 		"FilePermissions\\": "includes/"
 	},
+	"MessagesDirs": {
+		"FilePermissions": [
+			"i18n"
+		]
+	},
 	"callback": "FilePermissions\\Hooks\\RegistrationHooks::onRegistration",
 	"ServiceWiringFiles": [
 		"includes/ServiceWiring.php"

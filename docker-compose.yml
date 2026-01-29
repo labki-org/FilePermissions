@@ -14,6 +14,7 @@ services:
     volumes:
       - ./:/mw-user-extensions/FilePermissions
       - ./tests/LocalSettings.test.php:/mw-config/LocalSettings.user.php
+      - ./tests/apache-filepermissions.conf:/etc/apache2/conf-enabled/filepermissions.conf
       - images-data:/var/www/html/images
     depends_on:
       - db

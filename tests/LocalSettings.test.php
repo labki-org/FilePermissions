@@ -16,6 +16,24 @@ $wgUploadPath = "$wgScriptPath/img_auth.php";
 $wgImgAuthDetails = true;
 
 // =============================================================================
+// CRITICAL: Make img_auth.php enforce permission hooks
+// =============================================================================
+// MediaWiki's img_auth.php skips ALL permission hooks on "public" wikis
+// (where anonymous users have 'read' permission). To enable per-file
+// permission enforcement, we must remove anonymous read access.
+//
+// This means anonymous users cannot read wiki pages directly — they must
+// log in. This matches the intended deployment: a private wiki with
+// fine-grained file permissions.
+$wgGroupPermissions['*']['read'] = false;
+
+// Allow all logged-in users to read wiki pages
+$wgGroupPermissions['user']['read'] = true;
+
+// Allow anonymous access to login/create account pages
+$wgWhitelistRead = [ 'Special:UserLogin', 'Special:CreateAccount', 'Main Page' ];
+
+// =============================================================================
 // Load FilePermissions Extension
 // =============================================================================
 wfLoadExtension( 'FilePermissions', '/mw-user-extensions/FilePermissions/extension.json' );
