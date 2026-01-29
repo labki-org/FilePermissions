@@ -128,6 +128,7 @@ class DisplayHooks implements BeforePageDisplayHook
 			'options' => $options,
 			'value' => $currentLevel,
 			'id' => 'fileperm-edit-dropdown',
+			'infusable' => true,
 		] );
 
 		$button = new \OOUI\ButtonInputWidget( [
@@ -135,6 +136,7 @@ class DisplayHooks implements BeforePageDisplayHook
 			'flags' => [ 'primary', 'progressive' ],
 			'id' => 'fileperm-edit-save',
 			'type' => 'button',
+			'infusable' => true,
 		] );
 
 		return Html::rawElement( 'div', [

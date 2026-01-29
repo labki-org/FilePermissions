@@ -96,7 +96,6 @@
 			],
 			"dependencies": [
 				"mediawiki.api",
-				"mediawiki.notify",
 				"oojs-ui-core"
 			],
 			"messages": [
