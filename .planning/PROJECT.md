@@ -22,7 +22,19 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 
 ### Active
 
-(No active requirements — v1 complete, v2 not started)
+- [ ] PHPUnit test suite covering unit, integration, and E2E layers — v1.1
+- [ ] End-to-end HTTP leak checks verifying byte-level enforcement across all access vectors — v1.1
+- [ ] GitHub Actions CI pipeline running full test suite in labki-platform Docker environment — v1.1
+
+## Current Milestone: v1.1 Testing & CI
+
+**Goal:** Prove that the permission enforcement actually works — from unit-level logic through HTTP-level leak checks — and run it automatically on every PR.
+
+**Target features:**
+- PHPUnit unit tests for Config and PermissionService
+- PHPUnit integration tests for enforcement hooks, upload hooks, and API
+- E2E HTTP tests that upload files at each permission level and verify unauthorized users get 403s via img_auth.php, /images/, and thumbnail paths
+- GitHub Actions workflow using labki-platform Docker image
 
 ### Out of Scope
 
@@ -88,4 +100,4 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 | URLSearchParams for VE string body | mw.Api serializes as URL-encoded string, not FormData | Good |
 
 ---
-*Last updated: 2026-01-29 after v1.0 milestone*
+*Last updated: 2026-01-29 after v1.1 milestone start*
