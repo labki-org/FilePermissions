@@ -119,10 +119,7 @@ class EnforcementHooks implements
 		&$widthOption
 	) {
 		// Check if this file has a permission level (explicit or default)
-		$level = $this->permissionService->getLevel( $title );
-		if ( $level === null ) {
-			$level = \FilePermissions\Config::resolveDefaultLevel( $title->getNamespace() );
-		}
+		$level = $this->permissionService->getEffectiveLevel( $title );
 
 		// If the file is protected, disable parser cache for this page.
 		// The parser cache stores ONE version for all users, but different

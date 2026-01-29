@@ -211,6 +211,15 @@ Sets the permission level for a file. Requires CSRF token and `edit-fileperm` ri
 
 ## Extension Integration
 
+### Shared Module
+
+Both upload bridge modules depend on `ext.FilePermissions.shared`, which provides:
+
+- `mw.FilePermissions.verifyPermission(filename, errorMsgKey)` -- post-upload PageProps verification
+- A single `XMLHttpRequest.prototype.open` patch to tag API POST requests
+
+This ensures the XHR prototype is patched exactly once, even when both MsUpload and VisualEditor are active on the same page.
+
 ### MsUpload
 
 When the MsUpload extension is detected, `MsUploadHooks` loads the `ext.FilePermissions.msupload` module on edit pages. This adds a permission-level dropdown to the MsUpload interface. If MsUpload is not installed, the hook handler is a silent no-op.

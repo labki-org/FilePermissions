@@ -9,6 +9,7 @@ use FilePermissions\PermissionService;
 use MediaWiki\Html\Html;
 use MediaWiki\Output\Hook\BeforePageDisplayHook;
 use MediaWiki\Output\OutputPage;
+use MediaWiki\Page\Hook\ImagePageAfterImageLinksHook;
 
 /**
  * Display hooks for FilePermissions extension.
@@ -20,7 +21,7 @@ use MediaWiki\Output\OutputPage;
  * - FPUI-01: Permission indicator on File pages (ImagePageAfterImageLinks)
  * - FPUI-02: Conditional edit module loading (BeforePageDisplay)
  */
-class DisplayHooks implements BeforePageDisplayHook
+class DisplayHooks implements BeforePageDisplayHook, ImagePageAfterImageLinksHook
 {
 	private PermissionService $permissionService;
 

@@ -104,12 +104,17 @@ $wgCacheDirectory = "$IP/cache-filepermissions";
 //    - Go to Special:Upload
 //    - Upload TestProtectedFile.png
 //
-// 2. Set permission level on the file via SQL (until UI is built in Phase 3):
-//    docker compose exec db mysql -u labki -plabki_pass labki -e "
-//      INSERT INTO page_props (pp_page, pp_propname, pp_value)
-//      SELECT page_id, 'fileperm_level', 'confidential'
-//      FROM page WHERE page_title = 'TestProtectedFile.png' AND page_namespace = 6;
-//    "
+// 2. Set permission level on the file:
+//    a) Via the File page UI: navigate to File:TestProtectedFile.png, use the
+//       permission level dropdown and Save button (requires edit-fileperm right).
+//    b) Via the API:
+//       curl -b cookies.txt -d "action=fileperm-set-level&title=File:TestProtectedFile.png&level=confidential&token=..." http://localhost:8888/api.php
+//    c) Via direct SQL (useful for automated testing):
+//       docker compose exec db mysql -u labki -plabki_pass labki -e "
+//         INSERT INTO page_props (pp_page, pp_propname, pp_value)
+//         SELECT page_id, 'fileperm_level', 'confidential'
+//         FROM page WHERE page_title = 'TestProtectedFile.png' AND page_namespace = 6;
+//       "
 //
 // 3. Test as unauthorized user:
 //    - Log out or log in as TestUser (no confidential access)

@@ -37,39 +37,6 @@
 		return activeDropdown ? activeDropdown.getValue() : ( defaultLevel || levels[ 0 ] );
 	}
 
-	/**
-	 * Verify permission was stored for a file via PageProps API query.
-	 * Shows a persistent error notification if the permission level was
-	 * not found in PageProps after upload.
-	 *
-	 * @param {string} filename The uploaded filename
-	 */
-	function verifyPermission( filename ) {
-		new mw.Api().get( {
-			action: 'query',
-			titles: 'File:' + filename,
-			prop: 'pageprops',
-			ppprop: 'fileperm_level'
-		} ).then( function ( data ) {
-			var pages, pageId, page;
-
-			if ( !data.query || !data.query.pages ) {
-				return;
-			}
-
-			pages = data.query.pages;
-			for ( pageId in pages ) {
-				page = pages[ pageId ];
-				if ( !page.pageprops || !page.pageprops.fileperm_level ) {
-					mw.notify(
-						mw.msg( 'filepermissions-ve-error-save', filename ),
-						{ type: 'error', autoHide: false }
-					);
-				}
-			}
-		} );
-	}
-
 	// --- PART 1: Monkey-patch BookletLayout ---
 
 	// Patch renderInfoForm to inject OOUI DropdownInputWidget into the
@@ -154,18 +121,8 @@
 	//
 	// Both formats are handled below.
 	//
-	// Coexistence with MsUpload bridge: Both bridges wrap XMLHttpRequest
-	// prototype methods. Standard monkey-patching chains correctly because
-	// each stores and calls the previous version. Guards prevent double-injection.
-
-	// Patch open() to tag API POST requests
-	var origOpen = XMLHttpRequest.prototype.open;
-	XMLHttpRequest.prototype.open = function ( method, url ) {
-		if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
-			this._filePermIsApiPost = true;
-		}
-		return origOpen.apply( this, arguments );
-	};
+	// open() is patched once in ext.FilePermissions.shared.js to tag
+	// API POST requests with _filePermIsApiPost.
 
 	// Patch send() to inject wpFilePermLevel on publish-from-stash requests.
 	// Handles both FormData (MsUpload/plupload) and URL-encoded string (VE/mw.Api) bodies.
@@ -218,7 +175,7 @@
 		return origSaveFile.call( this ).then( function () {
 			// Delay verification to allow DeferredUpdates to store permission
 			setTimeout( function () {
-				verifyPermission( self.getFilename() );
+				mw.FilePermissions.verifyPermission( self.getFilename(), 'filepermissions-ve-error-save' );
 			}, 1000 );
 		} );
 	};

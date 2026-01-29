@@ -15,7 +15,7 @@ return [
 		MediaWikiServices $services
 	): PermissionService {
 		return new PermissionService(
-			$services->getDBLoadBalancerFactory(),
+			$services->getConnectionProvider(),
 			$services->getUserGroupManager()
 		);
 	},

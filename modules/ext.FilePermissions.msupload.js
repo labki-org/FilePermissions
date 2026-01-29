@@ -78,37 +78,6 @@
 	}
 
 	/**
-	 * Verify permission was stored for a file via PageProps API query.
-	 *
-	 * @param {string} filename The uploaded filename
-	 */
-	function verifyPermission( filename ) {
-		new mw.Api().get( {
-			action: 'query',
-			titles: 'File:' + filename,
-			prop: 'pageprops',
-			ppprop: 'fileperm_level'
-		} ).then( function ( data ) {
-			var pages, pageId, page;
-
-			if ( !data.query || !data.query.pages ) {
-				return;
-			}
-
-			pages = data.query.pages;
-			for ( pageId in pages ) {
-				page = pages[ pageId ];
-				if ( !page.pageprops || !page.pageprops.fileperm_level ) {
-					mw.notify(
-						mw.msg( 'filepermissions-msupload-error-save', filename ),
-						{ type: 'error', autoHide: false }
-					);
-				}
-			}
-		} );
-	}
-
-	/**
 	 * Initialize the bridge: inject dropdown and patch XHR for uploads.
 	 *
 	 * @param {jQuery} $msDiv The #msupload-div container
@@ -121,15 +90,8 @@
 		// FormData and monitor responses for post-upload verification.
 		// plupload uses native XHR (not jQuery.ajax), so we patch at
 		// the XHR prototype level.
-
-		// Patch open() to tag API POST requests
-		var origOpen = XMLHttpRequest.prototype.open;
-		XMLHttpRequest.prototype.open = function ( method, url ) {
-			if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
-				this._filePermIsApiPost = true;
-			}
-			return origOpen.apply( this, arguments );
-		};
+		// open() is patched once in ext.FilePermissions.shared.js to tag
+		// API POST requests with _filePermIsApiPost.
 
 		// Patch send() to inject param and attach response listeners
 		var origSend = XMLHttpRequest.prototype.send;
@@ -161,7 +123,7 @@
 							response.upload.result === 'Success' ) {
 							// Delay to allow DeferredUpdates to store permission
 							setTimeout( function () {
-								verifyPermission( response.upload.filename );
+								mw.FilePermissions.verifyPermission( response.upload.filename, 'filepermissions-msupload-error-save' );
 							}, 1000 );
 						}
 

@@ -167,6 +167,26 @@ class PermissionService {
 	}
 
 	/**
+	 * Get the effective permission level for a file.
+	 *
+	 * Returns the explicit level if set, otherwise falls back to the
+	 * namespace default (or global default). Returns null if no level
+	 * applies (unrestricted file).
+	 *
+	 * @param Title $title The file title
+	 * @return string|null The resolved permission level, or null if unrestricted
+	 */
+	public function getEffectiveLevel( Title $title ): ?string {
+		$level = $this->getLevel( $title );
+
+		if ( $level === null ) {
+			$level = Config::resolveDefaultLevel( $title->getNamespace() );
+		}
+
+		return $level;
+	}
+
+	/**
 	 * Check if a user can access a specific file.
 	 *
 	 * @param UserIdentity $user The user to check
@@ -174,16 +194,10 @@ class PermissionService {
 	 * @return bool True if user can access this file
 	 */
 	public function canUserAccessFile( UserIdentity $user, Title $title ): bool {
-		// Get the file's explicit level
-		$level = $this->getLevel( $title );
+		$level = $this->getEffectiveLevel( $title );
 
-		// If no explicit level, try to resolve default
-		if ( $level === null ) {
-			$level = Config::resolveDefaultLevel( $title->getNamespace() );
-		}
-
-		// If still no level (no default configured), treat as unrestricted
-		// This handles grandfathered files that predate the extension
+		// If no level applies, treat as unrestricted.
+		// This handles grandfathered files that predate the extension.
 		if ( $level === null ) {
 			return true;
 		}

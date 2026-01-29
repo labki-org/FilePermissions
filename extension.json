@@ -110,6 +110,16 @@
 				"filepermissions-edit-error"
 			]
 		},
+		"ext.FilePermissions.shared": {
+			"localBasePath": "modules",
+			"remoteExtPath": "FilePermissions/modules",
+			"packageFiles": [
+				"ext.FilePermissions.shared.js"
+			],
+			"dependencies": [
+				"mediawiki.api"
+			]
+		},
 		"ext.FilePermissions.msupload": {
 			"localBasePath": "modules",
 			"remoteExtPath": "FilePermissions/modules",
@@ -120,7 +130,8 @@
 				"ext.FilePermissions.msupload.css"
 			],
 			"dependencies": [
-				"mediawiki.api"
+				"mediawiki.api",
+				"ext.FilePermissions.shared"
 			],
 			"messages": [
 				"filepermissions-msupload-label",
@@ -140,7 +151,8 @@
 			"dependencies": [
 				"mediawiki.api",
 				"oojs-ui-core",
-				"mediawiki.ForeignStructuredUpload.BookletLayout"
+				"mediawiki.ForeignStructuredUpload.BookletLayout",
+				"ext.FilePermissions.shared"
 			],
 			"messages": [
 				"filepermissions-ve-label",
