@@ -61,10 +61,10 @@ Plans:
   2. Dropdown options match configured $wgFilePermLevels
   3. Default selection reflects namespace context or global default
   4. Uploaded file has selected permission level stored in PageProps
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md - Upload form dropdown + permission storage on upload
 
 ### Phase 4: Display & Management
 **Goal**: Users can see file permissions and admins can change them on File pages
@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Infrastructure | 2/2 | Complete | 2026-01-28 |
 | 2. Core Enforcement | 2/2 | Complete | 2026-01-28 |
-| 3. Upload Integration | 0/? | Not started | - |
+| 3. Upload Integration | 0/1 | Planned | - |
 | 4. Display & Management | 0/? | Not started | - |
 | 5. MsUpload Integration | 0/? | Not started | - |
 
