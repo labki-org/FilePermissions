@@ -118,6 +118,20 @@ class EnforcementHooks implements
 		&$query,
 		&$widthOption
 	) {
+		// Check if this file has a permission level (explicit or default)
+		$level = $this->permissionService->getLevel( $title );
+		if ( $level === null ) {
+			$level = \FilePermissions\Config::resolveDefaultLevel( $title->getNamespace() );
+		}
+
+		// If the file is protected, disable parser cache for this page.
+		// The parser cache stores ONE version for all users, but different
+		// users may have different file access levels. Without this, the
+		// first user to trigger a parse determines what all users see.
+		if ( $level !== null && $parser && $parser->getOutput() ) {
+			$parser->getOutput()->updateCacheExpiry( 0 );
+		}
+
 		$user = RequestContext::getMain()->getUser();
 
 		if ( !$this->permissionService->canUserAccessFile( $user, $title ) ) {
@@ -147,16 +161,18 @@ class EnforcementHooks implements
 	 */
 	private function generatePlaceholderHtml( int $width, int $height ): string {
 		// Lock icon SVG - minimal grayscale design
-		// URL-encoded for use in data URI (# encoded as %23)
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999">'
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#999">'
 			. '<path d="M12 17a2 2 0 002-2v-2a2 2 0 00-4 0v2a2 2 0 002 2zm6-7V8a6 6 0 10-12 0v2'
 			. 'a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2z"/></svg>';
+
+		// Base64-encode SVG to avoid HTML attribute escaping issues
+		$dataUri = 'data:image/svg+xml;base64,' . base64_encode( $svg );
 
 		// Non-clickable placeholder - no link wrapper, dead end
 		return '<span class="fileperm-placeholder" style="display:inline-block;'
 			. 'width:' . htmlspecialchars( (string)$width ) . 'px;'
 			. 'height:' . htmlspecialchars( (string)$height ) . 'px;'
-			. 'background:url(\'data:image/svg+xml,' . $svg . '\') center/50% no-repeat #f5f5f5;'
+			. 'background:url(' . htmlspecialchars( $dataUri ) . ') center/50% no-repeat #f5f5f5;'
 			. 'border:1px solid #ddd;"></span>';
 	}
 }

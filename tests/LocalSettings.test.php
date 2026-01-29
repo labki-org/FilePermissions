@@ -30,8 +30,9 @@ $wgGroupPermissions['*']['read'] = false;
 // Allow all logged-in users to read wiki pages
 $wgGroupPermissions['user']['read'] = true;
 
-// Allow anonymous access to login/create account pages
+// Allow anonymous access to login/create account pages and all main namespace pages
 $wgWhitelistRead = [ 'Special:UserLogin', 'Special:CreateAccount', 'Main Page' ];
+$wgWhitelistReadRegexp = [ '/^[^:]*$/' ];
 
 // =============================================================================
 // Load FilePermissions Extension
