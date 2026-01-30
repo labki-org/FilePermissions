@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 
 ## Current Position
 
-Phase: 8 of 10 (Integration Tests) -- COMPLETE
-Plan: 2 of 2 in phase 8
-Status: Phase 8 complete
-Last activity: 2026-01-30 -- Completed 08-02-PLAN.md
+Phase: 9 of 10 (E2E HTTP Leak Checks) -- IN PROGRESS
+Plan: 1 of 2 in phase 9
+Status: In progress
+Last activity: 2026-01-30 -- Completed 09-01-PLAN.md
 
-Progress: [########################....] ~50% (v1.1 phases 7-10; 4 plans complete, phases 9-10 remaining)
+Progress: [###########################.] ~63% (v1.1 phases 7-10; 5 plans complete, 09-02 + phase 10 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v1.1)
+- Total plans completed: 5 (v1.1)
 - Average duration: 3min
-- Total execution time: 12min
+- Total execution time: 16min
 
 **By Phase:**
 
@@ -29,6 +29,7 @@ Progress: [########################....] ~50% (v1.1 phases 7-10; 4 plans complet
 |-------|-------|-------|----------|
 | 07 | 2/2 | 6min | 3min |
 | 08 | 2/2 | 6min | 3min |
+| 09 | 1/2 | 4min | 4min |
 
 ## Accumulated Context
 
@@ -51,6 +52,10 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 | Mock UploadBase chain rather than full upload lifecycle | 08-02 | onUploadComplete only needs getLocalFile()->getTitle(); avoids unnecessary complexity |
 | ApiUsageException for all denial assertions | 08-02 | MW ApiTestCase throws ApiUsageException for permission denials, invalid params, missing tokens |
 | Direct PermissionService for query test setup | 08-02 | Setting levels via setLevel() is faster than API round-trip for query test data |
+| PHP curl over Guzzle for E2E HTTP client | 09-01 | Zero external dependency approach; curl is sufficient for E2E test HTTP needs |
+| Cookie-based clientlogin over bot passwords | 09-01 | Matches real user browser sessions; tests actual authentication flow |
+| Bootstrap skip pattern over hard failure | 09-01 | Gracefully skips when wiki unavailable; prevents false CI failures |
+| Public test file for Apache denial tests | 09-01 | Proves Apache blocks by path regardless of file permission level |
 
 ### Research Flags
 
@@ -66,8 +71,8 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 2. Test logged-in users, not anonymous -- MW core blocks anon on private wikis
 3. Set RequestContext user explicitly in hook tests -- RESOLVED: implemented in 08-01, 08-02
 4. @group Database on every test class touching DB -- RESOLVED: applied in 08-01, 08-02
-5. Test both original and /thumb/ paths for img_auth.php
-6. Distinguish Apache 403 from MW 403 in direct /images/ tests
+5. Test both original and /thumb/ paths for img_auth.php -- RESOLVED: E2ETestBase provides URL helpers for both, DirectPathAccessTest covers both (09-01)
+6. Distinguish Apache 403 from MW 403 in direct /images/ tests -- RESOLVED: DirectPathAccessTest assertion messages include "Apache direct path block" (09-01)
 7. Override all 5 FilePermissions config vars in integration setUp() -- RESOLVED: implemented in 08-01, 08-02
 
 ### Pending Todos
@@ -82,7 +87,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 08-02-PLAN.md (UploadHooks + API module integration tests -- phase 8 complete)
+Stopped at: Completed 09-01-PLAN.md (E2E test infrastructure + Apache direct-path denial tests)
 Resume file: None
 
-*Updated after 08-02 execution*
+*Updated after 09-01 execution*
