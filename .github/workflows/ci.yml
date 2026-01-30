@@ -1,0 +1,96 @@
+# FilePermissions CI Pipeline
+#
+# Runs all test tiers on PRs to main and pushes to main:
+#   1. Unit + Integration tests (inside Docker container via MW PHPUnit)
+#   2. E2E HTTP leak checks (against live wiki from runner)
+#
+# MERGE GATE (CI-05): Configure "test" as a required status check
+# in GitHub repo Settings > Branches > Branch protection rules > main
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit, Integration & E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start Docker environment
+        run: docker compose up -d
+
+      - name: Wait for wiki readiness
+        run: |
+          echo "Polling MediaWiki API for readiness (timeout: 120s)..."
+          timeout 120 bash -c '
+            until curl -sf "http://localhost:8888/api.php?action=query&meta=siteinfo&format=json" > /dev/null 2>&1; do
+              echo "Waiting for wiki..."
+              sleep 5
+            done
+          '
+          echo "Wiki is ready."
+
+      - name: Create test user
+        run: |
+          docker compose exec -T wiki php maintenance/run.php createAndPromote TestUser testpass123 || true
+
+      - name: Run database update
+        run: |
+          docker compose exec -T wiki php maintenance/run.php update --quick
+
+      - name: Run unit and integration tests
+        id: unit-integration
+        run: |
+          docker compose exec -T -w /var/www/html wiki php vendor/bin/phpunit \
+            --testdox \
+            extensions/FilePermissions/tests/phpunit/unit/ \
+            extensions/FilePermissions/tests/phpunit/integration/
+
+      - name: Install PHPUnit on runner
+        run: |
+          curl -L -o phpunit.phar https://phar.phpunit.de/phpunit-10.phar
+          chmod +x phpunit.phar
+          php phpunit.phar --version
+
+      - name: Run E2E HTTP leak checks
+        id: e2e
+        run: |
+          php phpunit.phar --testdox tests/phpunit/e2e/
+
+      - name: Write test summary
+        if: always()
+        env:
+          UNIT_RESULT: ${{ steps.unit-integration.outcome }}
+          E2E_RESULT: ${{ steps.e2e.outcome }}
+        run: |
+          echo "## CI Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tier | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$UNIT_RESULT" = "success" ]; then
+            echo "| Unit + Integration | PASS |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Unit + Integration | FAIL |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$E2E_RESULT" = "success" ]; then
+            echo "| E2E HTTP Leak Checks | PASS |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| E2E HTTP Leak Checks | FAIL |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Print Docker logs on failure
+        if: failure()
+        run: docker compose logs wiki
