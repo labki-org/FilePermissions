@@ -11,7 +11,7 @@ use MediaWiki\MediaWikiServices;
 /**
  * Maintenance script to detect and repair orphaned permission levels.
  *
- * Permission levels are stored as strings in page_props. If an admin
+ * Permission levels are stored in the fileperm_levels table. If an admin
  * renames or removes a level from $wgFilePermLevels, existing rows
  * still reference the old name. This script finds those mismatches
  * and optionally replaces them.
@@ -65,7 +65,7 @@ class ValidatePermissions extends Maintenance {
 	}
 
 	/**
-	 * Find all page_props rows whose fileperm_level value is not in the
+	 * Find all fileperm_levels rows whose level value is not in the
 	 * current valid set.
 	 *
 	 * @param array<string> $validLevels
@@ -75,22 +75,19 @@ class ValidatePermissions extends Maintenance {
 		$dbr = $this->getReplicaDB();
 
 		$rows = $dbr->newSelectQueryBuilder()
-			->select( [ 'pp_page', 'pp_value', 'page_title' ] )
-			->from( 'page_props' )
-			->join( 'page', null, 'page_id = pp_page' )
-			->where( [
-				'pp_propname' => 'fileperm_level',
-			] )
+			->select( [ 'fpl_page', 'fpl_level', 'page_title' ] )
+			->from( 'fileperm_levels' )
+			->join( 'page', null, 'page_id = fpl_page' )
 			->caller( __METHOD__ )
 			->fetchResultSet();
 
 		$orphans = [];
 		foreach ( $rows as $row ) {
-			if ( !in_array( $row->pp_value, $validLevels, true ) ) {
+			if ( !in_array( $row->fpl_level, $validLevels, true ) ) {
 				$orphans[] = [
-					'page_id' => (int)$row->pp_page,
+					'page_id' => (int)$row->fpl_page,
 					'title' => $row->page_title,
-					'level' => $row->pp_value,
+					'level' => $row->fpl_level,
 				];
 			}
 		}

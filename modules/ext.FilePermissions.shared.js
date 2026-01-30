@@ -3,7 +3,7 @@
  *
  * Provides common utilities used by both the MsUpload and VisualEditor bridge
  * modules:
- * - mw.FilePermissions.verifyPermission(): post-upload PageProps verification
+ * - mw.FilePermissions.verifyPermission(): post-upload permission verification
  * - One-time XMLHttpRequest.prototype.open patch to tag API POST requests
  *
  * Loaded as a dependency of ext.FilePermissions.msupload and
@@ -17,9 +17,9 @@
 	mw.FilePermissions = mw.FilePermissions || {};
 
 	/**
-	 * Verify permission was stored for a file via PageProps API query.
+	 * Verify permission was stored for a file via the fileperm API prop module.
 	 * Shows a persistent error notification if the permission level was
-	 * not found in PageProps after upload.
+	 * not found after upload.
 	 *
 	 * @param {string} filename The uploaded filename
 	 * @param {string} errorMsgKey The i18n message key for the error notification
@@ -28,8 +28,7 @@
 		new mw.Api().get( {
 			action: 'query',
 			titles: 'File:' + filename,
-			prop: 'pageprops',
-			ppprop: 'fileperm_level'
+			prop: 'fileperm'
 		} ).then( function ( data ) {
 			var pages, pageId, page;
 
@@ -40,7 +39,7 @@
 			pages = data.query.pages;
 			for ( pageId in pages ) {
 				page = pages[ pageId ];
-				if ( !page.pageprops || !page.pageprops.fileperm_level ) {
+				if ( !page.fileperm_level ) {
 					mw.notify(
 						mw.msg( errorMsgKey, filename ),
 						{ type: 'error', autoHide: false }

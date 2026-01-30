@@ -14,7 +14,7 @@ Key capabilities:
 - Enforcement on File: description pages, `img_auth.php` raw/thumbnail access, and embedded images
 - Fail-closed security model with placeholder SVG for unauthorized embeds
 - Audit log at `Special:Log/fileperm`
-- PageProps-based storage (no schema migrations)
+- Dedicated `fileperm_levels` table (survives page re-parses)
 
 ## Requirements
 
@@ -222,7 +222,7 @@ Sets the permission level for a file. Requires CSRF token and `edit-fileperm` ri
 
 Both upload bridge modules depend on `ext.FilePermissions.shared`, which provides:
 
-- `mw.FilePermissions.verifyPermission(filename, errorMsgKey)` -- post-upload PageProps verification
+- `mw.FilePermissions.verifyPermission(filename, errorMsgKey)` -- post-upload permission verification
 - A single `XMLHttpRequest.prototype.open` patch to tag API POST requests
 
 This ensures the XHR prototype is patched exactly once, even when both MsUpload and VisualEditor are active on the same page.
@@ -237,9 +237,11 @@ When VisualEditor is detected, `VisualEditorHooks` loads the `ext.FilePermission
 
 ## Storage
 
-Permission levels are stored in the `page_props` table under the property name `fileperm_level`. This uses MediaWiki's built-in PageProps infrastructure, so **no schema migrations or database changes are needed**.
+Permission levels are stored in a dedicated `fileperm_levels` table with columns `fpl_page` (primary key, references `page.page_id`) and `fpl_level`. This avoids the `page_props` table, whose rows are owned by the parser pipeline and silently wiped on page re-parse.
 
-On upload, storage is deferred via `DeferredUpdates` to ensure the file page exists before writing the property.
+The table is created automatically by `php maintenance/run.php update`.
+
+On upload, storage is deferred via `DeferredUpdates` to ensure the file page exists before writing the level.
 
 ## Permissions
 

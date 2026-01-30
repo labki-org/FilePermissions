@@ -1,0 +1,9 @@
+[{
+	"name": "fileperm_levels",
+	"columns": [
+		{ "name": "fpl_page", "type": "integer", "options": { "notnull": true, "unsigned": true } },
+		{ "name": "fpl_level", "type": "binary", "options": { "notnull": true, "length": 255 } }
+	],
+	"indexes": [],
+	"pk": ["fpl_page"]
+}]

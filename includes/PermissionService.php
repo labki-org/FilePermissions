@@ -14,11 +14,10 @@ use Wikimedia\Rdbms\IConnectionProvider;
  * Core permission service for FilePermissions extension.
  *
  * Provides the API for storing, retrieving, and checking file permissions.
- * Uses PageProps for storage and group-based grants for access control.
+ * Uses the dedicated fileperm_levels table for storage and group-based
+ * grants for access control.
  */
 class PermissionService {
-
-	private const PROP_NAME = 'fileperm_level';
 
 	private IConnectionProvider $dbProvider;
 	private UserGroupManager $userGroupManager;
@@ -60,19 +59,15 @@ class PermissionService {
 			return $this->levelCache[$pageId];
 		}
 
-		// Query page_props for the permission level
 		$dbr = $this->dbProvider->getReplicaDatabase();
 		$row = $dbr->newSelectQueryBuilder()
-			->select( 'pp_value' )
-			->from( 'page_props' )
-			->where( [
-				'pp_page' => $pageId,
-				'pp_propname' => self::PROP_NAME,
-			] )
+			->select( 'fpl_level' )
+			->from( 'fileperm_levels' )
+			->where( [ 'fpl_page' => $pageId ] )
 			->caller( __METHOD__ )
 			->fetchRow();
 
-		$level = $row === false ? null : $row->pp_value;
+		$level = $row === false ? null : $row->fpl_level;
 		$this->levelCache[$pageId] = $level;
 
 		return $level;
@@ -100,13 +95,11 @@ class PermissionService {
 
 		$dbw = $this->dbProvider->getPrimaryDatabase();
 		$dbw->newReplaceQueryBuilder()
-			->replaceInto( 'page_props' )
-			->uniqueIndexFields( [ 'pp_page', 'pp_propname' ] )
+			->replaceInto( 'fileperm_levels' )
+			->uniqueIndexFields( [ 'fpl_page' ] )
 			->row( [
-				'pp_page' => $pageId,
-				'pp_propname' => self::PROP_NAME,
-				'pp_value' => $level,
-				'pp_sortkey' => null,
+				'fpl_page' => $pageId,
+				'fpl_level' => $level,
 			] )
 			->caller( __METHOD__ )
 			->execute();
@@ -128,11 +121,8 @@ class PermissionService {
 
 		$dbw = $this->dbProvider->getPrimaryDatabase();
 		$dbw->newDeleteQueryBuilder()
-			->deleteFrom( 'page_props' )
-			->where( [
-				'pp_page' => $pageId,
-				'pp_propname' => self::PROP_NAME,
-			] )
+			->deleteFrom( 'fileperm_levels' )
+			->where( [ 'fpl_page' => $pageId ] )
 			->caller( __METHOD__ )
 			->execute();
 

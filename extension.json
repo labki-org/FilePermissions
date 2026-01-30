@@ -46,6 +46,9 @@
 		},
 		"visualeditor": {
 			"class": "FilePermissions\\Hooks\\VisualEditorHooks"
+		},
+		"SchemaChanges": {
+			"class": "FilePermissions\\Hooks\\SchemaChangesHandler"
 		}
 	},
 	"Hooks": {
@@ -57,7 +60,16 @@
 		"UploadComplete": "upload",
 		"ImagePageAfterImageLinks": "display",
 		"BeforePageDisplay": [ "display", "visualeditor" ],
-		"EditPage::showEditForm:initial": "msupload"
+		"EditPage::showEditForm:initial": "msupload",
+		"LoadExtensionSchemaUpdates": "SchemaChanges"
+	},
+	"APIPropModules": {
+		"fileperm": {
+			"class": "FilePermissions\\Api\\ApiQueryFilePermLevel",
+			"services": [
+				"FilePermissions.PermissionService"
+			]
+		}
 	},
 	"APIModules": {
 		"fileperm-set-level": {
