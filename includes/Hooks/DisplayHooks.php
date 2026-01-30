@@ -6,10 +6,13 @@ namespace FilePermissions\Hooks;
 
 use FilePermissions\Config;
 use FilePermissions\PermissionService;
+use MediaWiki\EditPage\EditPage;
+use MediaWiki\Hook\EditPage__showEditForm_initialHook;
 use MediaWiki\Html\Html;
 use MediaWiki\Output\Hook\BeforePageDisplayHook;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\Hook\ImagePageAfterImageLinksHook;
+use MediaWiki\Registration\ExtensionRegistry;
 
 /**
  * Display hooks for FilePermissions extension.
@@ -20,8 +23,15 @@ use MediaWiki\Page\Hook\ImagePageAfterImageLinksHook;
  * Implements:
  * - FPUI-01: Permission indicator on File pages (ImagePageAfterImageLinks)
  * - FPUI-02: Conditional edit module loading (BeforePageDisplay)
+ * - VE-01: Conditional bridge module loading (BeforePageDisplay)
+ * - VE-02: Namespace-aware default level in JS config vars
+ * - MSUP-01: Conditional bridge module loading (EditPage::showEditForm:initial)
+ * - MSUP-02: Namespace-aware default level in JS config vars
  */
-class DisplayHooks implements BeforePageDisplayHook, ImagePageAfterImageLinksHook
+class DisplayHooks implements
+	BeforePageDisplayHook,
+	ImagePageAfterImageLinksHook,
+	EditPage__showEditForm_initialHook
 {
 	private PermissionService $permissionService;
 
@@ -71,22 +81,56 @@ class DisplayHooks implements BeforePageDisplayHook, ImagePageAfterImageLinksHoo
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$title = $out->getTitle();
-		if ( !$title || $title->getNamespace() !== NS_FILE ) {
+
+		// File page display: indicator styles + edit module
+		if ( $title && $title->getNamespace() === NS_FILE ) {
+			// Always load indicator styles on File pages
+			$out->addModuleStyles( [ 'ext.FilePermissions.indicator' ] );
+
+			// Load edit module and config vars for users with edit-fileperm right
+			if ( $out->getUser()->isAllowed( 'edit-fileperm' ) ) {
+				$out->addModules( [ 'ext.FilePermissions.edit' ] );
+				$out->addJsConfigVars( [
+					'wgFilePermCurrentLevel' => $this->permissionService->getLevel( $title ),
+					'wgFilePermLevels' => Config::getLevels(),
+					'wgFilePermPageTitle' => $title->getPrefixedDBkey(),
+				] );
+			}
+		}
+
+		// VisualEditor bridge: load module when VE is installed
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'VisualEditor' ) ) {
+			$ns = $out->getTitle()->getNamespace();
+
+			$out->addModules( [ 'ext.FilePermissions.visualeditor' ] );
+			$out->addJsConfigVars( [
+				'wgFilePermLevels' => Config::getLevels(),
+				'wgFilePermVEDefault' => Config::resolveDefaultLevel( $ns ),
+			] );
+		}
+	}
+
+	/**
+	 * Load MsUpload bridge module and inject JS config vars on edit pages.
+	 *
+	 * Only activates when MsUpload extension is installed.
+	 *
+	 * @param EditPage $editor The EditPage instance
+	 * @param OutputPage $out The OutputPage to add modules/config to
+	 * @return bool|void True or no return value to continue
+	 */
+	public function onEditPage__showEditForm_initial( $editor, $out ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'MsUpload' ) ) {
 			return;
 		}
 
-		// Always load indicator styles on File pages
-		$out->addModuleStyles( [ 'ext.FilePermissions.indicator' ] );
+		$ns = $out->getTitle()->getNamespace();
 
-		// Load edit module and config vars for users with edit-fileperm right
-		if ( $out->getUser()->isAllowed( 'edit-fileperm' ) ) {
-			$out->addModules( [ 'ext.FilePermissions.edit' ] );
-			$out->addJsConfigVars( [
-				'wgFilePermCurrentLevel' => $this->permissionService->getLevel( $title ),
-				'wgFilePermLevels' => Config::getLevels(),
-				'wgFilePermPageTitle' => $title->getPrefixedDBkey(),
-			] );
-		}
+		$out->addModules( [ 'ext.FilePermissions.msupload' ] );
+		$out->addJsConfigVars( [
+			'wgFilePermLevels' => Config::getLevels(),
+			'wgFilePermMsUploadDefault' => Config::resolveDefaultLevel( $ns ),
+		] );
 	}
 
 	/**

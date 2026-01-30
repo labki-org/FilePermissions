@@ -4,7 +4,8 @@
  * Provides common utilities used by both the MsUpload and VisualEditor bridge
  * modules:
  * - mw.FilePermissions.verifyPermission(): post-upload permission verification
- * - One-time XMLHttpRequest.prototype.open patch to tag API POST requests
+ * - mw.FilePermissions.onUploadSend(): callback registry for XHR upload interception
+ * - One-time XMLHttpRequest.prototype.open/send patch to tag and intercept API uploads
  *
  * Loaded as a dependency of ext.FilePermissions.msupload and
  * ext.FilePermissions.visualeditor, ensuring these utilities are initialized
@@ -49,14 +50,57 @@
 		} );
 	};
 
+	// --- Callback registry for upload XHR interception ---
+
+	mw.FilePermissions._uploadCallbacks = [];
+
+	/**
+	 * Register a callback to be invoked when an upload XHR send() is detected.
+	 *
+	 * Callbacks receive (xhr, body) and may return a modified body string
+	 * (for URL-encoded string bodies only). FormData bodies are modified
+	 * in-place by the callback.
+	 *
+	 * @param {Function} callback Function(xhr, body) => modified body or undefined
+	 */
+	mw.FilePermissions.onUploadSend = function ( callback ) {
+		mw.FilePermissions._uploadCallbacks.push( callback );
+	};
+
 	// Patch XMLHttpRequest.prototype.open once to tag API POST requests.
-	// Both MsUpload and VE bridge modules rely on _filePermIsApiPost being
-	// set on XHR instances for their send() interceptors.
 	var origOpen = XMLHttpRequest.prototype.open;
 	XMLHttpRequest.prototype.open = function ( method, url ) {
 		if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
 			this._filePermIsApiPost = true;
 		}
 		return origOpen.apply( this, arguments );
+	};
+
+	// Patch XMLHttpRequest.prototype.send once to detect action=upload
+	// in both FormData and string bodies, then invoke all registered callbacks.
+	var origSend = XMLHttpRequest.prototype.send;
+	XMLHttpRequest.prototype.send = function ( body ) {
+		if ( this._filePermIsApiPost ) {
+			var isUpload = false;
+
+			if ( body instanceof FormData ) {
+				isUpload = ( typeof body.get === 'function' ) &&
+					body.get( 'action' ) === 'upload';
+			} else if ( typeof body === 'string' ) {
+				isUpload = body.indexOf( 'action=upload' ) !== -1;
+			}
+
+			if ( isUpload ) {
+				var callbacks = mw.FilePermissions._uploadCallbacks;
+				for ( var i = 0; i < callbacks.length; i++ ) {
+					var result = callbacks[ i ]( this, body );
+					if ( typeof result === 'string' ) {
+						body = result;
+					}
+				}
+			}
+		}
+
+		return origSend.call( this, body );
 	};
 }() );

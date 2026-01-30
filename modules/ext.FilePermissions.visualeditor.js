@@ -11,7 +11,7 @@
  * mw.Api's upload methods filter unknown parameters during the stash phase.
  *
  * Loaded conditionally when VisualEditor is installed (server-side check
- * in VisualEditorHooks.php). Does NOT declare ext.visualEditor as a dependency.
+ * in DisplayHooks.php). Does NOT declare ext.visualEditor as a dependency.
  */
 ( function () {
 	'use strict';
@@ -104,7 +104,7 @@
 		}
 	};
 
-	// --- PART 2: XHR prototype patching for publish-from-stash ---
+	// --- PART 2: Upload XHR interception for publish-from-stash ---
 	//
 	// VE uploads in two phases:
 	//   Phase 1 (stash): uploadToStash -> uploadWithFormData (fieldsAllowed STRIPS unknown params)
@@ -116,54 +116,23 @@
 	// Body format varies by caller:
 	//   - MsUpload (plupload): sends FormData directly via native XHR
 	//   - VE (mw.Api): serializes as URL-encoded string via jQuery.ajax
-	//     (uploadFromStash calls postWithEditToken without contentType:'multipart/form-data',
-	//      so mw.Api.ajax() uses $.param() producing a string, not FormData)
 	//
-	// Both formats are handled below.
-	//
-	// open() is patched once in ext.FilePermissions.shared.js to tag
-	// API POST requests with _filePermIsApiPost.
+	// Both formats are handled via the shared callback registry.
 
-	// Patch send() to inject wpFilePermLevel on publish-from-stash requests.
-	// Handles both FormData (MsUpload/plupload) and URL-encoded string (VE/mw.Api) bodies.
-	var origSend = XMLHttpRequest.prototype.send;
-	/**
-	 * Override of XMLHttpRequest#send.
-	 *
-	 * Intercepts outgoing XHR requests to the MediaWiki API. On publish-from-stash
-	 * requests (action=upload with filekey), appends wpFilePermLevel with the
-	 * currently selected permission level. Handles both FormData bodies
-	 * (MsUpload/plupload) and URL-encoded string bodies (VE/mw.Api).
-	 *
-	 * @param {FormData|string|null} body The request body
-	 */
-	XMLHttpRequest.prototype.send = function ( body ) {
-		if ( this._filePermIsApiPost ) {
-			if ( body instanceof FormData ) {
-				// FormData path (MsUpload/plupload sends FormData directly)
-				var isUpload = ( typeof body.get === 'function' ) &&
-					body.get( 'action' ) === 'upload';
-				var hasFilekey = ( typeof body.get === 'function' ) &&
-					!!body.get( 'filekey' );
-
-				if ( isUpload && hasFilekey && !body.get( 'wpFilePermLevel' ) ) {
-					body.append( 'wpFilePermLevel', getSelectedPermLevel() );
-				}
-			} else if ( typeof body === 'string' ) {
-				// URL-encoded string path (VE/mw.Api serializes via $.param())
-				var params = new URLSearchParams( body );
-				if ( params.get( 'action' ) === 'upload' &&
-					params.has( 'filekey' ) &&
-					!params.has( 'wpFilePermLevel' ) ) {
-					params.set( 'wpFilePermLevel', getSelectedPermLevel() );
-					body = params.toString();
-					return origSend.call( this, body );
-				}
+	mw.FilePermissions.onUploadSend( function ( xhr, body ) {
+		if ( body instanceof FormData ) {
+			var hasFilekey = typeof body.get === 'function' && !!body.get( 'filekey' );
+			if ( hasFilekey && !body.get( 'wpFilePermLevel' ) ) {
+				body.append( 'wpFilePermLevel', getSelectedPermLevel() );
+			}
+		} else if ( typeof body === 'string' ) {
+			var params = new URLSearchParams( body );
+			if ( params.has( 'filekey' ) && !params.has( 'wpFilePermLevel' ) ) {
+				params.set( 'wpFilePermLevel', getSelectedPermLevel() );
+				return params.toString();
 			}
 		}
-
-		return origSend.apply( this, arguments );
-	};
+	} );
 
 	// --- PART 3: Post-upload verification ---
 
