@@ -120,10 +120,10 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | INFRA-04 | Phase 9 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 28 total
-- Mapped to phases: 28
-- Unmapped: 0 ✓
+- v1.1 requirements: 33 total (UNIT: 6, INTG: 10, LEAK: 8, CI: 5, INFRA: 4)
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-29 after initial definition*
+*Last updated: 2026-01-29 after roadmap creation*
