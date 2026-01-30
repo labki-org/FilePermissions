@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 MVP** - Phases 1-6 (shipped 2026-01-29)
-- [ ] **v1.1 Testing & CI** - Phases 7-10 (in progress)
+- [x] **v1.1 Testing & CI** - Phases 7-10 (shipped 2026-01-30)
 
 ## Phases
 
@@ -27,7 +27,7 @@ See `.planning/milestones/v1.0/` for archived v1.0 roadmap and plans.
 - [x] **Phase 7: Test Infrastructure & Unit Tests** - Foundation for test discovery plus pure-logic tests for Config and PermissionService
 - [x] **Phase 8: Integration Tests** - Hook, API, and DB tests verifying enforcement wiring within MediaWiki runtime
 - [x] **Phase 9: E2E HTTP Leak Checks** - Live HTTP verification that unauthorized users cannot download protected file bytes
-- [ ] **Phase 10: CI Pipeline** - GitHub Actions workflow running all test tiers automatically
+- [x] **Phase 10: CI Pipeline** - GitHub Actions workflow running all test tiers automatically
 
 ## Phase Details
 
@@ -126,7 +126,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 10-01-PLAN.md -- GitHub Actions CI workflow (Docker health checks, unit/integration + E2E test jobs, merge gate)
+- [x] 10-01-PLAN.md -- GitHub Actions CI workflow (Docker health checks, unit/integration + E2E test jobs, merge gate)
 
 ---
 
@@ -139,8 +139,8 @@ Plans:
 | 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
 | 8. Integration Tests | v1.1 | 2/2 | Complete | 2026-01-30 |
 | 9. E2E HTTP Leak Checks | v1.1 | 2/2 | Complete | 2026-01-30 |
-| 10. CI Pipeline | v1.1 | 0/1 | Not started | - |
+| 10. CI Pipeline | v1.1 | 1/1 | Complete | 2026-01-30 |
 
 ---
 *Roadmap created: 2026-01-29*
-*Last updated: 2026-01-30 (Phase 9 complete)*
+*Last updated: 2026-01-30 (v1.1 complete — all phases done)*

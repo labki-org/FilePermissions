@@ -42,11 +42,11 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 ### CI Pipeline
 
-- [ ] **CI-01**: GitHub Actions workflow runs on PRs and pushes to main
-- [ ] **CI-02**: Docker Compose starts with health checks (not fixed sleep)
-- [ ] **CI-03**: PHPUnit job runs unit + integration tests inside container
-- [ ] **CI-04**: E2E job runs HTTP leak checks against live wiki
-- [ ] **CI-05**: Both jobs must pass for PR to be mergeable
+- [x] **CI-01**: GitHub Actions workflow runs on PRs and pushes to main
+- [x] **CI-02**: Docker Compose starts with health checks (not fixed sleep)
+- [x] **CI-03**: PHPUnit job runs unit + integration tests inside container
+- [x] **CI-04**: E2E job runs HTTP leak checks against live wiki
+- [x] **CI-05**: Both jobs must pass for PR to be mergeable
 
 ### Test Infrastructure
 
@@ -109,11 +109,11 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | LEAK-06 | Phase 9 | Complete |
 | LEAK-07 | Phase 9 | Complete |
 | LEAK-08 | Phase 9 | Complete |
-| CI-01 | Phase 10 | Pending |
-| CI-02 | Phase 10 | Pending |
-| CI-03 | Phase 10 | Pending |
-| CI-04 | Phase 10 | Pending |
-| CI-05 | Phase 10 | Pending |
+| CI-01 | Phase 10 | Complete |
+| CI-02 | Phase 10 | Complete |
+| CI-03 | Phase 10 | Complete |
+| CI-04 | Phase 10 | Complete |
+| CI-05 | Phase 10 | Complete |
 | INFRA-01 | Phase 7 | Complete |
 | INFRA-02 | Phase 7 | Complete |
 | INFRA-03 | Phase 9 | Complete |
@@ -126,4 +126,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-30 (Phase 9 requirements complete)*
+*Last updated: 2026-01-30 (v1.1 all requirements complete)*
