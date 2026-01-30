@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A MediaWiki extension providing fine-grained, group-based access control for uploaded files. Each file gets exactly one permission level (e.g., public, internal, lab, restricted), and user groups are granted access to specific levels. Permissions are enforced consistently for file description pages, embedded images, raw file downloads, and thumbnails via img_auth.php integration. Permission levels can be set during upload (Special:Upload, MsUpload, VisualEditor) and edited by sysop users on File: pages.
+A MediaWiki extension providing fine-grained, group-based access control for uploaded files. Each file gets exactly one permission level (e.g., public, internal, lab, restricted), and user groups are granted access to specific levels. Permissions are enforced consistently for file description pages, embedded images, raw file downloads, and thumbnails via img_auth.php integration. Permission levels can be set during upload (Special:Upload, MsUpload, VisualEditor) and edited by sysop users on File: pages. The full enforcement chain is proven by 152 automated tests spanning unit, integration, and E2E HTTP layers.
 
 ## Core Value
 
@@ -19,22 +19,13 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 - Permission selection during VisualEditor upload via BookletLayout monkey-patch — v1.0
 - File page permission indicator (badge) and sysop edit interface with audit logging — v1.0
 - Static Config class with typed access and fail-closed validation — v1.0
+- PHPUnit test suite covering unit, integration, and E2E layers (152 test methods, 10 test files) — v1.1
+- End-to-end HTTP leak checks verifying byte-level enforcement across all access vectors (18-scenario permission matrix) — v1.1
+- GitHub Actions CI pipeline running full test suite in labki-platform Docker environment — v1.1
 
 ### Active
 
-- [ ] PHPUnit test suite covering unit, integration, and E2E layers — v1.1
-- [ ] End-to-end HTTP leak checks verifying byte-level enforcement across all access vectors — v1.1
-- [ ] GitHub Actions CI pipeline running full test suite in labki-platform Docker environment — v1.1
-
-## Current Milestone: v1.1 Testing & CI
-
-**Goal:** Prove that the permission enforcement actually works — from unit-level logic through HTTP-level leak checks — and run it automatically on every PR.
-
-**Target features:**
-- PHPUnit unit tests for Config and PermissionService
-- PHPUnit integration tests for enforcement hooks, upload hooks, and API
-- E2E HTTP tests that upload files at each permission level and verify unauthorized users get 403s via img_auth.php, /images/, and thumbnail paths
-- GitHub Actions workflow using labki-platform Docker image
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -45,6 +36,9 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 - MsUpload forking — bridge module only, no MsUpload changes
 - Lockdown integration — independent, replaces Lockdown for files
 - SMW dependency — no Semantic MediaWiki required
+- Browser/Selenium tests — HTTP-level checks cover security surface
+- JavaScript unit tests — JS modules are UI bridges; enforcement is server-side PHP
+- Code coverage thresholds — focus on meaningful test scenarios, not arbitrary % targets
 
 ## Context
 
@@ -54,16 +48,20 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 - MsUpload extension installed (standard MediaWiki extension from Gerrit)
 - VisualEditor extension installed
 
-**Current State (v1.0 shipped):**
+**Current State (v1.1 shipped):**
 - 20 source files, 2,196 LOC (1,365 PHP, 471 JS, 102 CSS, 258 JSON)
+- 10 test files, 4,485 LOC (PHP test code)
 - Extension structure: `includes/` (Config, PermissionService, ServiceWiring), `includes/Hooks/` (6 hook classes), `includes/Api/` (1 API module), `modules/` (6 JS/CSS files)
-- All 27 v1 requirements satisfied across 6 phases
-- All upload paths covered: Special:Upload, MsUpload, VisualEditor
+- Test structure: `tests/phpunit/unit/` (2 files), `tests/phpunit/integration/` (4 files), `tests/phpunit/e2e/` (4 files)
+- CI: `.github/workflows/ci.yml` with Docker health checks, unit/integration inside container, E2E from runner
+- All 27 v1.0 requirements + 33 v1.1 requirements satisfied
+- 152 test methods: 89 unit, 48 integration, 33 E2E (including 18-scenario permission matrix)
 
 **Deployment Requirements:**
 - `$wgGroupPermissions['*']['read'] = false` (private wiki) for img_auth.php enforcement
 - Web server must block direct `/images/` access
 - Parser cache disabled for pages with protected embedded images (performance tradeoff)
+- GitHub branch protection: configure `test` as required status check for merge gate
 
 **Existing Patterns:**
 - Extension structure follows MSAssistant/SemanticSchemas conventions
@@ -71,20 +69,21 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 - Subdirectories: `Api/`, `Hooks/`
 - Static `Config.php` class for configuration access
 - ResourceLoader modules with IIFE JavaScript pattern
+- Test patterns: MediaWikiUnitTestCase for unit, MediaWikiIntegrationTestCase for integration, PHPUnit\TestCase with curl for E2E
 
 ## Constraints
 
 - **Tech stack**: PHP 8.x, MediaWiki 1.44 hooks and APIs
 - **No core mods**: Must use extension hooks only
 - **No MsUpload fork**: Bridge module injects into existing MsUpload
-- **Storage**: PageProps for permission metadata (fast, cached, native MW)
+- **Storage**: fileperm_levels table for permission metadata (dedicated table, fast lookup)
 - **Compatibility**: Must work alongside existing extensions without conflicts
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| PageProps for storage | Fast lookup, cached, no parsing, native MW infrastructure | Good |
+| PageProps for storage | Fast lookup, cached, no parsing, native MW infrastructure | Good (migrated to fileperm_levels in v1.0.1) |
 | Single permission level per file | Simplicity, clear mental model, matches "virtual namespace" concept | Good |
 | JS bridge for MsUpload | Avoids forking, uses existing events/hooks | Good |
 | Group-based only | Reduces complexity, aligns with MW permission model | Good |
@@ -98,6 +97,11 @@ Files are protected at the byte level — unauthorized users cannot view, embed,
 | BookletLayout monkey-patching for VE | Injects OOUI dropdown into VE upload dialog | Good |
 | XHR prototype patching for VE | Intercepts publish-from-stash to append permission level | Good |
 | URLSearchParams for VE string body | mw.Api serializes as URL-encoded string, not FormData | Good |
+| Global save/restore with __UNSET__ sentinel | Supports both null and truly-unset test cases in unit tests | Good |
+| overrideConfigValue for integration tests | MediaWikiIntegrationTestCase handles config isolation automatically | Good |
+| PHP curl over Guzzle for E2E | Zero external dependency; curl is sufficient for E2E needs | Good |
+| Cookie-based clientlogin for E2E | Matches real user browser sessions; tests actual auth flow | Good |
+| Single CI job with sequential steps | Avoids spinning up Docker twice; shares environment lifecycle | Good |
 
 ---
-*Last updated: 2026-01-29 after v1.1 milestone start*
+*Last updated: 2026-01-30 after v1.1 milestone completion*
