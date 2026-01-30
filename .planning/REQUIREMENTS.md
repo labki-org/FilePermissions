@@ -18,16 +18,16 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 ### Integration Tests
 
-- [ ] **INTG-01**: EnforcementHooks getUserPermissionsErrors denies unauthorized user access to File: pages
-- [ ] **INTG-02**: EnforcementHooks ImgAuthBeforeStream denies unauthorized file downloads via img_auth.php
-- [ ] **INTG-03**: EnforcementHooks ImageBeforeProduceHTML blocks embedding of protected images for unauthorized users
-- [ ] **INTG-04**: UploadHooks UploadVerifyUpload rejects uploads with invalid permission levels
-- [ ] **INTG-05**: UploadHooks stores permission level in fileperm_levels table on successful upload
-- [ ] **INTG-06**: ApiFilePermSetLevel sets permission level via API with proper authorization
-- [ ] **INTG-07**: ApiFilePermSetLevel denies permission changes from non-sysop users
-- [ ] **INTG-08**: ApiQueryFilePermLevel returns correct permission level for queried files
-- [ ] **INTG-09**: PermissionService round-trips setLevel/getLevel/removeLevel through fileperm_levels table
-- [ ] **INTG-10**: PermissionService in-process cache returns correct values and doesn't poison cross-scenario tests
+- [x] **INTG-01**: EnforcementHooks getUserPermissionsErrors denies unauthorized user access to File: pages
+- [x] **INTG-02**: EnforcementHooks ImgAuthBeforeStream denies unauthorized file downloads via img_auth.php
+- [x] **INTG-03**: EnforcementHooks ImageBeforeProduceHTML blocks embedding of protected images for unauthorized users
+- [x] **INTG-04**: UploadHooks UploadVerifyUpload rejects uploads with invalid permission levels
+- [x] **INTG-05**: UploadHooks stores permission level in fileperm_levels table on successful upload
+- [x] **INTG-06**: ApiFilePermSetLevel sets permission level via API with proper authorization
+- [x] **INTG-07**: ApiFilePermSetLevel denies permission changes from non-sysop users
+- [x] **INTG-08**: ApiQueryFilePermLevel returns correct permission level for queried files
+- [x] **INTG-09**: PermissionService round-trips setLevel/getLevel/removeLevel through fileperm_levels table
+- [x] **INTG-10**: PermissionService in-process cache returns correct values and doesn't poison cross-scenario tests
 
 ### E2E HTTP Leak Checks
 
@@ -91,16 +91,16 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | UNIT-04 | Phase 7 | Complete |
 | UNIT-05 | Phase 7 | Complete |
 | UNIT-06 | Phase 7 | Complete |
-| INTG-01 | Phase 8 | Pending |
-| INTG-02 | Phase 8 | Pending |
-| INTG-03 | Phase 8 | Pending |
-| INTG-04 | Phase 8 | Pending |
-| INTG-05 | Phase 8 | Pending |
-| INTG-06 | Phase 8 | Pending |
-| INTG-07 | Phase 8 | Pending |
-| INTG-08 | Phase 8 | Pending |
-| INTG-09 | Phase 8 | Pending |
-| INTG-10 | Phase 8 | Pending |
+| INTG-01 | Phase 8 | Complete |
+| INTG-02 | Phase 8 | Complete |
+| INTG-03 | Phase 8 | Complete |
+| INTG-04 | Phase 8 | Complete |
+| INTG-05 | Phase 8 | Complete |
+| INTG-06 | Phase 8 | Complete |
+| INTG-07 | Phase 8 | Complete |
+| INTG-08 | Phase 8 | Complete |
+| INTG-09 | Phase 8 | Complete |
+| INTG-10 | Phase 8 | Complete |
 | LEAK-01 | Phase 9 | Pending |
 | LEAK-02 | Phase 9 | Pending |
 | LEAK-03 | Phase 9 | Pending |
@@ -126,4 +126,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-29 (Phase 7 requirements complete)*
+*Last updated: 2026-01-30 (Phase 8 requirements complete)*
