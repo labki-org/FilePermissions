@@ -48,11 +48,11 @@ See `.planning/milestones/v1.0/` for archived v1.0 roadmap and plans.
 
 **Research flag:** Skip -- MediaWiki PHPUnit testing, TestAutoloadNamespaces, and MediaWikiUnitTestCase patterns are well-documented. Research already covers base class selection and globals patterns.
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md -- Test infrastructure (TestAutoloadNamespaces, directory structure) + Config unit tests
+- [ ] 07-02-PLAN.md -- PermissionService unit tests with mocked dependencies
 
 ---
 
@@ -136,7 +136,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 7. Test Infrastructure & Unit Tests | v1.1 | 0/TBD | Not started | - |
+| 7. Test Infrastructure & Unit Tests | v1.1 | 0/2 | Not started | - |
 | 8. Integration Tests | v1.1 | 0/TBD | Not started | - |
 | 9. E2E HTTP Leak Checks | v1.1 | 0/TBD | Not started | - |
 | 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
