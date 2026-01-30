@@ -80,7 +80,10 @@ jobs:
       - name: Run E2E HTTP leak checks
         id: e2e
         run: |
-          php phpunit.phar --testdox tests/phpunit/e2e/
+          php phpunit.phar \
+            --bootstrap tests/phpunit/e2e/E2ETestBase.php \
+            --testdox \
+            tests/phpunit/e2e/
 
       - name: Write test summary
         if: always()
