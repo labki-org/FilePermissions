@@ -26,7 +26,7 @@ See `.planning/milestones/v1.0/` for archived v1.0 roadmap and plans.
 
 - [x] **Phase 7: Test Infrastructure & Unit Tests** - Foundation for test discovery plus pure-logic tests for Config and PermissionService
 - [x] **Phase 8: Integration Tests** - Hook, API, and DB tests verifying enforcement wiring within MediaWiki runtime
-- [ ] **Phase 9: E2E HTTP Leak Checks** - Live HTTP verification that unauthorized users cannot download protected file bytes
+- [x] **Phase 9: E2E HTTP Leak Checks** - Live HTTP verification that unauthorized users cannot download protected file bytes
 - [ ] **Phase 10: CI Pipeline** - GitHub Actions workflow running all test tiers automatically
 
 ## Phase Details
@@ -102,7 +102,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md -- E2E test infrastructure (base class, MW API auth, file seeding, HTTP helpers) + Apache direct-path denial tests
-- [ ] 09-02-PLAN.md -- img_auth.php leak checks + full permission matrix (3 levels x 3 users x 2 vectors)
+- [x] 09-02-PLAN.md -- img_auth.php leak checks + full permission matrix (3 levels x 3 users x 2 vectors)
 
 ---
 
@@ -138,9 +138,9 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
 | 8. Integration Tests | v1.1 | 2/2 | Complete | 2026-01-30 |
-| 9. E2E HTTP Leak Checks | v1.1 | 1/2 | In progress | - |
+| 9. E2E HTTP Leak Checks | v1.1 | 2/2 | Complete | 2026-01-30 |
 | 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-29*
-*Last updated: 2026-01-30 (09-01 complete)*
+*Last updated: 2026-01-30 (Phase 9 complete)*
