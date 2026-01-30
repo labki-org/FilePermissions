@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** v1.1 Testing & CI -- Phase 9 (E2E HTTP Leak Checks)
+**Current focus:** v1.1 Testing & CI -- COMPLETE
 
 ## Current Position
 
-Phase: 9 of 10 (E2E HTTP Leak Checks) -- COMPLETE
-Plan: 2 of 2 in phase 9
-Status: Phase 9 complete
-Last activity: 2026-01-30 -- Completed 09-02-PLAN.md
+Phase: 10 of 10 (CI Pipeline) -- COMPLETE
+Plan: 1 of 1 in phase 10
+Status: v1.1 complete
+Last activity: 2026-01-30 -- Completed 10-01-PLAN.md
 
-Progress: [##############################..........] ~75% (v1.1 phases 7-10; 6 plans complete, phase 10 remaining)
+Progress: [########################################] 100% (v1.1 phases 7-10; 7 plans complete, all phases done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v1.1)
+- Total plans completed: 7 (v1.1)
 - Average duration: 3min
-- Total execution time: 18min
+- Total execution time: 20min
 
 **By Phase:**
 
@@ -30,6 +30,7 @@ Progress: [##############################..........] ~75% (v1.1 phases 7-10; 6 p
 | 07 | 2/2 | 6min | 3min |
 | 08 | 2/2 | 6min | 3min |
 | 09 | 2/2 | 6min | 3min |
+| 10 | 1/1 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -58,6 +59,10 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 | Public test file for Apache denial tests | 09-01 | Proves Apache blocks by path regardless of file permission level |
 | Separate test classes for targeted denial vs exhaustive matrix | 09-02 | ImgAuthLeakTest has descriptive names; PermissionMatrixTest uses data provider for completeness |
 | Data provider pattern for 18-case matrix | 09-02 | Single parameterized test method with static provider; PHPUnit 10 compatible |
+| Single job with sequential steps for CI | 10-01 | Avoids spinning up Docker twice; unit/integration and E2E share one environment lifecycle |
+| E2E tests run from runner via PHPUnit phar | 10-01 | E2ETestBase hardcodes localhost:8888; runner can reach Docker port mapping directly |
+| Health check polls MW API endpoint | 10-01 | Proper readiness check via curl -sf, not fixed sleep; 120s timeout with 5s intervals |
+| CI-05 merge gate as manual repo setting | 10-01 | Branch protection rules cannot be configured via workflow file; documented in comments |
 
 ### Research Flags
 
@@ -85,11 +90,12 @@ None.
 
 - Deployment requires private wiki config for img_auth.php enforcement
 - Parser cache disabled for pages with protected embedded images
+- CI-05 merge gate requires manual GitHub repo configuration (branch protection rules)
 
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 09-02-PLAN.md (img_auth.php leak checks + permission matrix -- Phase 9 complete)
+Stopped at: Completed 10-01-PLAN.md (CI Pipeline -- Phase 10 complete, v1.1 complete)
 Resume file: None
 
-*Updated after 09-02 execution*
+*Updated after 10-01 execution*
