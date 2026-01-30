@@ -31,14 +31,14 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 ### E2E HTTP Leak Checks
 
-- [ ] **LEAK-01**: Unauthorized user gets 403 from img_auth.php for confidential file download
-- [ ] **LEAK-02**: Unauthorized user gets 403 from img_auth.php for confidential file thumbnail
-- [ ] **LEAK-03**: Direct /images/ path is blocked by Apache (403 for all users)
-- [ ] **LEAK-04**: Direct /images/thumb/ path is blocked by Apache (403 for all users)
-- [ ] **LEAK-05**: Authorized user can download files at their granted permission levels
-- [ ] **LEAK-06**: Public files are accessible to all authenticated users
-- [ ] **LEAK-07**: Full permission matrix tested: 3 levels × 2 user roles × all access vectors
-- [ ] **LEAK-08**: Test authentication uses MW API login (cookie-based sessions, not anonymous)
+- [x] **LEAK-01**: Unauthorized user gets 403 from img_auth.php for confidential file download
+- [x] **LEAK-02**: Unauthorized user gets 403 from img_auth.php for confidential file thumbnail
+- [x] **LEAK-03**: Direct /images/ path is blocked by Apache (403 for all users)
+- [x] **LEAK-04**: Direct /images/thumb/ path is blocked by Apache (403 for all users)
+- [x] **LEAK-05**: Authorized user can download files at their granted permission levels
+- [x] **LEAK-06**: Public files are accessible to all authenticated users
+- [x] **LEAK-07**: Full permission matrix tested: 3 levels × 2 user roles × all access vectors
+- [x] **LEAK-08**: Test authentication uses MW API login (cookie-based sessions, not anonymous)
 
 ### CI Pipeline
 
@@ -52,8 +52,8 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 - [x] **INFRA-01**: phpunit.xml configured for extension test discovery
 - [x] **INFRA-02**: extension.json TestAutoloadNamespaces configured for test classes
-- [ ] **INFRA-03**: Test data setup script seeds files at each permission level with correct fileperm_levels entries
-- [ ] **INFRA-04**: E2E bootstrap handles MW API authentication for test users
+- [x] **INFRA-03**: Test data setup script seeds files at each permission level with correct fileperm_levels entries
+- [x] **INFRA-04**: E2E bootstrap handles MW API authentication for test users
 
 ## Future Requirements
 
@@ -101,14 +101,14 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | INTG-08 | Phase 8 | Complete |
 | INTG-09 | Phase 8 | Complete |
 | INTG-10 | Phase 8 | Complete |
-| LEAK-01 | Phase 9 | Pending |
-| LEAK-02 | Phase 9 | Pending |
-| LEAK-03 | Phase 9 | Pending |
-| LEAK-04 | Phase 9 | Pending |
-| LEAK-05 | Phase 9 | Pending |
-| LEAK-06 | Phase 9 | Pending |
-| LEAK-07 | Phase 9 | Pending |
-| LEAK-08 | Phase 9 | Pending |
+| LEAK-01 | Phase 9 | Complete |
+| LEAK-02 | Phase 9 | Complete |
+| LEAK-03 | Phase 9 | Complete |
+| LEAK-04 | Phase 9 | Complete |
+| LEAK-05 | Phase 9 | Complete |
+| LEAK-06 | Phase 9 | Complete |
+| LEAK-07 | Phase 9 | Complete |
+| LEAK-08 | Phase 9 | Complete |
 | CI-01 | Phase 10 | Pending |
 | CI-02 | Phase 10 | Pending |
 | CI-03 | Phase 10 | Pending |
@@ -116,8 +116,8 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | CI-05 | Phase 10 | Pending |
 | INFRA-01 | Phase 7 | Complete |
 | INFRA-02 | Phase 7 | Complete |
-| INFRA-03 | Phase 9 | Pending |
-| INFRA-04 | Phase 9 | Pending |
+| INFRA-03 | Phase 9 | Complete |
+| INFRA-04 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 33 total (UNIT: 6, INTG: 10, LEAK: 8, CI: 5, INFRA: 4)
@@ -126,4 +126,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-30 (Phase 8 requirements complete)*
+*Last updated: 2026-01-30 (Phase 9 requirements complete)*
