@@ -73,11 +73,11 @@ Plans:
 
 **Research flag:** Skip -- MediaWikiIntegrationTestCase, @group Database, overrideConfigValue(), RequestContext user injection all documented. Research covers all 7 critical pitfalls with solutions.
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md -- PermissionService DB round-trip tests + EnforcementHooks integration tests
+- [ ] 08-02-PLAN.md -- UploadHooks integration tests + API module integration tests
 
 ---
 
@@ -137,10 +137,10 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
-| 8. Integration Tests | v1.1 | 0/TBD | Not started | - |
+| 8. Integration Tests | v1.1 | 0/2 | Planned | - |
 | 9. E2E HTTP Leak Checks | v1.1 | 0/TBD | Not started | - |
 | 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-29*
-*Last updated: 2026-01-29 (Phase 7 complete)*
+*Last updated: 2026-01-29 (Phase 8 planned)*
