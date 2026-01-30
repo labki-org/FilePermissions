@@ -9,12 +9,12 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 ### Unit Tests
 
-- [ ] **UNIT-01**: Config tests validate correct behavior with valid configuration (levels, grants, defaults)
-- [ ] **UNIT-02**: Config tests verify fail-closed behavior on invalid/missing configuration
-- [ ] **UNIT-03**: Config tests cover edge cases (empty levels array, missing grants, unknown level names)
-- [ ] **UNIT-04**: PermissionService tests verify permission checks with mocked DB provider (group matching, deny, allow)
-- [ ] **UNIT-05**: PermissionService tests verify default level assignment for files without explicit level
-- [ ] **UNIT-06**: PermissionService tests verify behavior for unknown/missing files (null level)
+- [x] **UNIT-01**: Config tests validate correct behavior with valid configuration (levels, grants, defaults)
+- [x] **UNIT-02**: Config tests verify fail-closed behavior on invalid/missing configuration
+- [x] **UNIT-03**: Config tests cover edge cases (empty levels array, missing grants, unknown level names)
+- [x] **UNIT-04**: PermissionService tests verify permission checks with mocked DB provider (group matching, deny, allow)
+- [x] **UNIT-05**: PermissionService tests verify default level assignment for files without explicit level
+- [x] **UNIT-06**: PermissionService tests verify behavior for unknown/missing files (null level)
 
 ### Integration Tests
 
@@ -50,8 +50,8 @@ Requirements for testing milestone. Proves that v1.0 enforcement works across al
 
 ### Test Infrastructure
 
-- [ ] **INFRA-01**: phpunit.xml configured for extension test discovery
-- [ ] **INFRA-02**: extension.json TestAutoloadNamespaces configured for test classes
+- [x] **INFRA-01**: phpunit.xml configured for extension test discovery
+- [x] **INFRA-02**: extension.json TestAutoloadNamespaces configured for test classes
 - [ ] **INFRA-03**: Test data setup script seeds files at each permission level with correct fileperm_levels entries
 - [ ] **INFRA-04**: E2E bootstrap handles MW API authentication for test users
 
@@ -85,12 +85,12 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UNIT-01 | Phase 7 | Pending |
-| UNIT-02 | Phase 7 | Pending |
-| UNIT-03 | Phase 7 | Pending |
-| UNIT-04 | Phase 7 | Pending |
-| UNIT-05 | Phase 7 | Pending |
-| UNIT-06 | Phase 7 | Pending |
+| UNIT-01 | Phase 7 | Complete |
+| UNIT-02 | Phase 7 | Complete |
+| UNIT-03 | Phase 7 | Complete |
+| UNIT-04 | Phase 7 | Complete |
+| UNIT-05 | Phase 7 | Complete |
+| UNIT-06 | Phase 7 | Complete |
 | INTG-01 | Phase 8 | Pending |
 | INTG-02 | Phase 8 | Pending |
 | INTG-03 | Phase 8 | Pending |
@@ -114,8 +114,8 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | CI-03 | Phase 10 | Pending |
 | CI-04 | Phase 10 | Pending |
 | CI-05 | Phase 10 | Pending |
-| INFRA-01 | Phase 7 | Pending |
-| INFRA-02 | Phase 7 | Pending |
+| INFRA-01 | Phase 7 | Complete |
+| INFRA-02 | Phase 7 | Complete |
 | INFRA-03 | Phase 9 | Pending |
 | INFRA-04 | Phase 9 | Pending |
 
@@ -126,4 +126,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-29 after roadmap creation*
+*Last updated: 2026-01-29 (Phase 7 requirements complete)*

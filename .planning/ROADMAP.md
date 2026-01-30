@@ -24,7 +24,7 @@ See `.planning/milestones/v1.0/` for archived v1.0 roadmap and plans.
 
 **Phase Numbering:** Continues from v1.0 (phases 7-10).
 
-- [ ] **Phase 7: Test Infrastructure & Unit Tests** - Foundation for test discovery plus pure-logic tests for Config and PermissionService
+- [x] **Phase 7: Test Infrastructure & Unit Tests** - Foundation for test discovery plus pure-logic tests for Config and PermissionService
 - [ ] **Phase 8: Integration Tests** - Hook, API, and DB tests verifying enforcement wiring within MediaWiki runtime
 - [ ] **Phase 9: E2E HTTP Leak Checks** - Live HTTP verification that unauthorized users cannot download protected file bytes
 - [ ] **Phase 10: CI Pipeline** - GitHub Actions workflow running all test tiers automatically
@@ -51,8 +51,8 @@ See `.planning/milestones/v1.0/` for archived v1.0 roadmap and plans.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Test infrastructure (TestAutoloadNamespaces, directory structure) + Config unit tests
-- [ ] 07-02-PLAN.md -- PermissionService unit tests with mocked dependencies
+- [x] 07-01-PLAN.md -- Test infrastructure (TestAutoloadNamespaces, directory structure) + Config unit tests
+- [x] 07-02-PLAN.md -- PermissionService unit tests with mocked dependencies
 
 ---
 
@@ -136,11 +136,11 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 7. Test Infrastructure & Unit Tests | v1.1 | 0/2 | Not started | - |
+| 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
 | 8. Integration Tests | v1.1 | 0/TBD | Not started | - |
 | 9. E2E HTTP Leak Checks | v1.1 | 0/TBD | Not started | - |
 | 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-01-29*
-*Last updated: 2026-01-29*
+*Last updated: 2026-01-29 (Phase 7 complete)*
