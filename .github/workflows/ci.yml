@@ -1,8 +1,10 @@
 # FilePermissions CI Pipeline
 #
 # Runs all test tiers on PRs to main and pushes to main:
-#   1. Unit + Integration tests (inside Docker container via MW PHPUnit)
-#   2. E2E HTTP leak checks (against live wiki from runner)
+#   CI-01: Triggers on pull_request and push to main
+#   CI-02: Docker health check polling (not fixed sleep)
+#   CI-03: Unit + Integration tests (inside Docker container via MW PHPUnit)
+#   CI-04: E2E HTTP leak checks (against live wiki from runner)
 #
 # MERGE GATE (CI-05): Configure "test" as a required status check
 # in GitHub repo Settings > Branches > Branch protection rules > main
@@ -32,6 +34,7 @@ jobs:
       - name: Start Docker environment
         run: docker compose up -d
 
+      # CI-02: Health check polling (not fixed sleep) confirms wiki readiness
       - name: Wait for wiki readiness
         run: |
           echo "Polling MediaWiki API for readiness (timeout: 120s)..."
@@ -51,6 +54,7 @@ jobs:
         run: |
           docker compose exec -T wiki php maintenance/run.php update --quick
 
+      # CI-03: Unit + integration tests run inside Docker container
       - name: Run unit and integration tests
         id: unit-integration
         run: |
@@ -59,6 +63,7 @@ jobs:
             extensions/FilePermissions/tests/phpunit/unit/ \
             extensions/FilePermissions/tests/phpunit/integration/
 
+      # CI-04: E2E leak checks run from the runner against live wiki
       - name: Install PHPUnit on runner
         run: |
           curl -L -o phpunit.phar https://phar.phpunit.de/phpunit-10.phar
