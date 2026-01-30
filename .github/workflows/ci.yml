@@ -27,6 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    env:
+      LABKI_PLATFORM_TAG: latest-dev
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,35 +57,18 @@ jobs:
         run: |
           docker compose exec -T wiki php maintenance/run.php update --quick
 
-      # Install PHPUnit phar inside container (Composer dev deps unavailable
-      # in labki-platform production image due to dependency conflicts)
-      - name: Install PHPUnit in container
-        run: |
-          docker compose exec -T wiki bash -c '
-            curl -sL https://phar.phpunit.de/phpunit-9.6.phar -o /tmp/phpunit.phar
-            chmod +x /tmp/phpunit.phar
-            php /tmp/phpunit.phar --version
-          '
-
-      # CI-03: Unit + integration tests run inside Docker container via MW test runner.
-      # Pre-loads PHPUnit from phar, then delegates to tests/phpunit/phpunit.php
-      # which bootstraps MediaWiki (services, DB, config, extension autoloading)
-      # for MediaWikiUnitTestCase and MediaWikiIntegrationTestCase base classes.
+      # CI-03: Unit + integration tests via MW's test runner.
+      # latest-dev image includes PHPUnit and dev autoloading, so
+      # tests/phpunit/phpunit.php bootstraps MediaWiki and runs PHPUnit
+      # with full support for MediaWikiUnitTestCase and
+      # MediaWikiIntegrationTestCase base classes.
       - name: Run unit and integration tests
         id: unit-integration
         run: |
-          docker compose exec -T -w /var/www/html wiki bash -c '
-            cat > /tmp/run-mw-tests.php << "INNEREOF"
-          <?php
-          // Pre-load PHPUnit classes from phar so MW test runner finds them
-          require "phar:///tmp/phpunit.phar/vendor/autoload.php";
-          // Delegate to MW integrated test runner (bootstraps MW + runs PHPUnit)
-          require "/var/www/html/tests/phpunit/phpunit.php";
-          INNEREOF
-            php /tmp/run-mw-tests.php --testdox \
-              /mw-user-extensions/FilePermissions/tests/phpunit/unit/ \
-              /mw-user-extensions/FilePermissions/tests/phpunit/integration/
-          '
+          docker compose exec -T -w /var/www/html wiki php tests/phpunit/phpunit.php \
+            --testdox \
+            /mw-user-extensions/FilePermissions/tests/phpunit/unit/ \
+            /mw-user-extensions/FilePermissions/tests/phpunit/integration/
 
       # CI-04: E2E leak checks run from the runner against live wiki
       - name: Install PHPUnit on runner
