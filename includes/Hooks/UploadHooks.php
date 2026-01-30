@@ -213,25 +213,9 @@ class UploadHooks implements
 		// Empty placeholder requiring selection
 		$options[wfMessage( 'filepermissions-upload-choose' )->text()] = '';
 
-		$levels = Config::getLevels();
-		$groupGrants = Config::getGroupGrants();
+		$levelGroupMap = Config::getLevelGroupMap();
 
-		// Build reverse map: level => list of groups that grant it
-		$levelGroups = [];
-		foreach ( $levels as $level ) {
-			$levelGroups[$level] = [];
-		}
-		foreach ( $groupGrants as $group => $grants ) {
-			foreach ( $levels as $level ) {
-				if ( in_array( '*', $grants, true ) || in_array( $level, $grants, true ) ) {
-					$levelGroups[$level][] = $group;
-				}
-			}
-		}
-
-		// Build option labels
-		foreach ( $levels as $level ) {
-			$groups = $levelGroups[$level];
+		foreach ( $levelGroupMap as $level => $groups ) {
 			if ( count( $groups ) > 0 ) {
 				$label = $level . ' (' . implode( ', ', $groups ) . ')';
 			} else {

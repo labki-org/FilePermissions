@@ -8,7 +8,7 @@
  * uploader is module-scoped and not accessible from external code.
  *
  * Loaded conditionally when MsUpload is installed (server-side check
- * in MsUploadHooks.php). Does NOT declare ext.MsUpload as a dependency.
+ * in DisplayHooks.php). Does NOT declare ext.MsUpload as a dependency.
  */
 ( function () {
 	'use strict';
@@ -78,7 +78,7 @@
 	}
 
 	/**
-	 * Initialize the bridge: inject dropdown and patch XHR for uploads.
+	 * Initialize the bridge: inject dropdown and register upload callback.
 	 *
 	 * @param {jQuery} $msDiv The #msupload-div container
 	 */
@@ -86,69 +86,60 @@
 		// Inject dropdown before the dropzone
 		$msDiv.prepend( buildDropdown() );
 
-		// Intercept XMLHttpRequest to inject wpFilePermLevel into upload
-		// FormData and monitor responses for post-upload verification.
-		// plupload uses native XHR (not jQuery.ajax), so we patch at
-		// the XHR prototype level.
-		// open() is patched once in ext.FilePermissions.shared.js to tag
-		// API POST requests with _filePermIsApiPost.
-
-		// Patch send() to inject param and attach response listeners
-		var origSend = XMLHttpRequest.prototype.send;
-		XMLHttpRequest.prototype.send = function ( body ) {
-			if ( this._filePermIsApiPost && body instanceof FormData ) {
-				var isUpload = ( typeof body.get === 'function' ) &&
-					body.get( 'action' ) === 'upload';
-
-				if ( isUpload ) {
-					// Inject permission level if not already present
-					if ( !body.get( 'wpFilePermLevel' ) ) {
-						body.append( 'wpFilePermLevel', getSelectedLevel() );
-					}
-
-					// Disable dropdown while uploading
-					$( '#fileperm-msupload-select' ).prop( 'disabled', true );
-
-					// Listen for upload completion
-					var xhr = this;
-					xhr.addEventListener( 'load', function () {
-						var response;
-						try {
-							response = JSON.parse( xhr.responseText );
-						} catch ( e ) {
-							return;
-						}
-
-						if ( response && response.upload &&
-							response.upload.result === 'Success' ) {
-							// Delay to allow DeferredUpdates to store permission
-							setTimeout( function () {
-								mw.FilePermissions.verifyPermission( response.upload.filename, 'filepermissions-msupload-error-save' );
-							}, 1000 );
-						}
-
-						// Re-enable dropdown when no more uploads pending
-						setTimeout( function () {
-							var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
-							if ( pending === 0 ) {
-								$( '#fileperm-msupload-select' ).prop( 'disabled', false );
-							}
-						}, 500 );
-					} );
-
-					xhr.addEventListener( 'error', function () {
-						setTimeout( function () {
-							var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
-							if ( pending === 0 ) {
-								$( '#fileperm-msupload-select' ).prop( 'disabled', false );
-							}
-						}, 500 );
-					} );
-				}
+		// Register callback with shared XHR interceptor to inject
+		// wpFilePermLevel and monitor upload responses.
+		mw.FilePermissions.onUploadSend( function ( xhr, body ) {
+			if ( !( body instanceof FormData ) ) {
+				return;
+			}
+			var $select = $( '#fileperm-msupload-select' );
+			if ( !$select.length ) {
+				return;
 			}
 
-			return origSend.apply( this, arguments );
-		};
+			// Inject permission level if not already present
+			if ( !body.get( 'wpFilePermLevel' ) ) {
+				body.append( 'wpFilePermLevel', getSelectedLevel() );
+			}
+
+			// Disable dropdown while uploading
+			$select.prop( 'disabled', true );
+
+			// Listen for upload completion
+			xhr.addEventListener( 'load', function () {
+				var response;
+				try {
+					response = JSON.parse( xhr.responseText );
+				} catch ( e ) {
+					return;
+				}
+
+				if ( response && response.upload &&
+					response.upload.result === 'Success' ) {
+					// Delay to allow DeferredUpdates to store permission
+					setTimeout( function () {
+						mw.FilePermissions.verifyPermission( response.upload.filename, 'filepermissions-msupload-error-save' );
+					}, 1000 );
+				}
+
+				// Re-enable dropdown when no more uploads pending
+				setTimeout( function () {
+					var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
+					if ( pending === 0 ) {
+						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
+					}
+				}, 500 );
+			} );
+
+			xhr.addEventListener( 'error', function () {
+				setTimeout( function () {
+					var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
+					if ( pending === 0 ) {
+						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
+					}
+				}, 500 );
+			} );
+		} );
 	}
 
 	// Main initialization via memorized MW hook.

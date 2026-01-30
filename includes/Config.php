@@ -65,6 +65,33 @@ class Config {
 	}
 
 	/**
+	 * Get a reverse map of permission levels to the groups that grant each level.
+	 *
+	 * Expands wildcard (`*`) grants so that a group granting `*` appears under
+	 * every configured level.
+	 *
+	 * @return array<string, array<string>> Map of level => list of group names
+	 */
+	public static function getLevelGroupMap(): array {
+		$levels = self::getLevels();
+		$groupGrants = self::getGroupGrants();
+
+		$map = [];
+		foreach ( $levels as $level ) {
+			$map[$level] = [];
+		}
+		foreach ( $groupGrants as $group => $grants ) {
+			foreach ( $levels as $level ) {
+				if ( in_array( '*', $grants, true ) || in_array( $level, $grants, true ) ) {
+					$map[$level][] = $group;
+				}
+			}
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Check if a permission level is valid.
 	 *
 	 * @param string $level The level to check

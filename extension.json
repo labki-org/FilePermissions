@@ -44,12 +44,6 @@
 				"FilePermissions.PermissionService"
 			]
 		},
-		"msupload": {
-			"class": "FilePermissions\\Hooks\\MsUploadHooks"
-		},
-		"visualeditor": {
-			"class": "FilePermissions\\Hooks\\VisualEditorHooks"
-		},
 		"SchemaChanges": {
 			"class": "FilePermissions\\Hooks\\SchemaChangesHandler"
 		}
@@ -62,8 +56,8 @@
 		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload",
 		"ImagePageAfterImageLinks": "display",
-		"BeforePageDisplay": [ "display", "visualeditor" ],
-		"EditPage::showEditForm:initial": "msupload",
+		"BeforePageDisplay": "display",
+		"EditPage::showEditForm:initial": "display",
 		"LoadExtensionSchemaUpdates": "SchemaChanges"
 	},
 	"APIPropModules": {
