@@ -54,14 +54,21 @@ jobs:
         run: |
           docker compose exec -T wiki php maintenance/run.php update --quick
 
-      # CI-03: Unit + integration tests run inside Docker container
+      # Install PHPUnit and MW test framework (dev dependencies)
+      - name: Install Composer dev dependencies
+        run: |
+          docker compose exec -T -w /var/www/html wiki composer install
+
+      # CI-03: Unit + integration tests run inside Docker container via MW test runner
+      # Uses tests/phpunit/phpunit.php which bootstraps MediaWiki for
+      # MediaWikiUnitTestCase and MediaWikiIntegrationTestCase base classes
       - name: Run unit and integration tests
         id: unit-integration
         run: |
-          docker compose exec -T -w /var/www/html wiki php vendor/bin/phpunit \
+          docker compose exec -T -w /var/www/html wiki php tests/phpunit/phpunit.php \
             --testdox \
-            extensions/FilePermissions/tests/phpunit/unit/ \
-            extensions/FilePermissions/tests/phpunit/integration/
+            /mw-user-extensions/FilePermissions/tests/phpunit/unit/ \
+            /mw-user-extensions/FilePermissions/tests/phpunit/integration/
 
       # CI-04: E2E leak checks run from the runner against live wiki
       - name: Install PHPUnit on runner
