@@ -123,10 +123,10 @@ Plans:
 
 **Research flag:** Skip -- GitHub Actions + Docker Compose patterns are standard. Health check patterns documented in research. Only open question (labki-platform PHPUnit availability) resolves with a single exec command during implementation.
 
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md -- GitHub Actions CI workflow (Docker health checks, unit/integration + E2E test jobs, merge gate)
 
 ---
 
@@ -139,7 +139,7 @@ Plans:
 | 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
 | 8. Integration Tests | v1.1 | 2/2 | Complete | 2026-01-30 |
 | 9. E2E HTTP Leak Checks | v1.1 | 2/2 | Complete | 2026-01-30 |
-| 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
+| 10. CI Pipeline | v1.1 | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-01-29*
