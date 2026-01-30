@@ -5,29 +5,29 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** Files are protected at the byte level - unauthorized users cannot view, embed, or download protected files, period.
-**Current focus:** v1.1 Testing & CI -- Phase 7 (Test Infrastructure & Unit Tests)
+**Current focus:** v1.1 Testing & CI -- Phase 8 (Integration Tests)
 
 ## Current Position
 
-Phase: 7 of 10 (Test Infrastructure & Unit Tests)
-Plan: 1 of 2 in phase 7
-Status: In progress
-Last activity: 2026-01-29 -- Completed 07-01-PLAN.md
+Phase: 7 of 10 (Test Infrastructure & Unit Tests) -- COMPLETE
+Plan: 2 of 2 in phase 7
+Status: Phase 7 complete
+Last activity: 2026-01-29 -- Completed 07-02-PLAN.md
 
-Progress: [##########..........] ~12% (v1.1 phases 7-10; 1 plan complete, phase 7 plan 2 + phases 8-10 remaining)
+Progress: [################....] ~25% (v1.1 phases 7-10; 2 plans complete, phases 8-10 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v1.1)
-- Average duration: 2min
-- Total execution time: 2min
+- Total plans completed: 2 (v1.1)
+- Average duration: 3min
+- Total execution time: 6min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 07 | 1/2 | 2min | 2min |
+| 07 | 2/2 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -40,6 +40,9 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 | setUp/tearDown global save/restore with __UNSET__ sentinel | 07-01 | Supports both null and truly-unset global test cases without cross-test pollution |
 | Static data providers for PHPUnit 10 compat | 07-01 | PHPUnit 10 requires static data providers; future-proof now |
 | Fail-closed test naming suffix convention | 07-01 | Makes security guarantees grep-able and self-documenting (_FailClosed, _NoGrantsMeansNoAccess) |
+| createService() helper enforces fresh instance per test | 07-02 | Prevents PermissionService $levelCache poisoning across tests |
+| createNeverCalledDbProvider() for pure logic tests | 07-02 | Strict assertion that DB is never touched in canUserAccessLevel tests |
+| Sane defaults in setUp, individual tests override | 07-02 | Reduces boilerplate while keeping test intent clear |
 
 ### Research Flags
 
@@ -51,7 +54,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 
 ### Critical Pitfalls (from research)
 
-1. PermissionService cache poisoning -- fetch service fresh per test method
+1. PermissionService cache poisoning -- RESOLVED: createService() helper in 07-02
 2. Test logged-in users, not anonymous -- MW core blocks anon on private wikis
 3. Set RequestContext user explicitly in hook tests
 4. @group Database on every test class touching DB
@@ -72,7 +75,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 07-01-PLAN.md (test infrastructure + Config unit tests)
+Stopped at: Completed 07-02-PLAN.md (PermissionService unit tests -- phase 7 complete)
 Resume file: None
 
-*Updated after 07-01 execution*
+*Updated after 07-02 execution*
