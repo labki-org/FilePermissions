@@ -185,3 +185,36 @@ export async function isExtensionLoaded(
   const extensions = await queryInstalledExtensions(request);
   return extensions.includes(extensionName);
 }
+
+/**
+ * Query the full URL of a file (including hash-based path) via imageinfo.
+ * Optionally returns the thumbnail URL at a given width.
+ */
+export async function queryFileUrl(
+  request: APIRequestContext,
+  fileTitle: string,
+  thumbWidth?: number
+): Promise<string | null> {
+  const title = fileTitle.startsWith('File:') ? fileTitle : `File:${fileTitle}`;
+  const params: Record<string, string> = {
+    action: 'query',
+    titles: title,
+    prop: 'imageinfo',
+    iiprop: 'url',
+    format: 'json',
+  };
+  if (thumbWidth) {
+    params.iiurlwidth = String(thumbWidth);
+  }
+  const resp = await request.get(`${BASE_URL}/api.php`, { params });
+  const data = await resp.json();
+  const pages = data.query?.pages;
+  if (!pages) return null;
+  const pageId = Object.keys(pages)[0];
+  const imageinfo = pages[pageId]?.imageinfo;
+  if (!imageinfo || imageinfo.length === 0) return null;
+  if (thumbWidth) {
+    return imageinfo[0].thumburl ?? null;
+  }
+  return imageinfo[0].url ?? null;
+}

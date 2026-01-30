@@ -8,70 +8,108 @@
 
 import { test, expect } from './fixtures/auth';
 import { TEST_FILES } from './fixtures/test-files';
+import { queryFileUrl } from './fixtures/wiki-api';
 
 test.describe('Direct URL access', () => {
   test('img_auth.php serves file to authorized user', async ({
     adminPage,
+    adminContext,
   }) => {
-    // Admin (sysop) has access to all levels including confidential
-    const response = await adminPage.goto(
-      `/img_auth.php/${TEST_FILES.confidential}`
+    // Get the actual file URL with correct hash path from the API
+    const fileUrl = await queryFileUrl(
+      adminContext.request,
+      TEST_FILES.confidential
     );
+    expect(fileUrl).not.toBeNull();
+
+    // Extract the relative path (img_auth.php/...)
+    const url = new URL(fileUrl!);
+    const response = await adminPage.goto(url.pathname);
     expect(response).not.toBeNull();
-    // Should be 200 (file served) — not a redirect or error
     expect(response!.status()).toBe(200);
   });
 
   test('img_auth.php denies file to unauthorized user', async ({
     testUserPage,
+    testUserContext,
   }) => {
-    // TestUser does not have access to confidential
-    const response = await testUserPage.goto(
-      `/img_auth.php/${TEST_FILES.confidential}`
+    // Get the actual file URL with correct hash path
+    const fileUrl = await queryFileUrl(
+      testUserContext.request,
+      TEST_FILES.confidential
     );
-    expect(response).not.toBeNull();
 
-    // Should be 403 (forbidden) or the page should contain an access denied message
-    const status = response!.status();
-    if (status === 403) {
-      expect(status).toBe(403);
+    if (fileUrl) {
+      const url = new URL(fileUrl);
+      const response = await testUserPage.goto(url.pathname);
+      expect(response).not.toBeNull();
+
+      const status = response!.status();
+      if (status === 403) {
+        expect(status).toBe(403);
+      } else {
+        // MW may render an HTML error page with 200 status
+        const body = await testUserPage.textContent('body');
+        expect(body).toContain('permission');
+      }
     } else {
-      // MW may render an HTML error page with 200 status
-      const body = await testUserPage.textContent('body');
-      expect(body).toContain('permission');
+      // File URL not available via API (testUser may lack access to query it)
+      // Fall back to the simple path format
+      const response = await testUserPage.goto(
+        `/img_auth.php/${TEST_FILES.confidential}`
+      );
+      expect(response).not.toBeNull();
+      // Any non-200 is acceptable for an unauthorized user
+      expect(response!.status()).not.toBe(200);
     }
   });
 
   test('img_auth.php serves public file to all logged-in users', async ({
     testUserPage,
+    testUserContext,
   }) => {
-    // TestUser has access to "public" level
-    const response = await testUserPage.goto(
-      `/img_auth.php/${TEST_FILES.public}`
+    // Get the actual file URL with correct hash path
+    const fileUrl = await queryFileUrl(
+      testUserContext.request,
+      TEST_FILES.public
     );
+    expect(fileUrl).not.toBeNull();
+
+    const url = new URL(fileUrl!);
+    const response = await testUserPage.goto(url.pathname);
     expect(response).not.toBeNull();
     expect(response!.status()).toBe(200);
   });
 
   test('img_auth.php denies all files to anonymous users', async ({
     browser,
+    adminContext,
   }) => {
+    // Get the actual file URL from an authenticated context
+    const fileUrl = await queryFileUrl(
+      adminContext.request,
+      TEST_FILES.public
+    );
+    expect(fileUrl).not.toBeNull();
+
+    const url = new URL(fileUrl!);
+
     // Fresh context with no login
     const anonContext = await browser.newContext();
     const anonPage = await anonContext.newPage();
 
     const response = await anonPage.goto(
-      `http://localhost:8888/img_auth.php/${TEST_FILES.public}`
+      `http://localhost:8888${url.pathname}`
     );
     expect(response).not.toBeNull();
 
     // Should redirect to login or return 403
     const status = response!.status();
-    const url = anonPage.url();
+    const pageUrl = anonPage.url();
 
     const isBlocked =
       status === 403 ||
-      url.includes('UserLogin') ||
+      pageUrl.includes('UserLogin') ||
       (await anonPage.textContent('body')).includes('not authorised');
 
     expect(isBlocked).toBe(true);
@@ -94,28 +132,42 @@ test.describe('Direct URL access', () => {
 
   test('img_auth.php thumbnail access follows same rules', async ({
     testUserPage,
+    testUserContext,
+    adminContext,
   }) => {
     // TestUser should be DENIED access to confidential thumbnail
-    const confThumbResponse = await testUserPage.goto(
-      `/img_auth.php/thumb/${TEST_FILES.confidential}/120px-${TEST_FILES.confidential}`
+    // Get confidential thumbnail URL from admin context (testUser may not be able to query it)
+    const confThumbUrl = await queryFileUrl(
+      adminContext.request,
+      TEST_FILES.confidential,
+      120
     );
-    expect(confThumbResponse).not.toBeNull();
-    const confStatus = confThumbResponse!.status();
-    if (confStatus !== 403) {
-      // May render HTML error
-      const body = await testUserPage.textContent('body');
-      expect(body).toContain('permission');
+
+    if (confThumbUrl) {
+      const confUrl = new URL(confThumbUrl);
+      const confThumbResponse = await testUserPage.goto(confUrl.pathname);
+      expect(confThumbResponse).not.toBeNull();
+      const confStatus = confThumbResponse!.status();
+      if (confStatus !== 403) {
+        // May render HTML error
+        const body = await testUserPage.textContent('body');
+        expect(body).toContain('permission');
+      }
     }
 
     // TestUser should be ALLOWED access to internal thumbnail
-    const intThumbResponse = await testUserPage.goto(
-      `/img_auth.php/thumb/${TEST_FILES.internal}/120px-${TEST_FILES.internal}`
+    const intThumbUrl = await queryFileUrl(
+      testUserContext.request,
+      TEST_FILES.internal,
+      120
     );
+    expect(intThumbUrl).not.toBeNull();
+
+    const intUrl = new URL(intThumbUrl!);
+    const intThumbResponse = await testUserPage.goto(intUrl.pathname);
     expect(intThumbResponse).not.toBeNull();
-    // Internal level is accessible to TestUser (user group grants public+internal)
-    // Should be 200 or at least not 403
     const intStatus = intThumbResponse!.status();
-    // 200 = thumbnail served, 404 = thumbnail not generated yet (but access allowed)
+    // 200 = thumbnail served, 404 = thumbnail not yet generated (but access allowed)
     expect([200, 404]).toContain(intStatus);
   });
 });

@@ -73,25 +73,42 @@ test.describe('File: page display', () => {
     await adminPage.goto(`/index.php/File:${TEST_FILES.internal}`);
     await adminPage.waitForSelector('#fileperm-edit-dropdown', { timeout: 10_000 });
 
-    // Change level to "public" via OOUI dropdown
+    // Wait for ext.FilePermissions.edit RL module to load and infuse widgets.
+    // The module's $() callback runs synchronously once the script executes
+    // (DOM is already ready), so after getState === 'ready' the widgets are infused.
+    await adminPage.waitForFunction(() => {
+      try {
+        return typeof mw !== 'undefined' &&
+          mw.loader.getState('ext.FilePermissions.edit') === 'ready' &&
+          typeof OO !== 'undefined' &&
+          typeof OO.ui !== 'undefined' &&
+          typeof OO.ui.infuse === 'function';
+      } catch (e) {
+        return false;
+      }
+    }, { timeout: 30_000 });
+
+    // Change level to "public" using OOUI's infuse API (native DOM changes
+    // don't propagate through OOUI's internal state)
     await adminPage.evaluate(() => {
-      const dropdown = document.querySelector('#fileperm-edit-dropdown');
-      if (!dropdown) return;
-      const select = dropdown.querySelector('select');
-      if (select) {
-        select.value = 'public';
-        select.dispatchEvent(new Event('change', { bubbles: true }));
+      const $dropdown = $( '#fileperm-edit-dropdown' );
+      if ( $dropdown.length ) {
+        const widget = OO.ui.infuse( $dropdown );
+        widget.setValue( 'public' );
       }
     });
 
-    // Click save button via OOUI infusion
+    // Click save button using OOUI's infuse API
     await adminPage.evaluate(() => {
-      const btn = document.querySelector('#fileperm-edit-save');
-      if (btn) btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      const $btn = $( '#fileperm-edit-save' );
+      if ( $btn.length ) {
+        const widget = OO.ui.infuse( $btn );
+        widget.emit( 'click' );
+      }
     });
 
     // Wait for save to complete — look for success notification
-    await adminPage.waitForSelector('.mw-notification-type-success, .mw-notification', {
+    await adminPage.waitForSelector('.mw-notification', {
       timeout: 10_000,
     }).catch(() => {});
     await adminPage.waitForTimeout(2000);

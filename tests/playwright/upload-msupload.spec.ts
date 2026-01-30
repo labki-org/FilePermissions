@@ -8,7 +8,6 @@
 
 import { test, expect } from './fixtures/auth';
 import { queryFilePermLevel, deletePage } from './fixtures/wiki-api';
-import { createTestPng } from './fixtures/test-files';
 
 const MSUPLOAD_DIV = '#msupload-div';
 const CONTROLS_SELECTOR = '#fileperm-msupload-controls';
@@ -60,6 +59,10 @@ test.describe('MsUpload source editor integration', () => {
     adminContext,
   }) => {
     const testFilename = 'PW_MsUpload_Level_Test.png';
+    const apiContext = adminContext.request;
+
+    // Clean up from any previous run
+    await deletePage(apiContext, `File:${testFilename}`);
 
     await adminPage.goto('/index.php?title=PW_MsUpload_Test&action=edit');
     await adminPage.waitForSelector(MSUPLOAD_DIV, { timeout: 30_000 });
@@ -67,27 +70,49 @@ test.describe('MsUpload source editor integration', () => {
     // Select "internal" from the FilePermissions dropdown
     await adminPage.selectOption(SELECT_SELECTOR, 'internal');
 
-    // Trigger file upload via MsUpload's file input
-    const fileInput = adminPage.locator(`${MSUPLOAD_DIV} input[type="file"]`);
-    const png = createTestPng();
-    await fileInput.setInputFiles({
-      name: testFilename,
-      mimeType: 'image/png',
-      buffer: png,
-    });
+    // Upload via raw XHR on the edit page. The XHR goes through the patched
+    // XMLHttpRequest.prototype.send (ext.FilePermissions.shared). The MsUpload
+    // bridge's onUploadSend callback detects the FormData body with
+    // action=upload and appends wpFilePermLevel from #fileperm-msupload-select.
+    // We use raw XHR because plupload's moxie runtime ignores programmatic
+    // file input changes and the mediawiki.api.upload module is unavailable.
+    await adminPage.evaluate((filename) => {
+      return new Promise((resolve) => {
+        new mw.Api().getToken('csrf').then(function (token) {
+          var b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+          var binary = atob(b64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          var file = new File([bytes], filename, { type: 'image/png' });
 
-    // Wait for upload completion — MsUpload shows status in #msupload-list
-    await adminPage.waitForSelector('#msupload-list .green, #msupload-list li.successful', {
-      timeout: 30_000,
-    }).catch(() => {
-      // Fallback: wait for any completion indicator
-    });
+          var formData = new FormData();
+          formData.append('action', 'upload');
+          formData.append('filename', filename);
+          formData.append('file', file);
+          formData.append('comment', 'Playwright MsUpload test');
+          formData.append('ignorewarnings', '1');
+          formData.append('token', token);
+          formData.append('format', 'json');
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api.php');
+          xhr.onload = function () {
+            resolve('done:' + xhr.status);
+          };
+          xhr.onerror = function () {
+            resolve('error:' + xhr.status);
+          };
+          xhr.send(formData);
+        }, function (e) {
+          resolve('token-error:' + String(e));
+        });
+      });
+    }, testFilename);
 
     // Wait for DeferredUpdates to store permission
-    await adminPage.waitForTimeout(3000);
+    await adminPage.waitForTimeout(5000);
 
     // Verify via API
-    const apiContext = adminContext.request;
     const level = await queryFilePermLevel(apiContext, testFilename);
     expect(level).toBe('internal');
 
@@ -97,60 +122,70 @@ test.describe('MsUpload source editor integration', () => {
 
   test('dropdown is disabled during upload and re-enabled after', async ({
     adminPage,
+    adminContext,
   }) => {
     const testFilename = 'PW_MsUpload_Disabled_Test.png';
+
+    // Clean up from any previous run
+    await deletePage(adminContext.request, `File:${testFilename}`);
 
     await adminPage.goto('/index.php?title=PW_MsUpload_Test&action=edit');
     await adminPage.waitForSelector(MSUPLOAD_DIV, { timeout: 30_000 });
 
-    // Start an upload
-    const fileInput = adminPage.locator(`${MSUPLOAD_DIV} input[type="file"]`);
-    const png = createTestPng();
+    // Use a single evaluate that sets up a MutationObserver, then triggers
+    // the upload via raw XHR. The MsUpload bridge's onUploadSend callback
+    // disables #fileperm-msupload-select synchronously when xhr.send fires.
+    const wasDisabled = await adminPage.evaluate(([filename, selectSel]) => {
+      return new Promise((resolve) => {
+        var el = document.querySelector(selectSel);
+        if (!el) { resolve(false); return; }
 
-    // Set up a promise to check disabled state during upload
-    const checkDisabled = adminPage.evaluate((selectSel) => {
-      return new Promise<boolean>((resolve) => {
-        const observer = new MutationObserver(() => {
-          const el = document.querySelector(selectSel) as HTMLSelectElement;
-          if (el && el.disabled) {
+        // Observe disabled attribute changes
+        var observer = new MutationObserver(function () {
+          if (el.disabled) {
             observer.disconnect();
             resolve(true);
           }
         });
-        const target = document.querySelector(selectSel);
-        if (target) {
-          observer.observe(target, { attributes: true });
-        }
+        observer.observe(el, { attributes: true, attributeFilter: ['disabled'] });
+
+        // Get CSRF token and trigger upload via raw XHR
+        new mw.Api().getToken('csrf').then(function (token) {
+          var b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+          var binary = atob(b64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          var file = new File([bytes], filename, { type: 'image/png' });
+
+          var formData = new FormData();
+          formData.append('action', 'upload');
+          formData.append('filename', filename);
+          formData.append('file', file);
+          formData.append('comment', 'Playwright disabled test');
+          formData.append('ignorewarnings', '1');
+          formData.append('token', token);
+          formData.append('format', 'json');
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api.php');
+          xhr.send(formData);
+        });
+
         // Timeout fallback
-        setTimeout(() => {
+        setTimeout(function () {
           observer.disconnect();
-          const el = document.querySelector(selectSel) as HTMLSelectElement;
-          resolve(el?.disabled ?? false);
-        }, 5000);
+          resolve(el.disabled);
+        }, 15000);
       });
-    }, SELECT_SELECTOR);
+    }, [testFilename, SELECT_SELECTOR]);
 
-    await fileInput.setInputFiles({
-      name: testFilename,
-      mimeType: 'image/png',
-      buffer: png,
-    });
-
-    // Check that dropdown was disabled during upload
-    const wasDisabled = await checkDisabled;
     expect(wasDisabled).toBe(true);
 
-    // Wait for upload completion
-    await adminPage.waitForTimeout(3000);
-
-    // After upload, dropdown should be re-enabled
+    // After upload completes, dropdown should be re-enabled
     const select = adminPage.locator(SELECT_SELECTOR);
-    await expect(select).toBeEnabled({ timeout: 10_000 });
+    await expect(select).toBeEnabled({ timeout: 15_000 });
 
     // Clean up
-    await deletePage(
-      adminPage.context().request,
-      `File:${testFilename}`
-    );
+    await deletePage(adminContext.request, `File:${testFilename}`);
   });
 });
