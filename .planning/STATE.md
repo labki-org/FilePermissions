@@ -10,31 +10,36 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 7 of 10 (Test Infrastructure & Unit Tests)
-Plan: -- (not yet planned)
-Status: Ready to plan
-Last activity: 2026-01-29 -- Roadmap created for v1.1
+Plan: 1 of 2 in phase 7
+Status: In progress
+Last activity: 2026-01-29 -- Completed 07-01-PLAN.md
 
-Progress: [##########..........] 0% (v1.1 phases 7-10)
+Progress: [##########..........] ~12% (v1.1 phases 7-10; 1 plan complete, phase 7 plan 2 + phases 8-10 remaining)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v1.1)
-- Average duration: --
-- Total execution time: --
+- Total plans completed: 1 (v1.1)
+- Average duration: 2min
+- Total execution time: 2min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 07 | 1/2 | 2min | 2min |
 
 ## Accumulated Context
 
 ### Decisions
 
 All v1.0 decisions logged in PROJECT.md Key Decisions table.
-No v1.1 decisions yet.
+
+| Decision | Phase | Rationale |
+|----------|-------|-----------|
+| setUp/tearDown global save/restore with __UNSET__ sentinel | 07-01 | Supports both null and truly-unset global test cases without cross-test pollution |
+| Static data providers for PHPUnit 10 compat | 07-01 | PHPUnit 10 requires static data providers; future-proof now |
+| Fail-closed test naming suffix convention | 07-01 | Makes security guarantees grep-able and self-documenting (_FailClosed, _NoGrantsMeansNoAccess) |
 
 ### Research Flags
 
@@ -67,7 +72,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Roadmap created for v1.1 Testing & CI
+Stopped at: Completed 07-01-PLAN.md (test infrastructure + Config unit tests)
 Resume file: None
 
-*Updated after v1.1 roadmap creation*
+*Updated after 07-01 execution*
