@@ -98,11 +98,11 @@ Plans:
 
 **Research flag:** Skip -- Guzzle HTTP testing, MW API login flow, img_auth.php URL patterns all researched. Open questions (exact thumbnail path format, labki-platform PHPUnit availability) resolve during implementation, not research.
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md -- E2E test infrastructure (base class, MW API auth, file seeding, HTTP helpers) + Apache direct-path denial tests
+- [ ] 09-02-PLAN.md -- img_auth.php leak checks + full permission matrix (3 levels x 3 users x 2 vectors)
 
 ---
 
@@ -138,7 +138,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 7. Test Infrastructure & Unit Tests | v1.1 | 2/2 | Complete | 2026-01-29 |
 | 8. Integration Tests | v1.1 | 2/2 | Complete | 2026-01-30 |
-| 9. E2E HTTP Leak Checks | v1.1 | 0/TBD | Not started | - |
+| 9. E2E HTTP Leak Checks | v1.1 | 0/2 | Not started | - |
 | 10. CI Pipeline | v1.1 | 0/TBD | Not started | - |
 
 ---
