@@ -13,6 +13,9 @@
 	"AutoloadNamespaces": {
 		"FilePermissions\\": "includes/"
 	},
+	"TestAutoloadNamespaces": {
+		"FilePermissions\\Tests\\": "tests/phpunit/"
+	},
 	"MessagesDirs": {
 		"FilePermissions": [
 			"i18n"
