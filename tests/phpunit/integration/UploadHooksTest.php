@@ -350,4 +350,95 @@ class UploadHooksTest extends MediaWikiIntegrationTestCase {
 		$this->assertNull( $service->getLevel( $freshTitle ),
 			'Invalid level should not be stored in fileperm_levels' );
 	}
+
+	// =========================================================================
+	// Security audit tests
+	// =========================================================================
+
+	/**
+	 * SEC-07: Invalid level is rejected before default resolution logic.
+	 *
+	 * Even when a default level is configured, an explicitly invalid level
+	 * in the request must be rejected immediately — it should NOT fall
+	 * through to the default resolution path.
+	 */
+	public function testEarlyValidationRejectsInvalidLevelBeforeDefaultResolution(): void {
+		// Set a default so the default-resolution path would succeed
+		$this->overrideConfigValue( 'FilePermDefaultLevel', 'public' );
+		// But the request contains an explicitly invalid level
+		$this->setRequestParams( [ 'wpFilePermLevel' => 'hacked-level' ] );
+
+		$hooks = $this->createHooks();
+		$upload = $this->createMock( UploadBase::class );
+		$user = $this->getTestUser()->getUser();
+		$error = null;
+
+		$result = $hooks->onUploadVerifyUpload(
+			$upload, $user, null, '', '', $error
+		);
+
+		$this->assertFalse( $result,
+			'Invalid level must be rejected even when a default is configured' );
+		$this->assertSame( [ 'filepermissions-upload-invalid' ], $error );
+	}
+
+	/**
+	 * SEC-06: DeferredUpdate error does not propagate as an exception.
+	 *
+	 * If PermissionService::setLevel() throws inside the DeferredUpdate,
+	 * the exception is caught and logged rather than crashing the request.
+	 */
+	public function testDeferredUpdateCatchesExceptionsFromSetLevel(): void {
+		$this->setRequestParams( [ 'wpFilePermLevel' => 'internal' ] );
+
+		$title = $this->createFilePage( 'DeferredErrorTest.png' );
+
+		// Create a mock PermissionService that throws on setLevel
+		$mockService = $this->createMock( PermissionService::class );
+		$mockService->method( 'setLevel' )
+			->willThrowException( new \RuntimeException( 'DB connection lost' ) );
+
+		$upload = $this->createMock( UploadBase::class );
+		$localFile = $this->createMock( \LocalFile::class );
+		$localFile->method( 'getTitle' )->willReturn( $title );
+		$upload->method( 'getLocalFile' )->willReturn( $localFile );
+
+		$hooks = new UploadHooks( $mockService );
+
+		// onUploadComplete itself should succeed (deferred update is registered)
+		$result = $hooks->onUploadComplete( $upload );
+		$this->assertTrue( $result );
+
+		// Running deferred updates should NOT throw despite setLevel exception
+		DeferredUpdates::doUpdates();
+
+		// If we got here without an exception, the try-catch worked
+		$this->assertTrue( true );
+	}
+
+	/**
+	 * SEC-07: getText() returns empty string for missing params, not null.
+	 *
+	 * Verifies that onUploadComplete handles getText() behavior correctly:
+	 * missing wpFilePermLevel returns '' and falls through to default
+	 * resolution, not a null-based code path.
+	 */
+	public function testUploadCompleteHandlesMissingParamViaGetText(): void {
+		// Empty request - getText('wpFilePermLevel') returns ''
+		$this->setRequestParams( [] );
+		$this->overrideConfigValue( 'FilePermDefaultLevel', 'internal' );
+
+		$title = $this->createFilePage( 'GetTextTest.png' );
+		$upload = $this->createMockUploadBase( $title );
+		$hooks = $this->createHooks();
+
+		$hooks->onUploadComplete( $upload );
+		DeferredUpdates::doUpdates();
+
+		// Should have stored the default level 'internal'
+		$service = $this->getService();
+		$freshTitle = Title::makeTitle( NS_FILE, $title->getDBkey() );
+		$this->assertSame( 'internal', $service->getLevel( $freshTitle ),
+			'Default level should be applied when getText returns empty string' );
+	}
 }
