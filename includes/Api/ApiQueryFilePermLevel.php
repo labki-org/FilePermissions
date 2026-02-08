@@ -44,6 +44,6 @@ class ApiQueryFilePermLevel extends ApiQueryBase {
 
 	/** @return string */
 	public function getCacheMode( $params ) {
-		return 'public';
+		return 'private';
 	}
 }

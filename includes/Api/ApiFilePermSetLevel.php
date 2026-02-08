@@ -45,10 +45,18 @@ class ApiFilePermSetLevel extends ApiBase {
 	public function execute() {
 		$this->checkUserRightsAny( 'edit-fileperm' );
 
+		if ( $this->getUser()->pingLimiter( 'fileperm-setlevel' ) ) {
+			$this->dieWithError( 'apierror-ratelimited' );
+		}
+
 		$params = $this->extractRequestParams();
 		$title = Title::newFromText( $params['title'], NS_FILE );
 
 		if ( !$title || !$title->exists() ) {
+			$this->dieWithError( 'filepermissions-api-nosuchpage' );
+		}
+
+		if ( $title->getNamespace() !== NS_FILE ) {
 			$this->dieWithError( 'filepermissions-api-nosuchpage' );
 		}
 

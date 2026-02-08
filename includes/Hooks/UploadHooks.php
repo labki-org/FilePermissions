@@ -14,6 +14,7 @@ use MediaWiki\Hook\UploadVerifyUploadHook;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use UploadBase;
+use MediaWiki\Logger\LoggerFactory;
 use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
@@ -93,9 +94,14 @@ class UploadHooks implements
 		&$error
 	) {
 		$request = RequestContext::getMain()->getRequest();
-		$level = $request->getVal( 'wpFilePermLevel' );
+		$level = $request->getText( 'wpFilePermLevel' );
 
-		if ( $level === null || $level === '' ) {
+		if ( $level !== '' && !Config::isValidLevel( $level ) ) {
+			$error = [ 'filepermissions-upload-invalid' ];
+			return false;
+		}
+
+		if ( $level === '' ) {
 			// Attempt to resolve a namespace/global default
 			$default = Config::resolveDefaultLevel( NS_FILE );
 			if ( $default !== null ) {
@@ -117,11 +123,6 @@ class UploadHooks implements
 			// API upload with no default configured — allow without level
 			// (grandfathered: file will have no level, treated as unrestricted)
 			return true;
-		}
-
-		if ( !Config::isValidLevel( $level ) ) {
-			$error = [ 'filepermissions-upload-invalid' ];
-			return false;
 		}
 
 		return true;
@@ -148,10 +149,10 @@ class UploadHooks implements
 			return true;
 		}
 
-		$level = RequestContext::getMain()->getRequest()->getVal( 'wpFilePermLevel' );
+		$level = RequestContext::getMain()->getRequest()->getText( 'wpFilePermLevel' );
 
 		// If no explicit level provided, resolve namespace/global default
-		if ( $level === null || $level === '' ) {
+		if ( $level === '' ) {
 			$level = Config::resolveDefaultLevel( NS_FILE );
 		}
 
@@ -167,12 +168,18 @@ class UploadHooks implements
 
 		DeferredUpdates::addCallableUpdate(
 			static function () use ( $dbKey, $ns, $level, $permissionService ) {
-				// Fresh Title avoids cached articleID=0 from before page creation
-				$freshTitle = Title::makeTitle( $ns, $dbKey );
-				if ( $freshTitle->getArticleID( IDBAccessObject::READ_LATEST ) === 0 ) {
-					return;
+				try {
+					$freshTitle = Title::makeTitle( $ns, $dbKey );
+					if ( $freshTitle->getArticleID( IDBAccessObject::READ_LATEST ) === 0 ) {
+						return;
+					}
+					$permissionService->setLevel( $freshTitle, $level );
+				} catch ( \Exception $e ) {
+					LoggerFactory::getInstance( 'FilePermissions' )->error(
+						'Failed to set permission level on upload: {error}',
+						[ 'error' => $e->getMessage(), 'page' => "$ns:$dbKey" ]
+					);
 				}
-				$permissionService->setLevel( $freshTitle, $level );
 			}
 		);
 

@@ -183,6 +183,18 @@ The extension enforces permissions at four points:
 - If configuration validation fails at registration time, an internal flag (`$wgFilePermInvalidConfig`) is set and **all permission checks deny access**.
 - Files without an explicit level and no configured default are treated as unrestricted (grandfathered files).
 
+### Security model details
+
+The extension relies on `img_auth.php` as the enforcement boundary for raw file access. Several API endpoints return file-related data, but their output is safe because:
+
+- **`action=query&prop=imageinfo`** returns file URLs that route through `img_auth.php` when `$wgUploadPath` is configured correctly. The `ImgAuthBeforeStream` hook enforces permissions on these URLs, so URL exposure does not bypass protection.
+- **`action=parse`** triggers the `ImageBeforeProduceHTML` hook, which replaces protected images with placeholders for unauthorized users. Parsed output is therefore protected.
+- **Direct file access** must be blocked at the web server level by denying requests to the upload directory (see Installation step 5). This is a defense-in-depth measure independent of `img_auth.php`.
+
+### Timing considerations
+
+Permission checks may exhibit timing differences based on database lookups (e.g., checking whether a file has a permission level). This is inherent to the architecture and is mitigated by in-process caching in `PermissionService`, which reduces the timing delta for repeated checks within the same request.
+
 ## API Reference
 
 ### `action=fileperm-set-level`

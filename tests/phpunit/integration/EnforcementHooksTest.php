@@ -446,4 +446,46 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		// The assertion is in the mock expectation above (updateCacheExpiry called with 0)
 		$this->assertTrue( true );
 	}
+
+	/**
+	 * SEC-02: Parser cache is only disabled once even with multiple protected images.
+	 *
+	 * When a page embeds multiple protected images, updateCacheExpiry(0) should
+	 * be called exactly once to avoid redundant work.
+	 */
+	public function testDisablesParserCacheOnlyOnceForMultipleProtectedImages(): void {
+		$title1 = $this->createProtectedFile( 'MultiCache01.png', 'confidential' );
+		$title2 = $this->createProtectedFile( 'MultiCache02.png', 'internal' );
+		$user = $this->getTestUser( [ 'sysop' ] )->getUser();
+		RequestContext::getMain()->setUser( $user );
+		$hooks = $this->createHooks();
+
+		$unused = null;
+		$file = false;
+		$frameParams = [];
+		$handlerParams = [];
+		$time = false;
+		$res = null;
+		$parserOutput = $this->createMock( \ParserOutput::class );
+		$parserOutput->expects( $this->once() )
+			->method( 'updateCacheExpiry' )
+			->with( 0 );
+		$parser = $this->createMock( \Parser::class );
+		$parser->method( 'getOutput' )->willReturn( $parserOutput );
+		$query = '';
+		$widthOption = null;
+
+		// First call with title1 - should call updateCacheExpiry
+		$hooks->onImageBeforeProduceHTML(
+			$unused, $title1, $file, $frameParams, $handlerParams,
+			$time, $res, $parser, $query, $widthOption
+		);
+
+		// Second call with title2 - should NOT call updateCacheExpiry again
+		$res2 = null;
+		$hooks->onImageBeforeProduceHTML(
+			$unused, $title2, $file, $frameParams, $handlerParams,
+			$time, $res2, $parser, $query, $widthOption
+		);
+	}
 }

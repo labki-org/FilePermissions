@@ -14,6 +14,14 @@
 ( function () {
 	'use strict';
 
+	// SEC-12: Warn if namespace was already defined (possible extension conflict)
+	if ( mw.FilePermissions !== undefined ) {
+		mw.log.warn(
+			'FilePermissions: mw.FilePermissions namespace already defined. ' +
+			'Possible conflict with another extension or script.'
+		);
+	}
+
 	// Namespace for shared API
 	mw.FilePermissions = mw.FilePermissions || {};
 
@@ -52,7 +60,7 @@
 
 	// --- Callback registry for upload XHR interception ---
 
-	mw.FilePermissions._uploadCallbacks = [];
+	var uploadCallbacks = [];
 
 	/**
 	 * Register a callback to be invoked when an upload XHR send() is detected.
@@ -64,14 +72,17 @@
 	 * @param {Function} callback Function(xhr, body) => modified body or undefined
 	 */
 	mw.FilePermissions.onUploadSend = function ( callback ) {
-		mw.FilePermissions._uploadCallbacks.push( callback );
+		uploadCallbacks.push( callback );
 	};
+
+	// SEC-03: Use WeakMap to avoid exposing state on XHR instances
+	var xhrState = new WeakMap();
 
 	// Patch XMLHttpRequest.prototype.open once to tag API POST requests.
 	var origOpen = XMLHttpRequest.prototype.open;
 	XMLHttpRequest.prototype.open = function ( method, url ) {
 		if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
-			this._filePermIsApiPost = true;
+			xhrState.set( this, { isApiPost: true } );
 		}
 		return origOpen.apply( this, arguments );
 	};
@@ -80,7 +91,8 @@
 	// in both FormData and string bodies, then invoke all registered callbacks.
 	var origSend = XMLHttpRequest.prototype.send;
 	XMLHttpRequest.prototype.send = function ( body ) {
-		if ( this._filePermIsApiPost ) {
+		var state = xhrState.get( this );
+		if ( state && state.isApiPost ) {
 			var isUpload = false;
 
 			if ( body instanceof FormData ) {
@@ -91,9 +103,8 @@
 			}
 
 			if ( isUpload ) {
-				var callbacks = mw.FilePermissions._uploadCallbacks;
-				for ( var i = 0; i < callbacks.length; i++ ) {
-					var result = callbacks[ i ]( this, body );
+				for ( var i = 0; i < uploadCallbacks.length; i++ ) {
+					var result = uploadCallbacks[ i ]( this, body );
 					if ( typeof result === 'string' ) {
 						body = result;
 					}

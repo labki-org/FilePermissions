@@ -331,4 +331,37 @@ class ApiFilePermTest extends ApiTestCase {
 		$page = reset( $pages );
 		$this->assertSame( 'internal', $page['fileperm_level'] );
 	}
+
+	/**
+	 * SEC-01: Query cache mode must be 'private' since results are user-specific.
+	 */
+	public function testQueryCacheModeIsPrivate(): void {
+		$queryModule = $this->createMock( \MediaWiki\Api\ApiQuery::class );
+		$queryModule->method( 'getMain' )
+			->willReturn( $this->createMock( \MediaWiki\Api\ApiMain::class ) );
+		$permService = $this->getService();
+
+		$module = new \FilePermissions\Api\ApiQueryFilePermLevel(
+			$queryModule, 'fileperm', $permService
+		);
+
+		$this->assertSame( 'private', $module->getCacheMode( [] ) );
+	}
+
+	/**
+	 * SEC-08: Setting level on a non-File namespace page is rejected.
+	 */
+	public function testSetLevelRejectsNonFileNamespace(): void {
+		// Create a Main namespace page
+		$this->insertPage( 'NonFilePage_ApiNsTest', 'test content', NS_MAIN );
+		$sysop = $this->getTestSysop();
+
+		$this->expectException( ApiUsageException::class );
+
+		$this->doApiRequestWithToken( 'csrf', [
+			'action' => 'fileperm-set-level',
+			'title' => 'NonFilePage_ApiNsTest',
+			'level' => 'public',
+		], null, $sysop->getAuthority() );
+	}
 }

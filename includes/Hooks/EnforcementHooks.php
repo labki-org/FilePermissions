@@ -24,6 +24,7 @@ class EnforcementHooks implements
 	ImageBeforeProduceHTMLHook
 {
 	private PermissionService $permissionService;
+	private bool $hasDisabledCache = false;
 
 	public function __construct( PermissionService $permissionService ) {
 		$this->permissionService = $permissionService;
@@ -125,8 +126,9 @@ class EnforcementHooks implements
 		// The parser cache stores ONE version for all users, but different
 		// users may have different file access levels. Without this, the
 		// first user to trigger a parse determines what all users see.
-		if ( $level !== null && $parser && $parser->getOutput() ) {
+		if ( $level !== null && !$this->hasDisabledCache && $parser && $parser->getOutput() ) {
 			$parser->getOutput()->updateCacheExpiry( 0 );
+			$this->hasDisabledCache = true;
 		}
 
 		$user = RequestContext::getMain()->getUser();
