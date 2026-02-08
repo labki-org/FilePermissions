@@ -23,6 +23,13 @@ class RegistrationHooks {
 	 * permission checks will deny access (fail-closed behavior).
 	 */
 	public static function onRegistration(): void {
+		if ( !isset( $GLOBALS['wgRateLimits']['fileperm-setlevel'] ) ) {
+			$GLOBALS['wgRateLimits']['fileperm-setlevel'] = [
+				'user' => [ 10, 60 ],
+				'newbie' => [ 3, 60 ],
+			];
+		}
+
 		$errors = self::validateConfiguration();
 
 		if ( !empty( $errors ) ) {
@@ -35,6 +42,29 @@ class RegistrationHooks {
 					'error' => $error
 				] );
 			}
+		}
+
+		self::warnIfAnonymousReadEnabled();
+	}
+
+	/**
+	 * Warn if anonymous read access is enabled.
+	 *
+	 * File permission enforcement requires img_auth.php, which is only
+	 * active when anonymous read is disabled. Log a warning if the wiki
+	 * allows anonymous reads so the admin is alerted.
+	 */
+	private static function warnIfAnonymousReadEnabled(): void {
+		global $wgGroupPermissions;
+		if ( isset( $wgGroupPermissions['*']['read'] )
+			&& $wgGroupPermissions['*']['read'] === true
+		) {
+			LoggerFactory::getInstance( 'FilePermissions' )->warning(
+				'FilePermissions: anonymous read access is enabled. ' .
+				'File permission enforcement requires img_auth.php, which ' .
+				'is only active when anonymous read is disabled. Files may ' .
+				'be accessible to unauthorized users.'
+			);
 		}
 	}
 

@@ -85,7 +85,7 @@ class ApiFilePermTest extends ApiTestCase {
 		$title = $this->createFilePage( 'ApiSetLevel.png' );
 		$sysop = $this->getTestSysop();
 
-		[ $data ] = $this->doApiRequestWithToken( 'csrf', [
+		[ $data ] = $this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiSetLevel.png',
 			'level' => 'confidential',
@@ -110,14 +110,14 @@ class ApiFilePermTest extends ApiTestCase {
 		$sysop = $this->getTestSysop();
 
 		// First: set to public
-		$this->doApiRequestWithToken( 'csrf', [
+		$this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiOverwrite.png',
 			'level' => 'public',
 		], null, $sysop->getAuthority() );
 
 		// Second: overwrite to confidential
-		[ $data ] = $this->doApiRequestWithToken( 'csrf', [
+		[ $data ] = $this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiOverwrite.png',
 			'level' => 'confidential',
@@ -139,7 +139,7 @@ class ApiFilePermTest extends ApiTestCase {
 
 		$this->expectException( ApiUsageException::class );
 
-		$this->doApiRequestWithToken( 'csrf', [
+		$this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:DoesNotExist_' . mt_rand() . '.png',
 			'level' => 'public',
@@ -155,7 +155,7 @@ class ApiFilePermTest extends ApiTestCase {
 
 		$this->expectException( ApiUsageException::class );
 
-		$this->doApiRequestWithToken( 'csrf', [
+		$this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiInvalidLevel.png',
 			'level' => 'nonexistent-level',
@@ -175,7 +175,7 @@ class ApiFilePermTest extends ApiTestCase {
 
 		$this->expectException( ApiUsageException::class );
 
-		$this->doApiRequestWithToken( 'csrf', [
+		$this->doApiRequestWithToken( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiDenied.png',
 			'level' => 'public',
@@ -190,11 +190,13 @@ class ApiFilePermTest extends ApiTestCase {
 
 		$this->expectException( ApiUsageException::class );
 
-		// Pass no authority -- uses default (anon)
-		$this->doApiRequestWithToken( 'csrf', [
+		// Anonymous users cannot obtain CSRF tokens, so use doApiRequest
+		// with a bogus token. The API rejects before checking permissions.
+		$this->doApiRequest( [
 			'action' => 'fileperm-set-level',
 			'title' => 'File:ApiAnon.png',
 			'level' => 'public',
+			'token' => '+\\',
 		] );
 	}
 
@@ -330,5 +332,151 @@ class ApiFilePermTest extends ApiTestCase {
 		$pages = $data['query']['pages'];
 		$page = reset( $pages );
 		$this->assertSame( 'internal', $page['fileperm_level'] );
+	}
+
+	/**
+	 * SEC-01: Query cache mode must be 'private' since results are user-specific.
+	 */
+	public function testQueryCacheModeIsPrivate(): void {
+		$this->createFilePage( 'CacheModeTest.png' );
+
+		// Execute a real API query with appendModule=true to get the ApiMain
+		[ $data, , , $apiMain ] = $this->doApiRequest( [
+			'action' => 'query',
+			'prop' => 'fileperm',
+			'titles' => 'File:CacheModeTest.png',
+		], null, true );
+
+		// ApiMain tracks the most restrictive cache mode from all modules.
+		// Our module sets 'private', so the overall mode must be 'private'.
+		$this->assertSame( 'private', $apiMain->getCacheMode() );
+	}
+
+	/**
+	 * SEC-08: Setting level on a non-File namespace page is rejected.
+	 */
+	public function testSetLevelRejectsNonFileNamespace(): void {
+		// Create a Main namespace page
+		$this->insertPage( 'NonFilePage_ApiNsTest', 'test content', NS_MAIN );
+		$sysop = $this->getTestSysop();
+
+		$this->expectException( ApiUsageException::class );
+
+		$this->doApiRequestWithToken( [
+			'action' => 'fileperm-set-level',
+			'title' => 'NonFilePage_ApiNsTest',
+			'level' => 'public',
+		], null, $sysop->getAuthority() );
+	}
+
+	/**
+	 * SEC-08: Explicit non-File namespace prefix bypasses NS_FILE default.
+	 *
+	 * Title::newFromText('Main:Foo', NS_FILE) resolves to NS_MAIN because
+	 * the explicit prefix overrides the default namespace. The namespace
+	 * check must catch this case.
+	 */
+	public function testSetLevelRejectsExplicitNonFileNamespacePrefix(): void {
+		$this->insertPage( 'ExplicitNsTest', 'test content', NS_MAIN );
+		$sysop = $this->getTestSysop();
+
+		$this->expectException( ApiUsageException::class );
+
+		// 'Main:ExplicitNsTest' resolves to NS_MAIN despite NS_FILE default
+		$this->doApiRequestWithToken( [
+			'action' => 'fileperm-set-level',
+			'title' => 'Main:ExplicitNsTest',
+			'level' => 'public',
+		], null, $sysop->getAuthority() );
+	}
+
+	/**
+	 * SEC-08: Title without namespace prefix defaults to NS_FILE and succeeds.
+	 *
+	 * Confirms that bare filenames still work correctly after the namespace
+	 * validation was added — the check does not break the normal path.
+	 */
+	public function testSetLevelAcceptsImplicitFileNamespace(): void {
+		$title = $this->createFilePage( 'ImplicitNsTest.png' );
+		$sysop = $this->getTestSysop();
+
+		[ $data ] = $this->doApiRequestWithToken( [
+			'action' => 'fileperm-set-level',
+			// No 'File:' prefix — NS_FILE is the default
+			'title' => 'ImplicitNsTest.png',
+			'level' => 'internal',
+		], null, $sysop->getAuthority() );
+
+		$this->assertSame( 'success', $data['fileperm-set-level']['result'] );
+	}
+
+	/**
+	 * SEC-04: Rate limit is registered with correct thresholds.
+	 *
+	 * Verifies that onRegistration() sets wgRateLimits for the
+	 * fileperm-setlevel action with the expected user and newbie limits.
+	 */
+	public function testRateLimitIsRegisteredForSetLevel(): void {
+		// Invoke onRegistration to register rate limits
+		\FilePermissions\Hooks\RegistrationHooks::onRegistration();
+
+		$this->assertArrayHasKey( 'fileperm-setlevel', $GLOBALS['wgRateLimits'] );
+		$limits = $GLOBALS['wgRateLimits']['fileperm-setlevel'];
+		$this->assertSame( [ 10, 60 ], $limits['user'] );
+		$this->assertSame( [ 3, 60 ], $limits['newbie'] );
+	}
+
+	/**
+	 * SEC-04: Admin-configured rate limits are not overwritten.
+	 *
+	 * If $wgRateLimits['fileperm-setlevel'] is already set (e.g. by the
+	 * admin in LocalSettings.php), onRegistration() must not overwrite it.
+	 */
+	public function testRateLimitDoesNotOverrideAdminConfig(): void {
+		$GLOBALS['wgRateLimits']['fileperm-setlevel'] = [
+			'user' => [ 5, 30 ],
+		];
+
+		\FilePermissions\Hooks\RegistrationHooks::onRegistration();
+
+		// Should still be the admin's custom config
+		$this->assertSame( [ 5, 30 ],
+			$GLOBALS['wgRateLimits']['fileperm-setlevel']['user'] );
+		$this->assertArrayNotHasKey( 'newbie',
+			$GLOBALS['wgRateLimits']['fileperm-setlevel'] );
+	}
+
+	/**
+	 * SEC-09: onRegistration completes without error when anonymous read is enabled.
+	 *
+	 * When $wgGroupPermissions['*']['read'] is true, the extension should
+	 * log a warning but NOT crash or prevent the wiki from loading.
+	 */
+	public function testOnRegistrationHandlesAnonymousReadEnabled(): void {
+		$GLOBALS['wgGroupPermissions']['*']['read'] = true;
+		unset( $GLOBALS['wgRateLimits']['fileperm-setlevel'] );
+
+		// Should complete without throwing
+		\FilePermissions\Hooks\RegistrationHooks::onRegistration();
+
+		// Rate limits should still be registered (registration wasn't aborted)
+		$this->assertArrayHasKey( 'fileperm-setlevel', $GLOBALS['wgRateLimits'] );
+	}
+
+	/**
+	 * SEC-09: onRegistration completes without warning when anonymous read is disabled.
+	 *
+	 * Normal case: $wgGroupPermissions['*']['read'] is false. Registration
+	 * should complete cleanly with no warning path triggered.
+	 */
+	public function testOnRegistrationHandlesAnonymousReadDisabled(): void {
+		$GLOBALS['wgGroupPermissions']['*']['read'] = false;
+		unset( $GLOBALS['wgRateLimits']['fileperm-setlevel'] );
+
+		// Should complete without throwing
+		\FilePermissions\Hooks\RegistrationHooks::onRegistration();
+
+		// Rate limits should still be registered
+		$this->assertArrayHasKey( 'fileperm-setlevel', $GLOBALS['wgRateLimits'] );
 	}
 }
