@@ -1,0 +1,13 @@
+{
+	"name": "mediawiki/file-permissions",
+	"type": "mediawiki-extension",
+	"description": "Group-based file permission system for MediaWiki",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://www.mediawiki.org/wiki/Extension:FilePermissions",
+	"require": {
+		"php": ">= 8.1.0"
+	},
+	"suggest": {
+		"ext-msupload": "For MsUpload integration support"
+	}
+}
