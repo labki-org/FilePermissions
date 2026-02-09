@@ -472,4 +472,38 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 			$time, $res2, $parser, $query, $widthOption
 		);
 	}
+
+	// =========================================================================
+	// SEC-02: ParserOptionsRegister
+	// =========================================================================
+
+	/**
+	 * SEC-02: onParserOptionsRegister registers fileperm-user option correctly.
+	 *
+	 * Verifies the option is registered with null default, included in cache
+	 * keys, and lazy-loads the current user's ID.
+	 */
+	public function testParserOptionsRegisterSetsUpFilepermUserOption(): void {
+		$hooks = $this->createHooks();
+
+		$defaults = [];
+		$inCacheKey = [];
+		$lazyLoad = [];
+		$hooks->onParserOptionsRegister( $defaults, $inCacheKey, $lazyLoad );
+
+		$this->assertArrayHasKey( 'fileperm-user', $defaults );
+		$this->assertNull( $defaults['fileperm-user'] );
+
+		$this->assertArrayHasKey( 'fileperm-user', $inCacheKey );
+		$this->assertTrue( $inCacheKey['fileperm-user'] );
+
+		$this->assertArrayHasKey( 'fileperm-user', $lazyLoad );
+		$this->assertIsCallable( $lazyLoad['fileperm-user'] );
+
+		// Lazy-load callback should return the current context user's ID
+		$user = $this->getTestUser( [ 'sysop' ] )->getUser();
+		RequestContext::getMain()->setUser( $user );
+		$result = ( $lazyLoad['fileperm-user'] )();
+		$this->assertSame( (string)$user->getId(), $result );
+	}
 }
