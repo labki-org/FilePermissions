@@ -1,4 +1,20 @@
 {
 	"root": true,
-	"extends": "wikimedia/client"
+	"extends": "wikimedia/client/es5",
+	"globals": {
+		"mw": "readonly",
+		"OO": "readonly",
+		"$": "readonly",
+		"WeakMap": "readonly",
+		"URL": "readonly",
+		"URLSearchParams": "readonly",
+		"FormData": "readonly",
+		"XMLHttpRequest": "readonly",
+		"MutationObserver": "readonly"
+	},
+	"rules": {
+		"es-x/no-weak-map": "off",
+		"es-x/no-url": "off",
+		"es-x/no-url-search-params": "off"
+	}
 }

@@ -11,10 +11,10 @@ use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Hook\UploadCompleteHook;
 use MediaWiki\Hook\UploadFormInitDescriptorHook;
 use MediaWiki\Hook\UploadVerifyUploadHook;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use UploadBase;
-use MediaWiki\Logger\LoggerFactory;
 use Wikimedia\Rdbms\IDBAccessObject;
 
 /**

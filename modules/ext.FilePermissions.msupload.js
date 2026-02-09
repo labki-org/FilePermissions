@@ -155,10 +155,10 @@
 
 		// MsUpload hasn't created its container yet — watch for it
 		var observer = new MutationObserver( function () {
-			var $msDiv = $( '#msupload-div' );
-			if ( $msDiv.length ) {
+			var $found = $( '#msupload-div' );
+			if ( $found.length ) {
 				observer.disconnect();
-				init( $msDiv );
+				init( $found );
 			}
 		} );
 		var $toolbar = $( '.wikiEditor-ui' );
@@ -166,6 +166,8 @@
 			$toolbar.length ? $toolbar[ 0 ] : document.body,
 			{ childList: true, subtree: true }
 		);
-		setTimeout( function () { observer.disconnect(); }, 10000 );
+		setTimeout( function () {
+			observer.disconnect();
+		}, 10000 );
 	} );
 }() );

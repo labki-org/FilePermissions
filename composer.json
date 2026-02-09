@@ -16,5 +16,10 @@
 	"scripts": {
 		"phpcs": "phpcs -p -s",
 		"fix": "phpcbf"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }
