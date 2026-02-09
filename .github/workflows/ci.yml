@@ -24,12 +24,17 @@ concurrency:
 
 jobs:
   test:
-    name: Unit, Integration & E2E Tests
+    name: Unit, Integration & E2E Tests (MW ${{ matrix.mw-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    strategy:
+      matrix:
+        mw-version: ['latest-dev']
+      fail-fast: false
+
     env:
-      LABKI_PLATFORM_TAG: latest-dev
+      LABKI_PLATFORM_TAG: ${{ matrix.mw-version }}
 
     steps:
       - name: Checkout
@@ -112,12 +117,17 @@ jobs:
         run: docker compose logs wiki
 
   browser-tests:
-    name: Playwright Browser Tests
+    name: Playwright Browser Tests (MW ${{ matrix.mw-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    strategy:
+      matrix:
+        mw-version: ['latest-dev']
+      fail-fast: false
+
     env:
-      LABKI_PLATFORM_TAG: latest-dev
+      LABKI_PLATFORM_TAG: ${{ matrix.mw-version }}
 
     steps:
       - name: Checkout
@@ -164,7 +174,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.mw-version }}
           path: playwright-report/
           retention-days: 14
 
@@ -172,7 +182,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.mw-version }}
           path: test-results/
           retention-days: 7
 
