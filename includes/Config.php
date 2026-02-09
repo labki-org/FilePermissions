@@ -73,6 +73,11 @@ class Config {
 	 * @return array<string, array<string>> Map of level => list of group names
 	 */
 	public static function getLevelGroupMap(): array {
+		static $cache = null;
+		if ( $cache !== null ) {
+			return $cache;
+		}
+
 		$levels = self::getLevels();
 		$groupGrants = self::getGroupGrants();
 
@@ -88,6 +93,7 @@ class Config {
 			}
 		}
 
+		$cache = $map;
 		return $map;
 	}
 

@@ -11,7 +11,7 @@ class SchemaChangesHandler implements LoadExtensionSchemaUpdatesHook {
 	/**
 	 * @param \MediaWiki\Installer\DatabaseUpdater $updater
 	 */
-	public function onLoadExtensionSchemaUpdates( $updater ) {
+	public function onLoadExtensionSchemaUpdates( $updater ): void {
 		$dir = __DIR__ . '/../../sql';
 
 		$updater->addExtensionTable(

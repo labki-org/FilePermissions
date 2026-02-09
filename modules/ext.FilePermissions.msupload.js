@@ -161,6 +161,11 @@
 				init( $msDiv );
 			}
 		} );
-		observer.observe( document.body, { childList: true, subtree: true } );
+		var $toolbar = $( '.wikiEditor-ui' );
+		observer.observe(
+			$toolbar.length ? $toolbar[ 0 ] : document.body,
+			{ childList: true, subtree: true }
+		);
+		setTimeout( function () { observer.disconnect(); }, 10000 );
 	} );
 }() );

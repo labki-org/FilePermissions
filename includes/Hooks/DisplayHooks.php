@@ -45,7 +45,7 @@ class DisplayHooks implements
 	 * @param \ImagePage $imagePage
 	 * @param string &$html
 	 */
-	public function onImagePageAfterImageLinks( $imagePage, &$html ) {
+	public function onImagePageAfterImageLinks( $imagePage, &$html ): void {
 		$title = $imagePage->getTitle();
 		$level = $this->permissionService->getLevel( $title );
 
@@ -119,7 +119,7 @@ class DisplayHooks implements
 	 * @param OutputPage $out The OutputPage to add modules/config to
 	 * @return bool|void True or no return value to continue
 	 */
-	public function onEditPage__showEditForm_initial( $editor, $out ) {
+	public function onEditPage__showEditForm_initial( $editor, $out ): void {
 		if ( !ExtensionRegistry::getInstance()->isLoaded( 'MsUpload' ) ) {
 			return;
 		}

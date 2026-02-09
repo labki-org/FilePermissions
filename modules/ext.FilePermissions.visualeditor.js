@@ -18,6 +18,7 @@
 
 	var levels = mw.config.get( 'wgFilePermLevels' );
 	var defaultLevel = mw.config.get( 'wgFilePermVEDefault' );
+	var VERIFY_DELAY_MS = 1000;
 
 	// Guard: levels must be available and non-empty
 	if ( !levels || !levels.length ) {
@@ -26,7 +27,7 @@
 
 	// Module-level reference to the active dropdown widget.
 	// Set when renderInfoForm creates it, read by XHR interceptor.
-	var activeDropdown = null;
+	var activeBooklet = null;
 
 	/**
 	 * Get the currently selected permission level from the active dropdown.
@@ -34,7 +35,9 @@
 	 * @return {string} Selected permission level value
 	 */
 	function getSelectedPermLevel() {
-		return activeDropdown ? activeDropdown.getValue() : ( defaultLevel || levels[ 0 ] );
+		return ( activeBooklet && activeBooklet.filePermDropdown )
+			? activeBooklet.filePermDropdown.getValue()
+			: ( defaultLevel || levels[ 0 ] );
 	}
 
 	// --- PART 1: Monkey-patch BookletLayout ---
@@ -81,7 +84,7 @@
 		);
 
 		// Store reference for XHR interceptor to read
-		activeDropdown = this.filePermDropdown;
+		activeBooklet = this;
 
 		return form;
 	};
@@ -145,7 +148,7 @@
 			// Delay verification to allow DeferredUpdates to store permission
 			setTimeout( function () {
 				mw.FilePermissions.verifyPermission( self.getFilename(), 'filepermissions-ve-error-save' );
-			}, 1000 );
+			}, VERIFY_DELAY_MS );
 		} );
 	};
 }() );

@@ -27,51 +27,11 @@ use MediaWiki\Title\Title;
  */
 class ApiFilePermTest extends ApiTestCase {
 
+	use FilePermissionsIntegrationTrait;
+
 	protected function setUp(): void {
 		parent::setUp();
-
-		// Override all 5 FilePermissions config vars
-		$this->overrideConfigValue( 'FilePermLevels',
-			[ 'public', 'internal', 'confidential' ] );
-		$this->overrideConfigValue( 'FilePermGroupGrants', [
-			'sysop' => [ '*' ],
-			'editor' => [ 'public', 'internal' ],
-			'viewer' => [ 'public' ],
-		] );
-		$this->overrideConfigValue( 'FilePermDefaultLevel', null );
-		$this->overrideConfigValue( 'FilePermNamespaceDefaults', [] );
-		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
-
-		// Reset service to prevent cache poisoning across tests
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-	}
-
-	// =========================================================================
-	// Helper methods
-	// =========================================================================
-
-	/**
-	 * Get a fresh PermissionService from the service container.
-	 *
-	 * @return PermissionService
-	 */
-	private function getService(): PermissionService {
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-		return $this->getServiceContainer()
-			->getService( 'FilePermissions.PermissionService' );
-	}
-
-	/**
-	 * Insert a File: page and return its Title.
-	 *
-	 * @param string $name Page name without namespace prefix
-	 * @return Title
-	 */
-	private function createFilePage( string $name ): Title {
-		$result = $this->insertPage( "File:$name", 'test content', NS_FILE );
-		return $result['title'];
+		$this->setUpFilePermissionsConfig();
 	}
 
 	// =========================================================================

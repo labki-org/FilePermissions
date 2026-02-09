@@ -26,57 +26,11 @@ use MediaWikiIntegrationTestCase;
  */
 class PermissionServiceDbTest extends MediaWikiIntegrationTestCase {
 
+	use FilePermissionsIntegrationTrait;
+
 	protected function setUp(): void {
 		parent::setUp();
-
-		// Override all 5 FilePermissions config vars
-		$this->overrideConfigValue( 'FilePermLevels',
-			[ 'public', 'internal', 'confidential' ] );
-		$this->overrideConfigValue( 'FilePermGroupGrants', [
-			'sysop' => [ '*' ],
-			'editor' => [ 'public', 'internal' ],
-			'viewer' => [ 'public' ],
-		] );
-		$this->overrideConfigValue( 'FilePermDefaultLevel', null );
-		$this->overrideConfigValue( 'FilePermNamespaceDefaults', [] );
-		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
-
-		// Reset the service singleton to prevent cache poisoning across tests
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-	}
-
-	// =========================================================================
-	// Helper methods
-	// =========================================================================
-
-	/**
-	 * Get a fresh PermissionService from the service container.
-	 *
-	 * Resets the service singleton first to guarantee a clean cache.
-	 * This proves ServiceWiring.php works and prevents cache poisoning.
-	 *
-	 * @return PermissionService
-	 */
-	private function getService(): PermissionService {
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-		return $this->getServiceContainer()
-			->getService( 'FilePermissions.PermissionService' );
-	}
-
-	/**
-	 * Insert a File: page and return its Title.
-	 *
-	 * Uses the MW integration test framework's insertPage() which creates
-	 * a real page record with a real page ID.
-	 *
-	 * @param string $name Page name without namespace prefix
-	 * @return Title
-	 */
-	private function createFilePage( string $name ): Title {
-		$result = $this->insertPage( "File:$name", 'test content', NS_FILE );
-		return $result['title'];
+		$this->setUpFilePermissionsConfig();
 	}
 
 	// =========================================================================

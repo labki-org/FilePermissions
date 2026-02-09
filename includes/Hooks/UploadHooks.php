@@ -46,7 +46,7 @@ class UploadHooks implements
 	 * @param array &$descriptor HTMLForm descriptor array
 	 * @return bool
 	 */
-	public function onUploadFormInitDescriptor( &$descriptor ) {
+	public function onUploadFormInitDescriptor( &$descriptor ): bool {
 		// Build options array: placeholder + configured levels with group info
 		$options = $this->buildLevelOptions();
 
@@ -92,7 +92,7 @@ class UploadHooks implements
 		$comment,
 		$pageText,
 		&$error
-	) {
+	): bool {
 		$request = RequestContext::getMain()->getRequest();
 		$level = $request->getText( 'wpFilePermLevel' );
 
@@ -138,7 +138,7 @@ class UploadHooks implements
 	 * @param UploadBase $uploadBase The completed upload
 	 * @return bool
 	 */
-	public function onUploadComplete( $uploadBase ) {
+	public function onUploadComplete( $uploadBase ): bool {
 		$localFile = $uploadBase->getLocalFile();
 		if ( $localFile === null ) {
 			return true;
@@ -194,7 +194,7 @@ class UploadHooks implements
 	 * @param \HTMLForm $form The form object
 	 * @return bool|string True if valid, error message string if invalid
 	 */
-	public function validatePermissionLevel( $value, $alldata, $form ) {
+	public function validatePermissionLevel( $value, $alldata, $form ): bool|string {
 		if ( $value === null || $value === '' ) {
 			return wfMessage( 'filepermissions-upload-required' )->text();
 		}
