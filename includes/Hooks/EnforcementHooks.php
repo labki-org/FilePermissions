@@ -23,6 +23,8 @@ class EnforcementHooks implements
 	ImgAuthBeforeStreamHook,
 	ImageBeforeProduceHTMLHook
 {
+	private const DEFAULT_THUMBNAIL_WIDTH = 220;
+
 	private PermissionService $permissionService;
 	private bool $hasDisabledCache = false;
 
@@ -40,7 +42,7 @@ class EnforcementHooks implements
 	 * @param array|string|MessageSpecifier &$result
 	 * @return bool
 	 */
-	public function onGetUserPermissionsErrors( $title, $user, $action, &$result ) {
+	public function onGetUserPermissionsErrors( $title, $user, $action, &$result ): bool {
 		// Only apply to File: namespace
 		if ( $title->getNamespace() !== NS_FILE ) {
 			return true;
@@ -74,7 +76,7 @@ class EnforcementHooks implements
 	 * @param array &$result
 	 * @return bool
 	 */
-	public function onImgAuthBeforeStream( &$title, &$path, &$name, &$result ) {
+	public function onImgAuthBeforeStream( &$title, &$path, &$name, &$result ): bool {
 		$user = RequestContext::getMain()->getUser();
 
 		if ( !$this->permissionService->canUserAccessFile( $user, $title ) ) {
@@ -118,7 +120,7 @@ class EnforcementHooks implements
 		$parser,
 		&$query,
 		&$widthOption
-	) {
+	): bool {
 		// Check if this file has a permission level (explicit or default)
 		$level = $this->permissionService->getEffectiveLevel( $title );
 
@@ -135,7 +137,7 @@ class EnforcementHooks implements
 
 		if ( !$this->permissionService->canUserAccessFile( $user, $title ) ) {
 			// Use requested dimensions or fallback to default thumbnail size
-			$width = $handlerParams['width'] ?? 220;
+			$width = $handlerParams['width'] ?? self::DEFAULT_THUMBNAIL_WIDTH;
 			$height = $handlerParams['height'] ?? $width;
 
 			// Generate placeholder HTML and skip default rendering

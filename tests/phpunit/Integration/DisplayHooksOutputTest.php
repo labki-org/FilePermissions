@@ -5,7 +5,6 @@ declare( strict_types=1 );
 namespace FilePermissions\Tests\Integration;
 
 use FilePermissions\Hooks\DisplayHooks;
-use FilePermissions\PermissionService;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Registration\ExtensionRegistry;
@@ -25,37 +24,24 @@ use MediaWikiIntegrationTestCase;
  */
 class DisplayHooksOutputTest extends MediaWikiIntegrationTestCase {
 
+	use FilePermissionsIntegrationTrait;
+
 	private User $originalUser;
 
 	protected function setUp(): void {
 		parent::setUp();
-
 		$this->originalUser = RequestContext::getMain()->getUser();
-
-		$this->overrideConfigValue( 'FilePermLevels',
-			[ 'public', 'internal', 'confidential' ] );
+		$this->setUpFilePermissionsConfig();
+		// DisplayHooksOutputTest uses different GroupGrants than the trait default
 		$this->overrideConfigValue( 'FilePermGroupGrants', [
 			'sysop' => [ '*' ],
 			'user' => [ 'public', 'internal' ],
 		] );
-		$this->overrideConfigValue( 'FilePermDefaultLevel', null );
-		$this->overrideConfigValue( 'FilePermNamespaceDefaults', [] );
-		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
-
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
 	}
 
 	protected function tearDown(): void {
 		RequestContext::getMain()->setUser( $this->originalUser );
 		parent::tearDown();
-	}
-
-	private function getService(): PermissionService {
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-		return $this->getServiceContainer()
-			->getService( 'FilePermissions.PermissionService' );
 	}
 
 	private function createHooks(): DisplayHooks {

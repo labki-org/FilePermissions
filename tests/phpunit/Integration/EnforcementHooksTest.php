@@ -28,34 +28,18 @@ use MediaWikiIntegrationTestCase;
  */
 class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 
+	use FilePermissionsIntegrationTrait;
+
 	/** @var User Original RequestContext user, restored in tearDown */
 	private User $originalUser;
 
 	protected function setUp(): void {
 		parent::setUp();
-
-		// Save original RequestContext user for tearDown restoration
 		$this->originalUser = RequestContext::getMain()->getUser();
-
-		// Override all 5 FilePermissions config vars
-		$this->overrideConfigValue( 'FilePermLevels',
-			[ 'public', 'internal', 'confidential' ] );
-		$this->overrideConfigValue( 'FilePermGroupGrants', [
-			'sysop' => [ '*' ],
-			'editor' => [ 'public', 'internal' ],
-			'viewer' => [ 'public' ],
-		] );
-		$this->overrideConfigValue( 'FilePermDefaultLevel', null );
-		$this->overrideConfigValue( 'FilePermNamespaceDefaults', [] );
-		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
-
-		// Reset the service singleton to prevent cache poisoning across tests
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
+		$this->setUpFilePermissionsConfig();
 	}
 
 	protected function tearDown(): void {
-		// Restore original RequestContext user to prevent cross-test pollution
 		RequestContext::getMain()->setUser( $this->originalUser );
 		parent::tearDown();
 	}
@@ -63,18 +47,6 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 	// =========================================================================
 	// Helper methods
 	// =========================================================================
-
-	/**
-	 * Get a fresh PermissionService from the service container.
-	 *
-	 * @return PermissionService
-	 */
-	private function getService(): PermissionService {
-		$this->getServiceContainer()
-			->resetServiceForTesting( 'FilePermissions.PermissionService' );
-		return $this->getServiceContainer()
-			->getService( 'FilePermissions.PermissionService' );
-	}
 
 	/**
 	 * Create a File: page and set its permission level.
