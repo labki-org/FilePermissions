@@ -40,13 +40,15 @@
 		"upload": {
 			"class": "FilePermissions\\Hooks\\UploadHooks",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		},
 		"display": {
 			"class": "FilePermissions\\Hooks\\DisplayHooks",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		},
 		"SchemaChanges": {
@@ -78,7 +80,8 @@
 		"fileperm-set-level": {
 			"class": "FilePermissions\\Api\\ApiFilePermSetLevel",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		}
 	},

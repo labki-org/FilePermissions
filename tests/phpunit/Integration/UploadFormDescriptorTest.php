@@ -41,6 +41,8 @@ class UploadFormDescriptorTest extends MediaWikiIntegrationTestCase {
 		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
 
 		$this->getServiceContainer()
+			->resetServiceForTesting( 'FilePermissions.Config' );
+		$this->getServiceContainer()
 			->resetServiceForTesting( 'FilePermissions.PermissionService' );
 	}
 
@@ -53,13 +55,18 @@ class UploadFormDescriptorTest extends MediaWikiIntegrationTestCase {
 
 	private function getService(): PermissionService {
 		$this->getServiceContainer()
+			->resetServiceForTesting( 'FilePermissions.Config' );
+		$this->getServiceContainer()
 			->resetServiceForTesting( 'FilePermissions.PermissionService' );
 		return $this->getServiceContainer()
 			->getService( 'FilePermissions.PermissionService' );
 	}
 
 	private function createHooks(): UploadHooks {
-		return new UploadHooks( $this->getService() );
+		return new UploadHooks(
+			$this->getService(),
+			$this->getServiceContainer()->getService( 'FilePermissions.Config' )
+		);
 	}
 
 	private function setRequestParams( array $params ): void {
