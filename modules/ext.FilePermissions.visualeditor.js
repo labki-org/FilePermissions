@@ -35,9 +35,9 @@
 	 * @return {string} Selected permission level value
 	 */
 	function getSelectedPermLevel() {
-		return ( activeBooklet && activeBooklet.filePermDropdown )
-			? activeBooklet.filePermDropdown.getValue()
-			: ( defaultLevel || levels[ 0 ] );
+		return ( activeBooklet && activeBooklet.filePermDropdown ) ?
+			activeBooklet.filePermDropdown.getValue() :
+			( defaultLevel || levels[ 0 ] );
 	}
 
 	// --- PART 1: Monkey-patch BookletLayout ---
