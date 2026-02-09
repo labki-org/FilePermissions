@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"FilePermissions Contributors"
+		]
+	},
+	"filepermissions-desc": "{{desc|name=FilePermissions|url=https://www.mediawiki.org/wiki/Extension:FilePermissions}}",
+	"filepermissions-access-denied": "Error message shown when a user tries to view a file page they do not have permission to access.",
+	"filepermissions-img-denied": "Error message shown when a user tries to stream or download a file they do not have permission to access (via img_auth.php).",
+	"filepermissions-upload-label": "Label for the permission level dropdown on the file upload form.",
+	"filepermissions-upload-help": "Help text shown below the permission level dropdown on the file upload form.",
+	"filepermissions-upload-choose": "Placeholder option in the permission level dropdown prompting the user to select a level.",
+	"filepermissions-upload-required": "Error message shown when the user submits an upload without selecting a permission level.",
+	"filepermissions-upload-invalid": "Error message shown when the user submits an upload with a permission level that is not valid.",
+	"filepermissions-level-label": "Label displayed next to the current permission level on a file page and in the edit dropdown.",
+	"filepermissions-edit-save": "Label for the save button when editing a file's permission level on the file page.",
+	"filepermissions-edit-success": "Success notification shown after a file's permission level is updated.",
+	"filepermissions-edit-error": "Error notification shown when updating a file's permission level fails.",
+	"filepermissions-log-name": "Name of the file permission log as shown in Special:Log.",
+	"filepermissions-log-header": "Header text shown at the top of the file permission log page.",
+	"logentry-fileperm-change": "Log entry format for permission level changes. Parameters:\n* $1 - user link\n* $2 - user name (for GENDER)\n* $3 - file page link\n* $4 - old permission level\n* $5 - new permission level",
+	"filepermissions-api-nosuchpage": "API error message returned when the specified file page does not exist.",
+	"right-edit-fileperm": "{{int:right-edit-fileperm}} - User right to change file permission levels.",
+	"filepermissions-msupload-label": "Label for the permission level dropdown injected into the MsUpload interface.",
+	"filepermissions-msupload-error-nolevels": "Error message shown in the MsUpload interface when permission levels could not be loaded from the API.",
+	"filepermissions-msupload-error-save": "Warning shown in the MsUpload interface when a file was uploaded but its permission level may not have been saved. Parameters:\n* $1 - file name",
+	"filepermissions-ve-label": "Label for the permission level dropdown injected into the VisualEditor media upload dialog.",
+	"filepermissions-ve-error-nolevels": "Error message shown in the VisualEditor upload dialog when permission levels could not be loaded from the API.",
+	"filepermissions-ve-error-save": "Warning shown in the VisualEditor upload dialog when a file was uploaded but its permission level may not have been saved. Parameters:\n* $1 - file name"
+}

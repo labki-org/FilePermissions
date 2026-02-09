@@ -1,0 +1,15 @@
+# Export ignores for release tarballs
+.auth/               export-ignore
+.claude/             export-ignore
+.github/             export-ignore
+.planning/           export-ignore
+.playwright-mcp/     export-ignore
+tests/               export-ignore
+node_modules/        export-ignore
+test-results/        export-ignore
+docker-compose.yml   export-ignore
+package.json         export-ignore
+package-lock.json    export-ignore
+playwright.config.ts export-ignore
+.gitignore           export-ignore
+.gitattributes       export-ignore
