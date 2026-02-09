@@ -273,6 +273,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->atLeastOnce() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->atLeastOnce() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
@@ -308,6 +311,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->atLeastOnce() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->atLeastOnce() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
@@ -405,6 +411,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->once() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->once() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser = $this->createMock( \Parser::class );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
@@ -415,7 +424,7 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 			$time, $res, $parser, $query, $widthOption
 		);
 
-		// The assertion is in the mock expectation above (updateCacheExpiry called with 0)
+		// The assertion is in the mock expectations above
 		$this->assertTrue( true );
 	}
 
@@ -442,12 +451,15 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->once() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->once() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser = $this->createMock( \Parser::class );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
 
-		// First call with title1 - should call updateCacheExpiry
+		// First call with title1 - should call updateCacheExpiry and recordOption
 		$hooks->onImageBeforeProduceHTML(
 			$unused, $title1, $file, $frameParams, $handlerParams,
 			$time, $res, $parser, $query, $widthOption
@@ -459,5 +471,39 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 			$unused, $title2, $file, $frameParams, $handlerParams,
 			$time, $res2, $parser, $query, $widthOption
 		);
+	}
+
+	// =========================================================================
+	// SEC-02: ParserOptionsRegister
+	// =========================================================================
+
+	/**
+	 * SEC-02: onParserOptionsRegister registers fileperm-user option correctly.
+	 *
+	 * Verifies the option is registered with null default, included in cache
+	 * keys, and lazy-loads the current user's ID.
+	 */
+	public function testParserOptionsRegisterSetsUpFilepermUserOption(): void {
+		$hooks = $this->createHooks();
+
+		$defaults = [];
+		$inCacheKey = [];
+		$lazyLoad = [];
+		$hooks->onParserOptionsRegister( $defaults, $inCacheKey, $lazyLoad );
+
+		$this->assertArrayHasKey( 'fileperm-user', $defaults );
+		$this->assertNull( $defaults['fileperm-user'] );
+
+		$this->assertArrayHasKey( 'fileperm-user', $inCacheKey );
+		$this->assertTrue( $inCacheKey['fileperm-user'] );
+
+		$this->assertArrayHasKey( 'fileperm-user', $lazyLoad );
+		$this->assertIsCallable( $lazyLoad['fileperm-user'] );
+
+		// Lazy-load callback should return the current context user's ID
+		$user = $this->getTestUser( [ 'sysop' ] )->getUser();
+		RequestContext::getMain()->setUser( $user );
+		$result = ( $lazyLoad['fileperm-user'] )();
+		$this->assertSame( (string)$user->getId(), $result );
 	}
 }
