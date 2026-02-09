@@ -15,6 +15,7 @@
 	"rules": {
 		"es-x/no-weak-map": "off",
 		"es-x/no-url": "off",
-		"es-x/no-url-search-params": "off"
+		"es-x/no-url-search-params": "off",
+		"es-x/no-string-prototype-endswith": "off"
 	}
 }
