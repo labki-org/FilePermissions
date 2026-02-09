@@ -175,6 +175,16 @@
 			]
 		}
 	},
+	"QUnitTestModule": {
+		"localBasePath": "tests/qunit",
+		"remoteExtPath": "FilePermissions/tests/qunit",
+		"scripts": [
+			"ext.FilePermissions.shared.test.js"
+		],
+		"dependencies": [
+			"ext.FilePermissions.shared"
+		]
+	},
 	"config": {
 		"FilePermLevels": {
 			"value": [
