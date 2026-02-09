@@ -35,9 +35,11 @@ class UploadHooks implements
 	UploadCompleteHook
 {
 	private PermissionService $permissionService;
+	private Config $config;
 
-	public function __construct( PermissionService $permissionService ) {
+	public function __construct( PermissionService $permissionService, Config $config ) {
 		$this->permissionService = $permissionService;
+		$this->config = $config;
 	}
 
 	/**
@@ -96,14 +98,14 @@ class UploadHooks implements
 		$request = RequestContext::getMain()->getRequest();
 		$level = $request->getText( 'wpFilePermLevel' );
 
-		if ( $level !== '' && !Config::isValidLevel( $level ) ) {
+		if ( $level !== '' && !$this->config->isValidLevel( $level ) ) {
 			$error = [ 'filepermissions-upload-invalid' ];
 			return false;
 		}
 
 		if ( $level === '' ) {
 			// Attempt to resolve a namespace/global default
-			$default = Config::resolveDefaultLevel( NS_FILE );
+			$default = $this->config->resolveDefaultLevel( NS_FILE );
 			if ( $default !== null ) {
 				// A default is available — allow the upload to proceed.
 				// onUploadComplete will apply the resolved default.
@@ -153,11 +155,11 @@ class UploadHooks implements
 
 		// If no explicit level provided, resolve namespace/global default
 		if ( $level === '' ) {
-			$level = Config::resolveDefaultLevel( NS_FILE );
+			$level = $this->config->resolveDefaultLevel( NS_FILE );
 		}
 
 		// No level available (neither explicit nor default) — nothing to store
-		if ( $level === null || !Config::isValidLevel( $level ) ) {
+		if ( $level === null || !$this->config->isValidLevel( $level ) ) {
 			return true;
 		}
 
@@ -199,7 +201,7 @@ class UploadHooks implements
 			return wfMessage( 'filepermissions-upload-required' )->text();
 		}
 
-		if ( !Config::isValidLevel( $value ) ) {
+		if ( !$this->config->isValidLevel( $value ) ) {
 			return wfMessage( 'filepermissions-upload-invalid' )->text();
 		}
 
@@ -220,7 +222,7 @@ class UploadHooks implements
 		// Empty placeholder requiring selection
 		$options[wfMessage( 'filepermissions-upload-choose' )->text()] = '';
 
-		$levelGroupMap = Config::getLevelGroupMap();
+		$levelGroupMap = $this->config->getLevelGroupMap();
 
 		foreach ( $levelGroupMap as $level => $groups ) {
 			if ( count( $groups ) > 0 ) {
@@ -260,7 +262,7 @@ class UploadHooks implements
 		}
 
 		// Only pre-select if the level is still valid in current config
-		if ( !Config::isValidLevel( $existingLevel ) ) {
+		if ( !$this->config->isValidLevel( $existingLevel ) ) {
 			return null;
 		}
 

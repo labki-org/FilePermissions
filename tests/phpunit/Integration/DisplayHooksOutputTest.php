@@ -45,7 +45,10 @@ class DisplayHooksOutputTest extends MediaWikiIntegrationTestCase {
 	}
 
 	private function createHooks(): DisplayHooks {
-		return new DisplayHooks( $this->getService() );
+		return new DisplayHooks(
+			$this->getService(),
+			$this->getServiceContainer()->getService( 'FilePermissions.Config' )
+		);
 	}
 
 	/**

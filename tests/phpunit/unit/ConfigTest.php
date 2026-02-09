@@ -5,6 +5,8 @@ declare( strict_types=1 );
 namespace FilePermissions\Tests\Unit;
 
 use FilePermissions\Config;
+use MediaWiki\Config\HashConfig;
+use MediaWiki\Config\ServiceOptions;
 use MediaWikiUnitTestCase;
 
 /**
@@ -22,40 +24,31 @@ use MediaWikiUnitTestCase;
 class ConfigTest extends MediaWikiUnitTestCase {
 
 	/**
-	 * All 5 FilePermissions globals that must be reset between tests.
+	 * Create a Config instance with the given configuration values.
+	 *
+	 * @param array $overrides Config values to override defaults
+	 * @return Config
 	 */
-	private const GLOBALS_TO_RESET = [
-		'wgFilePermLevels',
-		'wgFilePermGroupGrants',
-		'wgFilePermDefaultLevel',
-		'wgFilePermNamespaceDefaults',
-		'wgFilePermInvalidConfig',
-	];
+	private function createConfig( array $overrides = [] ): Config {
+		$defaults = [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential' ],
+			'FilePermGroupGrants' => [
+				'sysop' => [ '*' ],
+				'user' => [ 'public', 'internal' ],
+			],
+			'FilePermDefaultLevel' => null,
+			'FilePermNamespaceDefaults' => [],
+			'FilePermInvalidConfig' => false,
+		];
 
-	/**
-	 * Saved global values for restoration in tearDown.
-	 * @var array<string, mixed>
-	 */
-	private array $savedGlobals = [];
+		$values = array_merge( $defaults, $overrides );
 
-	protected function setUp(): void {
-		parent::setUp();
-		// Save current global state before each test
-		foreach ( self::GLOBALS_TO_RESET as $global ) {
-			$this->savedGlobals[$global] = $GLOBALS[$global] ?? '__UNSET__';
-		}
-	}
-
-	protected function tearDown(): void {
-		// Restore all 5 globals to prevent cross-test pollution
-		foreach ( self::GLOBALS_TO_RESET as $global ) {
-			if ( $this->savedGlobals[$global] === '__UNSET__' ) {
-				unset( $GLOBALS[$global] );
-			} else {
-				$GLOBALS[$global] = $this->savedGlobals[$global];
-			}
-		}
-		parent::tearDown();
+		return new Config(
+			new ServiceOptions(
+				Config::CONSTRUCTOR_OPTIONS,
+				new HashConfig( $values )
+			)
+		);
 	}
 
 	// =========================================================================
@@ -66,10 +59,12 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getLevels
 	 */
 	public function testGetLevelsReturnsConfiguredLevels(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal', 'confidential' ];
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential' ],
+		] );
 		$this->assertSame(
 			[ 'public', 'internal', 'confidential' ],
-			Config::getLevels()
+			$config->getLevels()
 		);
 	}
 
@@ -79,10 +74,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	public function testGetLevelsDeduplicatesWhenMwMergesCauseDuplicates(): void {
 		// MediaWiki merges extension.json defaults with LocalSettings values,
 		// which can result in duplicate entries.
-		$GLOBALS['wgFilePermLevels'] = [
-			'public', 'internal', 'confidential', 'public', 'internal'
-		];
-		$result = Config::getLevels();
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential', 'public', 'internal' ],
+		] );
+		$result = $config->getLevels();
 		$this->assertSame( [ 'public', 'internal', 'confidential' ], $result );
 		// Verify sequential integer keys after deduplication
 		$this->assertSame( array_values( $result ), $result );
@@ -96,24 +91,30 @@ class ConfigTest extends MediaWikiUnitTestCase {
 			'sysop' => [ '*' ],
 			'user' => [ 'public', 'internal' ],
 		];
-		$GLOBALS['wgFilePermGroupGrants'] = $grants;
-		$this->assertSame( $grants, Config::getGroupGrants() );
+		$config = $this->createConfig( [
+			'FilePermGroupGrants' => $grants,
+		] );
+		$this->assertSame( $grants, $config->getGroupGrants() );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::getDefaultLevel
 	 */
 	public function testGetDefaultLevelReturnsConfiguredDefault(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = 'internal';
-		$this->assertSame( 'internal', Config::getDefaultLevel() );
+		$config = $this->createConfig( [
+			'FilePermDefaultLevel' => 'internal',
+		] );
+		$this->assertSame( 'internal', $config->getDefaultLevel() );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::getDefaultLevel
 	 */
 	public function testGetDefaultLevelReturnsNullWhenSetToNull(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$this->assertNull( Config::getDefaultLevel() );
+		$config = $this->createConfig( [
+			'FilePermDefaultLevel' => null,
+		] );
+		$this->assertNull( $config->getDefaultLevel() );
 	}
 
 	/**
@@ -121,24 +122,30 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 */
 	public function testGetNamespaceDefaultsReturnsConfiguredNamespaceMap(): void {
 		$nsDefaults = [ 6 => 'internal', 0 => 'public' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = $nsDefaults;
-		$this->assertSame( $nsDefaults, Config::getNamespaceDefaults() );
+		$config = $this->createConfig( [
+			'FilePermNamespaceDefaults' => $nsDefaults,
+		] );
+		$this->assertSame( $nsDefaults, $config->getNamespaceDefaults() );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::isValidLevel
 	 */
 	public function testIsValidLevelReturnsTrueForConfiguredLevel(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal', 'confidential' ];
-		$this->assertTrue( Config::isValidLevel( 'internal' ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential' ],
+		] );
+		$this->assertTrue( $config->isValidLevel( 'internal' ) );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::isValidLevel
 	 */
 	public function testIsValidLevelReturnsFalseForUnconfiguredLevel(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal', 'confidential' ];
-		$this->assertFalse( Config::isValidLevel( 'top-secret' ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential' ],
+		] );
+		$this->assertFalse( $config->isValidLevel( 'top-secret' ) );
 	}
 
 	/**
@@ -150,8 +157,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 		string $levelToCheck,
 		bool $expected
 	): void {
-		$GLOBALS['wgFilePermLevels'] = $configuredLevels;
-		$this->assertSame( $expected, Config::isValidLevel( $levelToCheck ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => $configuredLevels,
+		] );
+		$this->assertSame( $expected, $config->isValidLevel( $levelToCheck ) );
 	}
 
 	/**
@@ -184,52 +193,62 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNamespaceDefault(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal', 'confidential' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ 6 => 'confidential' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
-		$this->assertSame( 'confidential', Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal', 'confidential' ],
+			'FilePermNamespaceDefaults' => [ 6 => 'confidential' ],
+			'FilePermDefaultLevel' => 'public',
+		] );
+		$this->assertSame( 'confidential', $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelFallsBackToGlobalDefault(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'internal';
-		$this->assertSame( 'internal', Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermNamespaceDefaults' => [],
+			'FilePermDefaultLevel' => 'internal',
+		] );
+		$this->assertSame( 'internal', $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNullWhenNoDefaultsConfigured(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermNamespaceDefaults' => [],
+			'FilePermDefaultLevel' => null,
+		] );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelSkipsInvalidNamespaceDefaultAndFallsToGlobal(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		// Namespace default references a level NOT in the configured levels
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ 6 => 'nonexistent' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
-		$this->assertSame( 'public', Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			// Namespace default references a level NOT in the configured levels
+			'FilePermNamespaceDefaults' => [ 6 => 'nonexistent' ],
+			'FilePermDefaultLevel' => 'public',
+		] );
+		$this->assertSame( 'public', $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNullWhenGlobalDefaultIsInvalidLevel(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		// Global default references a level NOT in the configured levels
-		$GLOBALS['wgFilePermDefaultLevel'] = 'does-not-exist';
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermNamespaceDefaults' => [],
+			// Global default references a level NOT in the configured levels
+			'FilePermDefaultLevel' => 'does-not-exist',
+		] );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	// =========================================================================
@@ -242,8 +261,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::isInvalidConfig
 	 */
 	public function testIsInvalidConfigReturnsFalseByDefault(): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = false;
-		$this->assertFalse( Config::isInvalidConfig() );
+		$config = $this->createConfig( [
+			'FilePermInvalidConfig' => false,
+		] );
+		$this->assertFalse( $config->isInvalidConfig() );
 	}
 
 	/**
@@ -252,30 +273,24 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::isInvalidConfig
 	 */
 	public function testIsInvalidConfigReturnsTrueWhenConfigFlaggedInvalid(): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = true;
-		$this->assertTrue( Config::isInvalidConfig() );
+		$config = $this->createConfig( [
+			'FilePermInvalidConfig' => true,
+		] );
+		$this->assertTrue( $config->isInvalidConfig() );
 	}
 
 	/**
-	 * When levels config is null/unset, fallback to ['public'] only.
+	 * When levels config is null, fallback to ['public'] only.
 	 * This is a safe fallback: public is the least-restrictive level,
 	 * meaning no access beyond public is granted.
 	 *
 	 * @covers \FilePermissions\Config::getLevels
 	 */
 	public function testGetLevelsReturnsSafeFallbackWhenNull(): void {
-		$GLOBALS['wgFilePermLevels'] = null;
-		$this->assertSame( [ 'public' ], Config::getLevels() );
-	}
-
-	/**
-	 * Fail-closed: when group grants are unset, no grants means no access.
-	 *
-	 * @covers \FilePermissions\Config::getGroupGrants
-	 */
-	public function testGetGroupGrantsReturnsEmptyArrayWhenUnset_NoGrantsMeansNoAccess(): void {
-		unset( $GLOBALS['wgFilePermGroupGrants'] );
-		$this->assertSame( [], Config::getGroupGrants() );
+		$config = $this->createConfig( [
+			'FilePermLevels' => null,
+		] );
+		$this->assertSame( [ 'public' ], $config->getLevels() );
 	}
 
 	/**
@@ -284,29 +299,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getGroupGrants
 	 */
 	public function testGetGroupGrantsReturnsEmptyArrayWhenNull_NoGrantsMeansNoAccess(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = null;
-		$this->assertSame( [], Config::getGroupGrants() );
-	}
-
-	/**
-	 * When default level is unset, null means explicit selection required.
-	 *
-	 * @covers \FilePermissions\Config::getDefaultLevel
-	 */
-	public function testGetDefaultLevelReturnsNullWhenUnset_ExplicitSelectionRequired(): void {
-		unset( $GLOBALS['wgFilePermDefaultLevel'] );
-		$this->assertNull( Config::getDefaultLevel() );
-	}
-
-	/**
-	 * Fail-closed: when namespace defaults are unset, no defaults means
-	 * no automatic permission assignment.
-	 *
-	 * @covers \FilePermissions\Config::getNamespaceDefaults
-	 */
-	public function testGetNamespaceDefaultsReturnsEmptyArrayWhenUnset_NoAutoAssignment(): void {
-		unset( $GLOBALS['wgFilePermNamespaceDefaults'] );
-		$this->assertSame( [], Config::getNamespaceDefaults() );
+		$config = $this->createConfig( [
+			'FilePermGroupGrants' => null,
+		] );
+		$this->assertSame( [], $config->getGroupGrants() );
 	}
 
 	/**
@@ -316,8 +312,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getNamespaceDefaults
 	 */
 	public function testGetNamespaceDefaultsReturnsEmptyArrayWhenNull_NoAutoAssignment(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = null;
-		$this->assertSame( [], Config::getNamespaceDefaults() );
+		$config = $this->createConfig( [
+			'FilePermNamespaceDefaults' => null,
+		] );
+		$this->assertSame( [], $config->getNamespaceDefaults() );
 	}
 
 	// =========================================================================
@@ -330,8 +328,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getLevels
 	 */
 	public function testGetLevelsWithEmptyArrayReturnsEmptyArray(): void {
-		$GLOBALS['wgFilePermLevels'] = [];
-		$this->assertSame( [], Config::getLevels() );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [],
+		] );
+		$this->assertSame( [], $config->getLevels() );
 	}
 
 	/**
@@ -340,8 +340,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getLevels
 	 */
 	public function testGetLevelsWithSingleLevelReturnsSingleElementArray(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'restricted' ];
-		$this->assertSame( [ 'restricted' ], Config::getLevels() );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'restricted' ],
+		] );
+		$this->assertSame( [ 'restricted' ], $config->getLevels() );
 	}
 
 	/**
@@ -351,9 +353,11 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 */
 	public function testGetLevelsWithManyLevelsReturnsAllLevels(): void {
 		$levels = [ 'public', 'internal', 'confidential', 'secret', 'top-secret', 'classified' ];
-		$GLOBALS['wgFilePermLevels'] = $levels;
-		$this->assertSame( $levels, Config::getLevels() );
-		$this->assertCount( 6, Config::getLevels() );
+		$config = $this->createConfig( [
+			'FilePermLevels' => $levels,
+		] );
+		$this->assertSame( $levels, $config->getLevels() );
+		$this->assertCount( 6, $config->getLevels() );
 	}
 
 	/**
@@ -362,8 +366,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getGroupGrants
 	 */
 	public function testGetGroupGrantsWithGroupGrantedEmptyArray(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = [ 'viewer' => [] ];
-		$result = Config::getGroupGrants();
+		$config = $this->createConfig( [
+			'FilePermGroupGrants' => [ 'viewer' => [] ],
+		] );
+		$result = $config->getGroupGrants();
 		$this->assertSame( [], $result['viewer'] );
 	}
 
@@ -374,8 +380,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getGroupGrants
 	 */
 	public function testGetGroupGrantsWithWildcardGrant(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = [ 'sysop' => [ '*' ] ];
-		$result = Config::getGroupGrants();
+		$config = $this->createConfig( [
+			'FilePermGroupGrants' => [ 'sysop' => [ '*' ] ],
+		] );
+		$result = $config->getGroupGrants();
 		$this->assertSame( [ '*' ], $result['sysop'] );
 	}
 
@@ -390,8 +398,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 			'editor' => [ 'public', 'internal' ],
 			'viewer' => [ 'public' ],
 		];
-		$GLOBALS['wgFilePermGroupGrants'] = $grants;
-		$result = Config::getGroupGrants();
+		$config = $this->createConfig( [
+			'FilePermGroupGrants' => $grants,
+		] );
+		$result = $config->getGroupGrants();
 		$this->assertSame( $grants, $result );
 		$this->assertCount( 3, $result );
 	}
@@ -402,8 +412,10 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::isValidLevel
 	 */
 	public function testIsValidLevelReturnsFalseWhenLevelsEmpty_NothingIsValid(): void {
-		$GLOBALS['wgFilePermLevels'] = [];
-		$this->assertFalse( Config::isValidLevel( 'public' ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [],
+		] );
+		$this->assertFalse( $config->isValidLevel( 'public' ) );
 	}
 
 	/**
@@ -413,11 +425,13 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelWithNamespaceDefaultReferencingNonexistentLevel(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ 6 => 'nonexistent-level' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public' ],
+			'FilePermNamespaceDefaults' => [ 6 => 'nonexistent-level' ],
+			'FilePermDefaultLevel' => 'public',
+		] );
 		// Should skip invalid namespace default and fall back to global
-		$this->assertSame( 'public', Config::resolveDefaultLevel( 6 ) );
+		$this->assertSame( 'public', $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
@@ -427,10 +441,12 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelWithGlobalDefaultReferencingNonexistentLevel_ReturnsNull(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'secret';
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermNamespaceDefaults' => [],
+			'FilePermDefaultLevel' => 'secret',
+		] );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
@@ -439,10 +455,12 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNullWhenBothDefaultsAreInvalid_FailClosed(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ 6 => 'bogus' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'also-bogus';
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public' ],
+			'FilePermNamespaceDefaults' => [ 6 => 'bogus' ],
+			'FilePermDefaultLevel' => 'also-bogus',
+		] );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
@@ -451,33 +469,13 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelForUnconfiguredNamespaceUsesGlobalDefault(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal' ];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ 6 => 'internal' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermNamespaceDefaults' => [ 6 => 'internal' ],
+			'FilePermDefaultLevel' => 'public',
+		] );
 		// Namespace 0 has no specific default, should get global
-		$this->assertSame( 'public', Config::resolveDefaultLevel( 0 ) );
-	}
-
-	/**
-	 * isInvalidConfig returns false when global is completely unset
-	 * (as opposed to explicitly set to false).
-	 *
-	 * @covers \FilePermissions\Config::isInvalidConfig
-	 */
-	public function testIsInvalidConfigReturnsFalseWhenGlobalIsUnset(): void {
-		unset( $GLOBALS['wgFilePermInvalidConfig'] );
-		$this->assertFalse( Config::isInvalidConfig() );
-	}
-
-	/**
-	 * getLevels with null global falls back to safe default.
-	 * Tests the unset case (vs null case tested separately).
-	 *
-	 * @covers \FilePermissions\Config::getLevels
-	 */
-	public function testGetLevelsReturnsSafeFallbackWhenGlobalIsUnset(): void {
-		unset( $GLOBALS['wgFilePermLevels'] );
-		$this->assertSame( [ 'public' ], Config::getLevels() );
+		$this->assertSame( 'public', $config->resolveDefaultLevel( 0 ) );
 	}
 
 	/**
@@ -487,10 +485,12 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNullWhenEverythingIsEmpty_FailClosed(): void {
-		$GLOBALS['wgFilePermLevels'] = [];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$config = $this->createConfig( [
+			'FilePermLevels' => [],
+			'FilePermNamespaceDefaults' => [],
+			'FilePermDefaultLevel' => null,
+		] );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
@@ -500,11 +500,13 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::resolveDefaultLevel
 	 */
 	public function testResolveDefaultLevelReturnsNullWhenLevelsEmptyEvenIfGlobalDefaultSet_FailClosed(): void {
-		$GLOBALS['wgFilePermLevels'] = [];
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createConfig( [
+			'FilePermLevels' => [],
+			'FilePermNamespaceDefaults' => [],
+			'FilePermDefaultLevel' => 'public',
+		] );
 		// 'public' is not valid because levels is empty
-		$this->assertNull( Config::resolveDefaultLevel( 6 ) );
+		$this->assertNull( $config->resolveDefaultLevel( 6 ) );
 	}
 
 	/**
@@ -513,12 +515,14 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::isValidLevel
 	 */
 	public function testIsValidLevelUsesStrictComparison(): void {
-		$GLOBALS['wgFilePermLevels'] = [ 'public', '0', '1' ];
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', '0', '1' ],
+		] );
 		// '0' is a valid level (exact string match)
-		$this->assertTrue( Config::isValidLevel( '0' ) );
-		$this->assertTrue( Config::isValidLevel( '1' ) );
+		$this->assertTrue( $config->isValidLevel( '0' ) );
+		$this->assertTrue( $config->isValidLevel( '1' ) );
 		// But only exact string matches work
-		$this->assertFalse( Config::isValidLevel( 'false' ) );
+		$this->assertFalse( $config->isValidLevel( 'false' ) );
 	}
 
 	/**
@@ -527,8 +531,30 @@ class ConfigTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\Config::getDefaultLevel
 	 */
 	public function testGetDefaultLevelReturnsExactStringValue(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = '0';
-		$this->assertSame( '0', Config::getDefaultLevel() );
-		$this->assertIsString( Config::getDefaultLevel() );
+		$config = $this->createConfig( [
+			'FilePermDefaultLevel' => '0',
+		] );
+		$this->assertSame( '0', $config->getDefaultLevel() );
+		$this->assertIsString( $config->getDefaultLevel() );
+	}
+
+	/**
+	 * getLevelGroupMap caches the result on the instance.
+	 *
+	 * @covers \FilePermissions\Config::getLevelGroupMap
+	 */
+	public function testGetLevelGroupMapReturnsCachedResult(): void {
+		$config = $this->createConfig( [
+			'FilePermLevels' => [ 'public', 'internal' ],
+			'FilePermGroupGrants' => [
+				'sysop' => [ '*' ],
+				'viewer' => [ 'public' ],
+			],
+		] );
+		$result1 = $config->getLevelGroupMap();
+		$result2 = $config->getLevelGroupMap();
+		$this->assertSame( $result1, $result2 );
+		$this->assertSame( [ 'sysop', 'viewer' ], $result1['public'] );
+		$this->assertSame( [ 'sysop' ], $result1['internal'] );
 	}
 }

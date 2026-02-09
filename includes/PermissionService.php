@@ -21,6 +21,7 @@ class PermissionService {
 
 	private IConnectionProvider $dbProvider;
 	private UserGroupManager $userGroupManager;
+	private Config $config;
 
 	/** @var array<int, ?string> In-process cache of page ID → permission level */
 	private array $levelCache = [];
@@ -28,13 +29,16 @@ class PermissionService {
 	/**
 	 * @param IConnectionProvider $dbProvider Database connection provider
 	 * @param UserGroupManager $userGroupManager User group manager
+	 * @param Config $config FilePermissions configuration service
 	 */
 	public function __construct(
 		IConnectionProvider $dbProvider,
-		UserGroupManager $userGroupManager
+		UserGroupManager $userGroupManager,
+		Config $config
 	) {
 		$this->dbProvider = $dbProvider;
 		$this->userGroupManager = $userGroupManager;
+		$this->config = $config;
 	}
 
 	/**
@@ -86,10 +90,10 @@ class PermissionService {
 			throw new InvalidArgumentException( 'Cannot set permission level: page does not exist' );
 		}
 
-		if ( !Config::isValidLevel( $level ) ) {
+		if ( !$this->config->isValidLevel( $level ) ) {
 			throw new InvalidArgumentException(
 				"Invalid permission level: $level. Valid levels: " .
-				implode( ', ', Config::getLevels() )
+				implode( ', ', $this->config->getLevels() )
 			);
 		}
 
@@ -138,12 +142,12 @@ class PermissionService {
 	 */
 	public function canUserAccessLevel( UserIdentity $user, string $level ): bool {
 		// Fail closed on invalid config
-		if ( Config::isInvalidConfig() ) {
+		if ( $this->config->isInvalidConfig() ) {
 			return false;
 		}
 
 		$userGroups = $this->userGroupManager->getUserEffectiveGroups( $user );
-		$groupGrants = Config::getGroupGrants();
+		$groupGrants = $this->config->getGroupGrants();
 
 		foreach ( $userGroups as $group ) {
 			if ( !isset( $groupGrants[$group] ) ) {
@@ -180,7 +184,7 @@ class PermissionService {
 		$level = $this->getLevel( $title );
 
 		if ( $level === null ) {
-			$level = Config::resolveDefaultLevel( $title->getNamespace() );
+			$level = $this->config->resolveDefaultLevel( $title->getNamespace() );
 		}
 
 		return $level;

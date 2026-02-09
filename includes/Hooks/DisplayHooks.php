@@ -34,9 +34,11 @@ class DisplayHooks implements
 	EditPage__showEditForm_initialHook
 {
 	private PermissionService $permissionService;
+	private Config $config;
 
-	public function __construct( PermissionService $permissionService ) {
+	public function __construct( PermissionService $permissionService, Config $config ) {
 		$this->permissionService = $permissionService;
+		$this->config = $config;
 	}
 
 	/**
@@ -92,7 +94,7 @@ class DisplayHooks implements
 				$out->addModules( [ 'ext.FilePermissions.edit' ] );
 				$out->addJsConfigVars( [
 					'wgFilePermCurrentLevel' => $this->permissionService->getLevel( $title ),
-					'wgFilePermLevels' => Config::getLevels(),
+					'wgFilePermLevels' => $this->config->getLevels(),
 					'wgFilePermPageTitle' => $title->getPrefixedDBkey(),
 				] );
 			}
@@ -104,8 +106,8 @@ class DisplayHooks implements
 
 			$out->addModules( [ 'ext.FilePermissions.visualeditor' ] );
 			$out->addJsConfigVars( [
-				'wgFilePermLevels' => Config::getLevels(),
-				'wgFilePermVEDefault' => Config::resolveDefaultLevel( $ns ),
+				'wgFilePermLevels' => $this->config->getLevels(),
+				'wgFilePermVEDefault' => $this->config->resolveDefaultLevel( $ns ),
 			] );
 		}
 	}
@@ -128,8 +130,8 @@ class DisplayHooks implements
 
 		$out->addModules( [ 'ext.FilePermissions.msupload' ] );
 		$out->addJsConfigVars( [
-			'wgFilePermLevels' => Config::getLevels(),
-			'wgFilePermMsUploadDefault' => Config::resolveDefaultLevel( $ns ),
+			'wgFilePermLevels' => $this->config->getLevels(),
+			'wgFilePermMsUploadDefault' => $this->config->resolveDefaultLevel( $ns ),
 		] );
 	}
 
@@ -161,7 +163,7 @@ class DisplayHooks implements
 		$out->enableOOUI();
 
 		$options = [];
-		foreach ( Config::getLevels() as $lvl ) {
+		foreach ( $this->config->getLevels() as $lvl ) {
 			$options[] = [
 				'data' => $lvl,
 				'label' => $lvl,

@@ -22,15 +22,23 @@ use MediaWiki\Title\Title;
 class ApiFilePermSetLevel extends ApiBase {
 
 	private PermissionService $permissionService;
+	private Config $config;
 
 	/**
 	 * @param \MediaWiki\Api\ApiMain $mainModule
 	 * @param string $moduleName
 	 * @param PermissionService $permissionService
+	 * @param Config $config
 	 */
-	public function __construct( $mainModule, $moduleName, PermissionService $permissionService ) {
+	public function __construct(
+		$mainModule,
+		$moduleName,
+		PermissionService $permissionService,
+		Config $config
+	) {
 		parent::__construct( $mainModule, $moduleName );
 		$this->permissionService = $permissionService;
+		$this->config = $config;
 	}
 
 	/**
@@ -105,7 +113,7 @@ class ApiFilePermSetLevel extends ApiBase {
 				ApiBase::PARAM_REQUIRED => true,
 			],
 			'level' => [
-				ApiBase::PARAM_TYPE => Config::getLevels(),
+				ApiBase::PARAM_TYPE => $this->config->getLevels(),
 				ApiBase::PARAM_REQUIRED => true,
 			],
 		];
