@@ -57,6 +57,7 @@
 		"getUserPermissionsErrors": "enforcement",
 		"ImgAuthBeforeStream": "enforcement",
 		"ImageBeforeProduceHTML": "enforcement",
+		"ParserOptionsRegister": "enforcement",
 		"UploadFormInitDescriptor": "upload",
 		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload",

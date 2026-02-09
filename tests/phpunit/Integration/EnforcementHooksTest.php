@@ -273,6 +273,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->atLeastOnce() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->atLeastOnce() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
@@ -308,6 +311,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->atLeastOnce() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->atLeastOnce() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
@@ -405,6 +411,9 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->once() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->once() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser = $this->createMock( \Parser::class );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
@@ -415,7 +424,7 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 			$time, $res, $parser, $query, $widthOption
 		);
 
-		// The assertion is in the mock expectation above (updateCacheExpiry called with 0)
+		// The assertion is in the mock expectations above
 		$this->assertTrue( true );
 	}
 
@@ -442,12 +451,15 @@ class EnforcementHooksTest extends MediaWikiIntegrationTestCase {
 		$parserOutput->expects( $this->once() )
 			->method( 'updateCacheExpiry' )
 			->with( 0 );
+		$parserOutput->expects( $this->once() )
+			->method( 'recordOption' )
+			->with( 'fileperm-user' );
 		$parser = $this->createMock( \Parser::class );
 		$parser->method( 'getOutput' )->willReturn( $parserOutput );
 		$query = '';
 		$widthOption = null;
 
-		// First call with title1 - should call updateCacheExpiry
+		// First call with title1 - should call updateCacheExpiry and recordOption
 		$hooks->onImageBeforeProduceHTML(
 			$unused, $title1, $file, $frameParams, $handlerParams,
 			$time, $res, $parser, $query, $widthOption

@@ -8,6 +8,7 @@ use FilePermissions\PermissionService;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\Hook\ImageBeforeProduceHTMLHook;
 use MediaWiki\Hook\ImgAuthBeforeStreamHook;
+use MediaWiki\Hook\ParserOptionsRegisterHook;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 
 /**
@@ -21,7 +22,8 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 class EnforcementHooks implements
 	GetUserPermissionsErrorsHook,
 	ImgAuthBeforeStreamHook,
-	ImageBeforeProduceHTMLHook
+	ImageBeforeProduceHTMLHook,
+	ParserOptionsRegisterHook
 {
 	private const DEFAULT_THUMBNAIL_WIDTH = 220;
 
@@ -30,6 +32,26 @@ class EnforcementHooks implements
 
 	public function __construct( PermissionService $permissionService ) {
 		$this->permissionService = $permissionService;
+	}
+
+	/**
+	 * Register 'fileperm-user' parser option for cache key variation.
+	 *
+	 * Defense-in-depth: if any intermediate caching layer ignores the zero
+	 * expiry set by onImageBeforeProduceHTML, different users still get
+	 * different cache keys.
+	 *
+	 * @param array &$defaults
+	 * @param array &$inCacheKey
+	 * @param array &$lazyLoad
+	 * @return void
+	 */
+	public function onParserOptionsRegister( &$defaults, &$inCacheKey, &$lazyLoad ): void {
+		$defaults['fileperm-user'] = null;
+		$inCacheKey['fileperm-user'] = true;
+		$lazyLoad['fileperm-user'] = static function () {
+			return (string)RequestContext::getMain()->getUser()->getId();
+		};
 	}
 
 	/**
@@ -130,6 +152,7 @@ class EnforcementHooks implements
 		// first user to trigger a parse determines what all users see.
 		if ( $level !== null && !$this->hasDisabledCache && $parser && $parser->getOutput() ) {
 			$parser->getOutput()->updateCacheExpiry( 0 );
+			$parser->getOutput()->recordOption( 'fileperm-user' );
 			$this->hasDisabledCache = true;
 		}
 
