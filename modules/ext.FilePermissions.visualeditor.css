@@ -21,3 +21,10 @@
 .fileperm-ve-dropdown.oo-ui-widget-disabled {
 	opacity: 0.6;
 }
+
+/* Help text below the dropdown */
+.fileperm-ve-help {
+	color: var(--color-subtle, #72777d);
+	font-size: 0.85em;
+	margin-top: 0.25em;
+}

@@ -25,6 +25,12 @@
 		return;
 	}
 
+	// Guard: BookletLayout must be available
+	if ( !mw.ForeignStructuredUpload || !mw.ForeignStructuredUpload.BookletLayout ) {
+		mw.log.warn( 'FilePermissions: ForeignStructuredUpload.BookletLayout not available' );
+		return;
+	}
+
 	// Module-level reference to the active dropdown widget.
 	// Set when renderInfoForm creates it, read by XHR interceptor.
 	let activeBooklet = null;
@@ -70,6 +76,12 @@
 			classes: [ 'fileperm-ve-dropdown' ]
 		} );
 
+		// Help text below the dropdown
+		const helpText = new OO.ui.LabelWidget( {
+			label: mw.msg( 'filepermissions-ve-help' ),
+			classes: [ 'fileperm-ve-help' ]
+		} );
+
 		// Wrap in a labeled field layout for consistent VE dialog styling
 		const fieldLayout = new OO.ui.FieldLayout( this.filePermDropdown, {
 			label: mw.msg( 'filepermissions-ve-label' ),
@@ -78,7 +90,8 @@
 
 		// Append to the existing info form fieldset
 		form.$element.find( '.oo-ui-fieldsetLayout' ).append(
-			fieldLayout.$element
+			fieldLayout.$element,
+			helpText.$element
 		);
 
 		// Store reference for XHR interceptor to read

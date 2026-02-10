@@ -31,6 +31,7 @@
 		// DropdownWidget overlay that only works after infusion.
 		const dropdown = OO.ui.infuse( $dropdownEl );
 		const saveBtn = OO.ui.infuse( $saveBtnEl );
+		const originalLabel = saveBtn.getLabel();
 
 		saveBtn.on( 'click', () => {
 			const newLevel = dropdown.getValue();
@@ -39,8 +40,9 @@
 				return;
 			}
 
-			// Disable save button to prevent double-submit
+			// Show loading state
 			saveBtn.setDisabled( true );
+			saveBtn.setLabel( mw.msg( 'filepermissions-edit-saving' ) );
 
 			const api = new mw.Api();
 			api.postWithToken( 'csrf', {
@@ -49,11 +51,15 @@
 				level: newLevel
 			} ).then( () => {
 				mw.notify( mw.msg( 'filepermissions-edit-success' ), { type: 'success' } );
-				$( '#fileperm-level-badge' ).text( newLevel );
+				const $badge = $( '#fileperm-level-badge' );
+				$badge.text( newLevel ).addClass( 'fileperm-updated' );
+				setTimeout( () => $badge.removeClass( 'fileperm-updated' ), 1500 );
 				currentLevel = newLevel;
+				saveBtn.setLabel( originalLabel );
 				saveBtn.setDisabled( false );
 			}, () => {
 				mw.notify( mw.msg( 'filepermissions-edit-error' ), { type: 'error' } );
+				saveBtn.setLabel( originalLabel );
 				saveBtn.setDisabled( false );
 			} );
 		} );

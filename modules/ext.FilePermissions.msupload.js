@@ -24,6 +24,7 @@
 				$msDiv.prepend(
 					$( '<div>' )
 						.addClass( 'fileperm-msupload-error' )
+						.attr( 'role', 'alert' )
 						.text( mw.msg( 'filepermissions-msupload-error-nolevels' ) )
 				);
 			}
@@ -85,6 +86,20 @@
 		// Inject dropdown before the dropzone
 		$msDiv.prepend( buildDropdown() );
 
+		/**
+		 * Re-enable the dropdown when no more uploads are pending.
+		 * Uses requestAnimationFrame to let DOM update before checking.
+		 */
+		function checkAndReEnable() {
+			requestAnimationFrame( () => {
+				const pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
+				if ( pending === 0 ) {
+					$( '#fileperm-msupload-select' ).prop( 'disabled', false );
+					$( '#fileperm-msupload-controls' ).removeClass( 'fileperm-uploading' );
+				}
+			} );
+		}
+
 		// Register callback with shared XHR interceptor to inject
 		// wpFilePermLevel and monitor upload responses.
 		mw.FilePermissions.onUploadSend( ( xhr, body ) => {
@@ -103,6 +118,7 @@
 
 			// Disable dropdown while uploading
 			$select.prop( 'disabled', true );
+			$( '#fileperm-msupload-controls' ).addClass( 'fileperm-uploading' );
 
 			// Listen for upload completion
 			xhr.addEventListener( 'load', () => {
@@ -121,22 +137,11 @@
 					}, 1000 );
 				}
 
-				// Re-enable dropdown when no more uploads pending
-				setTimeout( () => {
-					const pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
-					if ( pending === 0 ) {
-						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
-					}
-				}, 500 );
+				checkAndReEnable();
 			} );
 
 			xhr.addEventListener( 'error', () => {
-				setTimeout( () => {
-					const pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
-					if ( pending === 0 ) {
-						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
-					}
-				}, 500 );
+				checkAndReEnable();
 			} );
 		} );
 	}

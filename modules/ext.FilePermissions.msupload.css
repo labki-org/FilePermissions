@@ -9,8 +9,8 @@
 /* Container for label + select dropdown */
 .fileperm-msupload-controls {
 	padding: 6px 8px;
-	border-bottom: 1px solid #c8ccd1;
-	background: #f8f9fa;
+	border-bottom: 1px solid var(--border-color-subtle, #c8ccd1);
+	background: var(--background-color-interactive-subtle, #f8f9fa);
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -23,13 +23,28 @@
 	font-size: 0.9em;
 }
 
+/* Uploading state indicator appended to label */
+.fileperm-msupload-controls.fileperm-uploading label::after {
+	content: ' (uploading...)';
+	font-weight: normal;
+	font-style: italic;
+	color: var(--color-subtle, #72777d);
+}
+
 /* Permission level select dropdown */
 #fileperm-msupload-select {
 	padding: 4px 8px;
-	border: 1px solid #a2a9b1;
+	border: 1px solid var(--border-color-base, #a2a9b1);
 	border-radius: 2px;
 	font-size: 0.9em;
 	background: #fff;
+}
+
+/* Focus state for keyboard accessibility */
+#fileperm-msupload-select:focus {
+	outline: 1px solid var(--border-color-progressive, #36c);
+	outline-offset: -1px;
+	box-shadow: inset 0 0 0 1px var(--border-color-progressive, #36c);
 }
 
 /* Disabled state during upload */
@@ -41,7 +56,7 @@
 /* Error state when permission levels cannot be loaded */
 .fileperm-msupload-error {
 	padding: 8px;
-	color: #d33;
+	color: var(--color-error, #d33);
 	font-size: 0.9em;
-	border-bottom: 1px solid #c8ccd1;
+	border-bottom: 1px solid var(--border-color-subtle, #c8ccd1);
 }
