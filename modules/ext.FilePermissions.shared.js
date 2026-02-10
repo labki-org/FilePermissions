@@ -76,18 +76,41 @@
 	// SEC-03: Use WeakMap to avoid exposing state on XHR instances
 	const xhrState = new WeakMap();
 
-	// Patch XMLHttpRequest.prototype.open once to tag API POST requests.
+	// CQ-08: Detect if another script already patched XHR prototypes
 	const origOpen = XMLHttpRequest.prototype.open;
+	if ( origOpen.toString().indexOf( '[native code]' ) === -1 ) {
+		mw.log.warn(
+			'FilePermissions: XMLHttpRequest.prototype.open already patched ' +
+			'by another script. Upload interception may conflict.'
+		);
+	}
+
+	const origSend = XMLHttpRequest.prototype.send;
+	if ( origSend.toString().indexOf( '[native code]' ) === -1 ) {
+		mw.log.warn(
+			'FilePermissions: XMLHttpRequest.prototype.send already patched ' +
+			'by another script. Upload interception may conflict.'
+		);
+	}
+
+	// Patch XMLHttpRequest.prototype.open once to tag API POST requests.
 	XMLHttpRequest.prototype.open = function ( method, url ) {
-		if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
-			xhrState.set( this, { isApiPost: true } );
+		if ( method === 'POST' && url ) {
+			// CQ-08: Use URL parser for tighter pathname matching
+			try {
+				const parsed = new URL( url, location.origin );
+				if ( parsed.pathname.endsWith( 'api.php' ) ) {
+					xhrState.set( this, { isApiPost: true } );
+				}
+			} catch ( e ) {
+				// Malformed URL, skip tagging
+			}
 		}
 		return origOpen.apply( this, arguments );
 	};
 
 	// Patch XMLHttpRequest.prototype.send once to detect action=upload
 	// in both FormData and string bodies, then invoke all registered callbacks.
-	const origSend = XMLHttpRequest.prototype.send;
 	XMLHttpRequest.prototype.send = function ( body ) {
 		const state = xhrState.get( this );
 		if ( state && state.isApiPost ) {
@@ -97,7 +120,13 @@
 				isUpload = ( typeof body.get === 'function' ) &&
 					body.get( 'action' ) === 'upload';
 			} else if ( typeof body === 'string' ) {
-				isUpload = body.indexOf( 'action=upload' ) !== -1;
+				// CQ-08: Use URLSearchParams for safer string body parsing
+				try {
+					const params = new URLSearchParams( body );
+					isUpload = params.get( 'action' ) === 'upload';
+				} catch ( e ) {
+					isUpload = false;
+				}
 			}
 
 			if ( isUpload ) {

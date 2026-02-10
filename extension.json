@@ -40,13 +40,15 @@
 		"upload": {
 			"class": "FilePermissions\\Hooks\\UploadHooks",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		},
 		"display": {
 			"class": "FilePermissions\\Hooks\\DisplayHooks",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		},
 		"SchemaChanges": {
@@ -57,6 +59,7 @@
 		"getUserPermissionsErrors": "enforcement",
 		"ImgAuthBeforeStream": "enforcement",
 		"ImageBeforeProduceHTML": "enforcement",
+		"ParserOptionsRegister": "enforcement",
 		"UploadFormInitDescriptor": "upload",
 		"UploadVerifyUpload": "upload",
 		"UploadComplete": "upload",
@@ -77,7 +80,8 @@
 		"fileperm-set-level": {
 			"class": "FilePermissions\\Api\\ApiFilePermSetLevel",
 			"services": [
-				"FilePermissions.PermissionService"
+				"FilePermissions.PermissionService",
+				"FilePermissions.Config"
 			]
 		}
 	},

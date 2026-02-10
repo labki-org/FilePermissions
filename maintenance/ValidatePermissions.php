@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace FilePermissions\Maintenance;
 
-use FilePermissions\Config;
 use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
 
@@ -41,7 +40,8 @@ class ValidatePermissions extends Maintenance {
 	}
 
 	public function execute(): void {
-		$validLevels = Config::getLevels();
+		$config = MediaWikiServices::getInstance()->getService( 'FilePermissions.Config' );
+		$validLevels = $config->getLevels();
 		$this->output( "Valid permission levels: " . implode( ', ', $validLevels ) . "\n\n" );
 
 		$orphans = $this->findOrphans( $validLevels );

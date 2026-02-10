@@ -110,7 +110,10 @@ class UploadHooksTest extends MediaWikiIntegrationTestCase {
 	 * @return UploadHooks
 	 */
 	private function createHooks(): UploadHooks {
-		return new UploadHooks( $this->getService() );
+		return new UploadHooks(
+			$this->getService(),
+			$this->getServiceContainer()->getService( 'FilePermissions.Config' )
+		);
 	}
 
 	// =========================================================================
@@ -362,7 +365,10 @@ class UploadHooksTest extends MediaWikiIntegrationTestCase {
 		$localFile->method( 'getTitle' )->willReturn( $title );
 		$upload->method( 'getLocalFile' )->willReturn( $localFile );
 
-		$hooks = new UploadHooks( $mockService );
+		$hooks = new UploadHooks(
+			$mockService,
+			$this->getServiceContainer()->getService( 'FilePermissions.Config' )
+		);
 
 		// onUploadComplete itself should succeed (deferred update is registered)
 		$result = $hooks->onUploadComplete( $upload );

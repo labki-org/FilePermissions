@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace FilePermissions\Tests\Unit;
 
+use FilePermissions\Config;
 use FilePermissions\PermissionService;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserGroupManager;
@@ -30,56 +31,61 @@ use Wikimedia\Rdbms\SelectQueryBuilder;
  */
 class PermissionServiceTest extends MediaWikiUnitTestCase {
 
-	/**
-	 * All 5 FilePermissions globals that must be reset between tests.
-	 */
-	private const GLOBALS_TO_RESET = [
-		'wgFilePermLevels',
-		'wgFilePermGroupGrants',
-		'wgFilePermDefaultLevel',
-		'wgFilePermNamespaceDefaults',
-		'wgFilePermInvalidConfig',
-	];
-
-	/**
-	 * Saved global values for restoration in tearDown.
-	 * @var array<string, mixed>
-	 */
-	private array $savedGlobals = [];
-
-	protected function setUp(): void {
-		parent::setUp();
-		// Save current global state before each test
-		foreach ( self::GLOBALS_TO_RESET as $global ) {
-			$this->savedGlobals[$global] = $GLOBALS[$global] ?? '__UNSET__';
-		}
-		// Set sane defaults for most tests
-		$GLOBALS['wgFilePermLevels'] = [ 'public', 'internal', 'confidential' ];
-		$GLOBALS['wgFilePermGroupGrants'] = [
-			'sysop' => [ '*' ],
-			'editor' => [ 'public', 'internal' ],
-			'viewer' => [ 'public' ],
-		];
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermInvalidConfig'] = false;
-	}
-
-	protected function tearDown(): void {
-		// Restore all 5 globals to prevent cross-test pollution
-		foreach ( self::GLOBALS_TO_RESET as $global ) {
-			if ( $this->savedGlobals[$global] === '__UNSET__' ) {
-				unset( $GLOBALS[$global] );
-			} else {
-				$GLOBALS[$global] = $this->savedGlobals[$global];
-			}
-		}
-		parent::tearDown();
-	}
-
 	// =========================================================================
 	// Helper methods
 	// =========================================================================
+
+	/**
+	 * Create a mock Config with the given settings.
+	 *
+	 * @param array $overrides Config values to override defaults
+	 * @return Config
+	 */
+	private function createMockConfig( array $overrides = [] ): Config {
+		$defaults = [
+			'levels' => [ 'public', 'internal', 'confidential' ],
+			'groupGrants' => [
+				'sysop' => [ '*' ],
+				'editor' => [ 'public', 'internal' ],
+				'viewer' => [ 'public' ],
+			],
+			'defaultLevel' => null,
+			'namespaceDefaults' => [],
+			'invalidConfig' => false,
+		];
+
+		$values = array_merge( $defaults, $overrides );
+
+		$config = $this->createMock( Config::class );
+		$config->method( 'getLevels' )->willReturn( $values['levels'] );
+		$config->method( 'getGroupGrants' )->willReturn( $values['groupGrants'] );
+		$config->method( 'getDefaultLevel' )->willReturn( $values['defaultLevel'] );
+		$config->method( 'getNamespaceDefaults' )->willReturn( $values['namespaceDefaults'] );
+		$config->method( 'isInvalidConfig' )->willReturn( $values['invalidConfig'] );
+		$config->method( 'isValidLevel' )->willReturnCallback(
+			static fn ( string $level ): bool => in_array( $level, $values['levels'], true )
+		);
+		$config->method( 'resolveDefaultLevel' )->willReturnCallback(
+			static function ( int $ns ) use ( $values ): ?string {
+				// Check namespace-specific default first
+				if ( isset( $values['namespaceDefaults'][$ns] ) ) {
+					$level = $values['namespaceDefaults'][$ns];
+					if ( in_array( $level, $values['levels'], true ) ) {
+						return $level;
+					}
+				}
+				// Fall back to global default
+				if ( $values['defaultLevel'] !== null
+					&& in_array( $values['defaultLevel'], $values['levels'], true )
+				) {
+					return $values['defaultLevel'];
+				}
+				return null;
+			}
+		);
+
+		return $config;
+	}
 
 	/**
 	 * Create a fresh PermissionService with the given mocks.
@@ -89,13 +95,19 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 *
 	 * @param IConnectionProvider $dbProvider
 	 * @param UserGroupManager $userGroupManager
+	 * @param Config|null $config
 	 * @return PermissionService
 	 */
 	private function createService(
 		IConnectionProvider $dbProvider,
-		UserGroupManager $userGroupManager
+		UserGroupManager $userGroupManager,
+		?Config $config = null
 	): PermissionService {
-		return new PermissionService( $dbProvider, $userGroupManager );
+		return new PermissionService(
+			$dbProvider,
+			$userGroupManager,
+			$config ?? $this->createMockConfig()
+		);
 	}
 
 	/**
@@ -337,10 +349,13 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessLevel
 	 */
 	public function testCanUserAccessLevelReturnsFalseWhenGroupHasEmptyGrantsArray(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = [ 'intern' => [] ];
+		$config = $this->createMockConfig( [
+			'groupGrants' => [ 'intern' => [] ],
+		] );
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [ 'intern' ] )
+			$this->createMockUserGroupManager( [ 'intern' ] ),
+			$config
 		);
 
 		$this->assertFalse( $service->canUserAccessLevel(
@@ -377,12 +392,13 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessLevel
 	 */
 	public function testCanUserAccessLevelReturnsFalseWhenConfigInvalid_FailClosed(): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = true;
+		$config = $this->createMockConfig( [ 'invalidConfig' => true ] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
 			// sysop has wildcard -- would normally grant access
-			$this->createMockUserGroupManager( [ 'sysop' ] )
+			$this->createMockUserGroupManager( [ 'sysop' ] ),
+			$config
 		);
 
 		$this->assertFalse(
@@ -400,11 +416,12 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	public function testCanUserAccessLevelDeniesAllLevelsWhenConfigInvalid_FailClosed(
 		string $level
 	): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = true;
+		$config = $this->createMockConfig( [ 'invalidConfig' => true ] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [ 'sysop' ] )
+			$this->createMockUserGroupManager( [ 'sysop' ] ),
+			$config
 		);
 
 		$this->assertFalse(
@@ -430,7 +447,7 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessLevel
 	 */
 	public function testCanUserAccessLevelDoesNotCheckGroupsWhenConfigInvalid_FailClosed(): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = true;
+		$config = $this->createMockConfig( [ 'invalidConfig' => true ] );
 
 		$ugm = $this->createMock( UserGroupManager::class );
 		$ugm->expects( $this->never() )
@@ -438,7 +455,8 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$ugm
+			$ugm,
+			$config
 		);
 
 		$this->assertFalse( $service->canUserAccessLevel(
@@ -643,12 +661,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelReturnsNamespaceDefaultWhenNoExplicitLevel(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'internal' ];
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'internal' ],
+		] );
 
 		// DB returns no row (no explicit level)
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -662,13 +683,16 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelReturnsGlobalDefaultWhenNoNamespaceDefault(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [],
+			'defaultLevel' => 'public',
+		] );
 
 		// DB returns no row (no explicit level)
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -682,13 +706,16 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelReturnsNullWhenNoDefaults_Unrestricted(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [],
+			'defaultLevel' => null,
+		] );
 
 		// DB returns no row
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -701,12 +728,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelPrefersNamespaceDefaultOverGlobal(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'confidential' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'confidential' ],
+			'defaultLevel' => 'public',
+		] );
 
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -719,13 +749,16 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelPrefersExplicitLevelOverNamespaceDefault(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'public' ];
-		$GLOBALS['wgFilePermDefaultLevel'] = 'public';
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'public' ],
+			'defaultLevel' => 'public',
+		] );
 
 		$row = (object)[ 'fpl_level' => 'confidential' ];
 		$service = $this->createService(
 			$this->createMockDbProvider( $row ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -742,14 +775,17 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsTrueWhenUserHasDefaultLevel(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = 'internal';
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => 'internal',
+			'namespaceDefaults' => [],
+		] );
 
 		// DB returns no row -- default level applies
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
 			// editor has [ 'public', 'internal' ]
-			$this->createMockUserGroupManager( [ 'editor' ] )
+			$this->createMockUserGroupManager( [ 'editor' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -765,14 +801,17 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsFalseWhenUserLacksDefaultLevel(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = 'confidential';
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => 'confidential',
+			'namespaceDefaults' => [],
+		] );
 
 		// DB returns no row -- default level applies
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
 			// viewer only has [ 'public' ]
-			$this->createMockUserGroupManager( [ 'viewer' ] )
+			$this->createMockUserGroupManager( [ 'viewer' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -788,12 +827,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsTrueWhenUserHasNamespaceDefaultLevel(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'internal' ];
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'internal' ],
+		] );
 
 		// DB returns no row -- namespace default applies
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [ 'editor' ] )
+			$this->createMockUserGroupManager( [ 'editor' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -809,12 +851,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsFalseWhenUserLacksNamespaceDefaultLevel(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'confidential' ];
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'confidential' ],
+		] );
 
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
 			// viewer only has 'public'
-			$this->createMockUserGroupManager( [ 'viewer' ] )
+			$this->createMockUserGroupManager( [ 'viewer' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -867,14 +912,17 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsTrueWhenNoLevelSet_UnrestrictedFile(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => null,
+			'namespaceDefaults' => [],
+		] );
 
 		// DB returns no row (no level set)
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
 			// Even with no groups, unrestricted files are accessible
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -890,13 +938,16 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileUnrestrictedFileAccessibleToGrouplessUser(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermGroupGrants'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => null,
+			'namespaceDefaults' => [],
+			'groupGrants' => [],
+		] );
 
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -913,13 +964,16 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsFalseWhenDefaultAppliesAndUserLacksAccess(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = 'confidential';
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => 'confidential',
+			'namespaceDefaults' => [],
+		] );
 
 		$service = $this->createService(
 			$this->createMockDbProvider( false ),
 			// viewer only has 'public', not 'confidential'
-			$this->createMockUserGroupManager( [ 'viewer' ] )
+			$this->createMockUserGroupManager( [ 'viewer' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -939,11 +993,14 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelReturnsDefaultForNonexistentFile(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [ NS_FILE => 'internal' ];
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [ NS_FILE => 'internal' ],
+		] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		// Page ID 0 = nonexistent
@@ -957,12 +1014,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::getEffectiveLevel
 	 */
 	public function testGetEffectiveLevelReturnsNullForNonexistentFileWithNoDefaults(): void {
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
+		$config = $this->createMockConfig( [
+			'namespaceDefaults' => [],
+			'defaultLevel' => null,
+		] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 0 );
@@ -976,12 +1036,15 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsTrueForNonexistentUnrestrictedFile(): void {
-		$GLOBALS['wgFilePermDefaultLevel'] = null;
-		$GLOBALS['wgFilePermNamespaceDefaults'] = [];
+		$config = $this->createMockConfig( [
+			'defaultLevel' => null,
+			'namespaceDefaults' => [],
+		] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [] )
+			$this->createMockUserGroupManager( [] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 0 );
@@ -1003,9 +1066,6 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 		);
 
 		$title = $this->createMockNonFileTitle( NS_MAIN, 100 );
-		// getLevel returns null (non-NS_FILE), getEffectiveLevel falls through to
-		// Config::resolveDefaultLevel(NS_MAIN) which returns null (no NS_MAIN default),
-		// so file is unrestricted
 		$this->assertTrue( $service->canUserAccessFile(
 			$this->createMockUser(),
 			$title
@@ -1188,14 +1248,17 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessLevel
 	 */
 	public function testCanUserAccessLevelShortCircuitsOnFirstGrantMatch(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = [
-			'first-group' => [ 'confidential' ],
-			'second-group' => [ 'public' ],
-		];
+		$config = $this->createMockConfig( [
+			'groupGrants' => [
+				'first-group' => [ 'confidential' ],
+				'second-group' => [ 'public' ],
+			],
+		] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [ 'first-group', 'second-group' ] )
+			$this->createMockUserGroupManager( [ 'first-group', 'second-group' ] ),
+			$config
 		);
 
 		$this->assertTrue( $service->canUserAccessLevel(
@@ -1210,12 +1273,13 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessFile
 	 */
 	public function testCanUserAccessFileReturnsFalseWhenConfigInvalid_FailClosed(): void {
-		$GLOBALS['wgFilePermInvalidConfig'] = true;
+		$config = $this->createMockConfig( [ 'invalidConfig' => true ] );
 
 		$row = (object)[ 'fpl_level' => 'public' ];
 		$service = $this->createService(
 			$this->createMockDbProvider( $row ),
-			$this->createMockUserGroupManager( [ 'sysop' ] )
+			$this->createMockUserGroupManager( [ 'sysop' ] ),
+			$config
 		);
 
 		$title = $this->createMockFileTitle( 42 );
@@ -1231,11 +1295,14 @@ class PermissionServiceTest extends MediaWikiUnitTestCase {
 	 * @covers \FilePermissions\PermissionService::canUserAccessLevel
 	 */
 	public function testCanUserAccessLevelReturnsFalseWithEmptyGrantsConfig(): void {
-		$GLOBALS['wgFilePermGroupGrants'] = [];
+		$config = $this->createMockConfig( [
+			'groupGrants' => [],
+		] );
 
 		$service = $this->createService(
 			$this->createNeverCalledDbProvider(),
-			$this->createMockUserGroupManager( [ 'sysop' ] )
+			$this->createMockUserGroupManager( [ 'sysop' ] ),
+			$config
 		);
 
 		$this->assertFalse( $service->canUserAccessLevel(

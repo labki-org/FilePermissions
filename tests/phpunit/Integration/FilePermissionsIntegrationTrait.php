@@ -38,6 +38,8 @@ trait FilePermissionsIntegrationTrait {
 		$this->overrideConfigValue( 'FilePermInvalidConfig', false );
 
 		$this->getServiceContainer()
+			->resetServiceForTesting( 'FilePermissions.Config' );
+		$this->getServiceContainer()
 			->resetServiceForTesting( 'FilePermissions.PermissionService' );
 	}
 
@@ -49,6 +51,8 @@ trait FilePermissionsIntegrationTrait {
 	 * @return PermissionService
 	 */
 	protected function getService(): PermissionService {
+		$this->getServiceContainer()
+			->resetServiceForTesting( 'FilePermissions.Config' );
 		$this->getServiceContainer()
 			->resetServiceForTesting( 'FilePermissions.PermissionService' );
 		return $this->getServiceContainer()
