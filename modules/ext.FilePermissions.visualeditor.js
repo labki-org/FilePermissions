@@ -16,9 +16,9 @@
 ( function () {
 	'use strict';
 
-	var levels = mw.config.get( 'wgFilePermLevels' );
-	var defaultLevel = mw.config.get( 'wgFilePermVEDefault' );
-	var VERIFY_DELAY_MS = 1000;
+	const levels = mw.config.get( 'wgFilePermLevels' );
+	const defaultLevel = mw.config.get( 'wgFilePermVEDefault' );
+	const VERIFY_DELAY_MS = 1000;
 
 	// Guard: levels must be available and non-empty
 	if ( !levels || !levels.length ) {
@@ -27,7 +27,7 @@
 
 	// Module-level reference to the active dropdown widget.
 	// Set when renderInfoForm creates it, read by XHR interceptor.
-	var activeBooklet = null;
+	let activeBooklet = null;
 
 	/**
 	 * Get the currently selected permission level from the active dropdown.
@@ -44,7 +44,7 @@
 
 	// Patch renderInfoForm to inject OOUI DropdownInputWidget into the
 	// upload dialog's info form panel.
-	var origRenderInfoForm = mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm;
+	const origRenderInfoForm = mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm;
 	/**
 	 * Override of BookletLayout#renderInfoForm.
 	 *
@@ -55,7 +55,7 @@
 	 * @return {OO.ui.PageLayout} The info form page with the dropdown appended
 	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm = function () {
-		var form = origRenderInfoForm.call( this );
+		const form = origRenderInfoForm.call( this );
 
 		// Skip dropdown for foreign upload targets (e.g. Commons).
 		// Only local uploads support FilePermissions.
@@ -65,15 +65,13 @@
 
 		// Create OOUI dropdown with permission levels
 		this.filePermDropdown = new OO.ui.DropdownInputWidget( {
-			options: levels.map( function ( lvl ) {
-				return { data: lvl, label: lvl };
-			} ),
+			options: levels.map( ( lvl ) => ( { data: lvl, label: lvl } ) ),
 			value: defaultLevel || levels[ 0 ],
 			classes: [ 'fileperm-ve-dropdown' ]
 		} );
 
 		// Wrap in a labeled field layout for consistent VE dialog styling
-		var fieldLayout = new OO.ui.FieldLayout( this.filePermDropdown, {
+		const fieldLayout = new OO.ui.FieldLayout( this.filePermDropdown, {
 			label: mw.msg( 'filepermissions-ve-label' ),
 			align: 'top'
 		} );
@@ -92,7 +90,7 @@
 	// Patch clear() to reset dropdown when dialog is reused.
 	// VE reuses the BookletLayout instance across multiple upload operations,
 	// so the dropdown must reset to the default value.
-	var origClear = mw.ForeignStructuredUpload.BookletLayout.prototype.clear;
+	const origClear = mw.ForeignStructuredUpload.BookletLayout.prototype.clear;
 	/**
 	 * Override of BookletLayout#clear.
 	 *
@@ -122,14 +120,14 @@
 	//
 	// Both formats are handled via the shared callback registry.
 
-	mw.FilePermissions.onUploadSend( function ( xhr, body ) {
+	mw.FilePermissions.onUploadSend( ( xhr, body ) => {
 		if ( body instanceof FormData ) {
-			var hasFilekey = typeof body.get === 'function' && !!body.get( 'filekey' );
+			const hasFilekey = typeof body.get === 'function' && !!body.get( 'filekey' );
 			if ( hasFilekey && !body.get( 'wpFilePermLevel' ) ) {
 				body.append( 'wpFilePermLevel', getSelectedPermLevel() );
 			}
 		} else if ( typeof body === 'string' ) {
-			var params = new URLSearchParams( body );
+			const params = new URLSearchParams( body );
 			if ( params.has( 'filekey' ) && !params.has( 'wpFilePermLevel' ) ) {
 				params.set( 'wpFilePermLevel', getSelectedPermLevel() );
 				return params.toString();
@@ -141,12 +139,12 @@
 
 	// Patch saveFile to verify PageProps storage after successful upload.
 	// saveFile() performs the publish-from-stash step and returns a promise.
-	var origSaveFile = mw.ForeignStructuredUpload.BookletLayout.prototype.saveFile;
+	const origSaveFile = mw.ForeignStructuredUpload.BookletLayout.prototype.saveFile;
 	mw.ForeignStructuredUpload.BookletLayout.prototype.saveFile = function () {
-		var self = this;
-		return origSaveFile.call( this ).then( function () {
+		const self = this;
+		return origSaveFile.call( this ).then( () => {
 			// Delay verification to allow DeferredUpdates to store permission
-			setTimeout( function () {
+			setTimeout( () => {
 				mw.FilePermissions.verifyPermission( self.getFilename(), 'filepermissions-ve-error-save' );
 			}, VERIFY_DELAY_MS );
 		} );

@@ -13,13 +13,13 @@
 ( function () {
 	'use strict';
 
-	var levels = mw.config.get( 'wgFilePermLevels' );
-	var defaultLevel = mw.config.get( 'wgFilePermMsUploadDefault' );
+	const levels = mw.config.get( 'wgFilePermLevels' );
+	const defaultLevel = mw.config.get( 'wgFilePermMsUploadDefault' );
 
 	// Guard: levels must be available and non-empty
 	if ( !levels || !levels.length ) {
-		mw.hook( 'wikiEditor.toolbarReady' ).add( function () {
-			var $msDiv = $( '#msupload-div' );
+		mw.hook( 'wikiEditor.toolbarReady' ).add( () => {
+			const $msDiv = $( '#msupload-div' );
 			if ( $msDiv.length ) {
 				$msDiv.prepend(
 					$( '<div>' )
@@ -37,27 +37,26 @@
 	 * @return {jQuery} Container element ready to prepend into #msupload-div
 	 */
 	function buildDropdown() {
-		var $container = $( '<div>' )
+		const $container = $( '<div>' )
 			.addClass( 'fileperm-msupload-controls' )
 			.attr( 'id', 'fileperm-msupload-controls' );
 
-		var $label = $( '<label>' )
+		const $label = $( '<label>' )
 			.attr( 'for', 'fileperm-msupload-select' )
 			.text( mw.msg( 'filepermissions-msupload-label' ) );
 
-		var $select = $( '<select>' )
+		const $select = $( '<select>' )
 			.attr( { id: 'fileperm-msupload-select', name: 'fileperm-msupload-select' } );
 
-		var i, $option;
-		for ( i = 0; i < levels.length; i++ ) {
-			$option = $( '<option>' )
-				.val( levels[ i ] )
-				.text( levels[ i ] );
-			if ( levels[ i ] === defaultLevel ) {
+		levels.forEach( ( level ) => {
+			const $option = $( '<option>' )
+				.val( level )
+				.text( level );
+			if ( level === defaultLevel ) {
 				$option.prop( 'selected', true );
 			}
 			$select.append( $option );
-		}
+		} );
 
 		// If no default matched and levels exist, select the first option
 		if ( defaultLevel === null && levels.length > 0 ) {
@@ -88,11 +87,11 @@
 
 		// Register callback with shared XHR interceptor to inject
 		// wpFilePermLevel and monitor upload responses.
-		mw.FilePermissions.onUploadSend( function ( xhr, body ) {
+		mw.FilePermissions.onUploadSend( ( xhr, body ) => {
 			if ( !( body instanceof FormData ) ) {
 				return;
 			}
-			var $select = $( '#fileperm-msupload-select' );
+			const $select = $( '#fileperm-msupload-select' );
 			if ( !$select.length ) {
 				return;
 			}
@@ -106,8 +105,8 @@
 			$select.prop( 'disabled', true );
 
 			// Listen for upload completion
-			xhr.addEventListener( 'load', function () {
-				var response;
+			xhr.addEventListener( 'load', () => {
+				let response;
 				try {
 					response = JSON.parse( xhr.responseText );
 				} catch ( e ) {
@@ -117,23 +116,23 @@
 				if ( response && response.upload &&
 					response.upload.result === 'Success' ) {
 					// Delay to allow DeferredUpdates to store permission
-					setTimeout( function () {
+					setTimeout( () => {
 						mw.FilePermissions.verifyPermission( response.upload.filename, 'filepermissions-msupload-error-save' );
 					}, 1000 );
 				}
 
 				// Re-enable dropdown when no more uploads pending
-				setTimeout( function () {
-					var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
+				setTimeout( () => {
+					const pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
 					if ( pending === 0 ) {
 						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
 					}
 				}, 500 );
 			} );
 
-			xhr.addEventListener( 'error', function () {
-				setTimeout( function () {
-					var pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
+			xhr.addEventListener( 'error', () => {
+				setTimeout( () => {
+					const pending = $( '#msupload-list li:not(.green):not(.yellow)' ).length;
 					if ( pending === 0 ) {
 						$( '#fileperm-msupload-select' ).prop( 'disabled', false );
 					}
@@ -146,27 +145,27 @@
 	// Both this module and MsUpload listen to wikiEditor.toolbarReady.
 	// If our callback fires before MsUpload's, #msupload-div won't exist
 	// yet. Use a MutationObserver to wait for MsUpload to create it.
-	mw.hook( 'wikiEditor.toolbarReady' ).add( function () {
-		var $msDiv = $( '#msupload-div' );
+	mw.hook( 'wikiEditor.toolbarReady' ).add( () => {
+		const $msDiv = $( '#msupload-div' );
 		if ( $msDiv.length ) {
 			init( $msDiv );
 			return;
 		}
 
 		// MsUpload hasn't created its container yet — watch for it
-		var observer = new MutationObserver( function () {
-			var $found = $( '#msupload-div' );
+		const observer = new MutationObserver( () => {
+			const $found = $( '#msupload-div' );
 			if ( $found.length ) {
 				observer.disconnect();
 				init( $found );
 			}
 		} );
-		var $toolbar = $( '.wikiEditor-ui' );
+		const $toolbar = $( '.wikiEditor-ui' );
 		observer.observe(
 			$toolbar.length ? $toolbar[ 0 ] : document.body,
 			{ childList: true, subtree: true }
 		);
-		setTimeout( function () {
+		setTimeout( () => {
 			observer.disconnect();
 		}, 10000 );
 	} );

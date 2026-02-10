@@ -38,16 +38,14 @@
 			action: 'query',
 			titles: 'File:' + filename,
 			prop: 'fileperm'
-		} ).then( function ( data ) {
-			var pages, pageId, page;
-
+		} ).then( ( data ) => {
 			if ( !data.query || !data.query.pages ) {
 				return;
 			}
 
-			pages = data.query.pages;
-			for ( pageId in pages ) {
-				page = pages[ pageId ];
+			const pages = data.query.pages;
+			for ( const pageId of Object.keys( pages ) ) {
+				const page = pages[ pageId ];
 				if ( !page.fileperm_level ) {
 					mw.notify(
 						mw.msg( errorMsgKey, filename ),
@@ -60,7 +58,7 @@
 
 	// --- Callback registry for upload XHR interception ---
 
-	var uploadCallbacks = [];
+	const uploadCallbacks = [];
 
 	/**
 	 * Register a callback to be invoked when an upload XHR send() is detected.
@@ -76,10 +74,10 @@
 	};
 
 	// SEC-03: Use WeakMap to avoid exposing state on XHR instances
-	var xhrState = new WeakMap();
+	const xhrState = new WeakMap();
 
 	// Patch XMLHttpRequest.prototype.open once to tag API POST requests.
-	var origOpen = XMLHttpRequest.prototype.open;
+	const origOpen = XMLHttpRequest.prototype.open;
 	XMLHttpRequest.prototype.open = function ( method, url ) {
 		if ( method === 'POST' && url && url.indexOf( 'api.php' ) !== -1 ) {
 			xhrState.set( this, { isApiPost: true } );
@@ -89,11 +87,11 @@
 
 	// Patch XMLHttpRequest.prototype.send once to detect action=upload
 	// in both FormData and string bodies, then invoke all registered callbacks.
-	var origSend = XMLHttpRequest.prototype.send;
+	const origSend = XMLHttpRequest.prototype.send;
 	XMLHttpRequest.prototype.send = function ( body ) {
-		var state = xhrState.get( this );
+		const state = xhrState.get( this );
 		if ( state && state.isApiPost ) {
-			var isUpload = false;
+			let isUpload = false;
 
 			if ( body instanceof FormData ) {
 				isUpload = ( typeof body.get === 'function' ) &&
@@ -103,8 +101,8 @@
 			}
 
 			if ( isUpload ) {
-				for ( var i = 0; i < uploadCallbacks.length; i++ ) {
-					var result = uploadCallbacks[ i ]( this, body );
+				for ( const callback of uploadCallbacks ) {
+					const result = callback( this, body );
 					if ( typeof result === 'string' ) {
 						body = result;
 					}
