@@ -48,7 +48,13 @@
 				const page = pages[ pageId ];
 				if ( !page.fileperm_level ) {
 					mw.notify(
-						mw.msg( errorMsgKey, filename ),
+						$( '<span>' ).append(
+							mw.msg( errorMsgKey, filename ),
+							' ',
+							$( '<a>' )
+								.attr( 'href', mw.util.getUrl( 'File:' + filename ) )
+								.text( mw.msg( 'filepermissions-verify-link' ) )
+						),
 						{ type: 'error', autoHide: false }
 					);
 				}

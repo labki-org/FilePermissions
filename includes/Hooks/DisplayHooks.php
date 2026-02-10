@@ -60,6 +60,9 @@ class DisplayHooks implements
 		$out = $context->getOutput();
 		$user = $context->getUser();
 
+		// Enable OOUI for the lock icon in the indicator
+		$out->enableOOUI();
+
 		// Build indicator HTML (visible to all authorized users)
 		$indicatorHtml = $this->buildIndicatorHtml( $level );
 
@@ -142,9 +145,14 @@ class DisplayHooks implements
 	 * @return string HTML for the indicator
 	 */
 	private function buildIndicatorHtml( string $level ): string {
+		$icon = new \OOUI\IconWidget( [
+			'icon' => 'lock',
+			'classes' => [ 'fileperm-indicator-icon' ],
+		] );
+
 		return Html::rawElement( 'div', [
 			'class' => 'fileperm-indicator',
-		], Html::element( 'strong', [],
+		], $icon . Html::element( 'strong', [],
 			wfMessage( 'filepermissions-level-label' )->text()
 		) . ' ' . Html::element( 'span', [
 			'class' => 'fileperm-level-badge',

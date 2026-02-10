@@ -26,5 +26,8 @@
 	"filepermissions-msupload-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page.",
 	"filepermissions-ve-label": "Permission level:",
 	"filepermissions-ve-error-nolevels": "Error: Permission levels could not be loaded.",
-	"filepermissions-ve-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page."
+	"filepermissions-ve-error-save": "Warning: File uploaded but permission level may not have been saved for \"$1\". Check the file page.",
+	"filepermissions-edit-saving": "Saving...",
+	"filepermissions-ve-help": "Controls which groups can view this file.",
+	"filepermissions-verify-link": "Set it manually."
 }
