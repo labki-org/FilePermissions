@@ -125,7 +125,8 @@
 			],
 			"messages": [
 				"filepermissions-edit-success",
-				"filepermissions-edit-error"
+				"filepermissions-edit-error",
+				"filepermissions-edit-saving"
 			]
 		},
 		"ext.FilePermissions.shared": {
@@ -136,6 +137,9 @@
 			],
 			"dependencies": [
 				"mediawiki.api"
+			],
+			"messages": [
+				"filepermissions-verify-link"
 			]
 		},
 		"ext.FilePermissions.msupload": {
@@ -175,7 +179,8 @@
 			"messages": [
 				"filepermissions-ve-label",
 				"filepermissions-ve-error-nolevels",
-				"filepermissions-ve-error-save"
+				"filepermissions-ve-error-save",
+				"filepermissions-ve-help"
 			]
 		}
 	},
