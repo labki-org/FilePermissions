@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.0.1
+
+### Documentation
+- Fixed license identifier in `extension.json` and `composer.json` (GPL-2.0-or-later → GPL-3.0-or-later to match LICENSE file)
+- Fixed stale "PageProps" references in PHPDoc for `ApiFilePermSetLevel` and `UploadHooks` (now references `fileperm_levels` table)
+- Added class docblock to `SchemaChangesHandler`
+- Added `action=query&prop=fileperm` API documentation to README
+- Added rate limiting documentation to README
+- Added database schema subsection to README
+- Added Maintenance section to README (ValidatePermissions.php usage)
+- Added Troubleshooting section to README
+- Fixed incorrect class names in Extension Integration section (`MsUploadHooks`/`VisualEditorHooks` → `DisplayHooks`)
+- Created CONTRIBUTING.md with development setup, architecture overview, test instructions, and PR guidelines
+
 ## v1.0.0
 
 Initial release of FilePermissions for MediaWiki.

@@ -6,6 +6,9 @@ namespace FilePermissions\Hooks;
 
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 
+/**
+ * Registers the fileperm_levels table with MediaWiki's schema updater.
+ */
 class SchemaChangesHandler implements LoadExtensionSchemaUpdatesHook {
 
 	/**

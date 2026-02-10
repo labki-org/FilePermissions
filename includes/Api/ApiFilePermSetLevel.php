@@ -44,7 +44,7 @@ class ApiFilePermSetLevel extends ApiBase {
 	/**
 	 * Execute the API action: validate inputs, update the permission level, and log the change.
 	 *
-	 * Requires the `edit-fileperm` user right. Stores the new level in PageProps
+	 * Requires the `edit-fileperm` user right. Stores the new level in the fileperm_levels table
 	 * via PermissionService and publishes an audit log entry to Special:Log/fileperm.
 	 *
 	 * @throws \MediaWiki\Api\ApiUsageException If the user lacks `edit-fileperm`,

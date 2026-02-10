@@ -21,13 +21,13 @@ use Wikimedia\Rdbms\IDBAccessObject;
  * Upload hooks for FilePermissions extension.
  *
  * Adds a permission-level dropdown to Special:Upload and stores
- * the selected level in PageProps on upload completion.
+ * the selected level in the fileperm_levels table on upload completion.
  *
  * Implements four upload requirements:
  * - UPLD-01: Permission dropdown appears on Special:Upload form
  * - UPLD-02: Dropdown lists all configured levels with group info
  * - UPLD-03: Empty placeholder default; re-upload pre-selects existing level
- * - UPLD-04: Selected level stored in PageProps on upload
+ * - UPLD-04: Selected level stored in fileperm_levels on upload
  */
 class UploadHooks implements
 	UploadFormInitDescriptorHook,

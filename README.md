@@ -197,6 +197,39 @@ Permission checks may exhibit timing differences based on database lookups (e.g.
 
 ## API Reference
 
+### `action=query&prop=fileperm`
+
+Retrieves the permission level for one or more file pages.
+
+**Method:** GET
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `titles` | string | Yes | Pipe-separated list of file page titles |
+
+**Response:**
+
+```json
+{
+  "query": {
+    "pages": {
+      "123": {
+        "pageid": 123,
+        "ns": 6,
+        "title": "File:Example.png",
+        "fileperm_level": "internal"
+      }
+    }
+  }
+}
+```
+
+Pages without a permission level omit the `fileperm_level` field entirely.
+
+**Cache mode:** `private` (responses are not cached by shared proxies).
+
 ### `action=fileperm-set-level`
 
 Sets the permission level for a file. Requires CSRF token and `edit-fileperm` right.
@@ -228,6 +261,24 @@ Sets the permission level for a file. Requires CSRF token and `edit-fileperm` ri
 - `permissiondenied` -- User lacks the `edit-fileperm` right
 - `badtoken` -- Invalid or missing CSRF token
 
+### Rate Limiting
+
+The `fileperm-set-level` endpoint enforces rate limits via MediaWiki's `fileperm-setlevel` rate limiter. Default limits:
+
+| Group | Limit |
+|---|---|
+| `user` | 10 actions per 60 seconds |
+| `newbie` | 3 actions per 60 seconds |
+
+Override in `LocalSettings.php`:
+
+```php
+$wgRateLimits['fileperm-setlevel'] = [
+    'user' => [ 20, 60 ],    // 20 per 60s for logged-in users
+    'newbie' => [ 5, 60 ],   // 5 per 60s for new accounts
+];
+```
+
 ## Extension Integration
 
 ### Shared Module
@@ -241,11 +292,11 @@ This ensures the XHR prototype is patched exactly once, even when both MsUpload 
 
 ### MsUpload
 
-When the MsUpload extension is detected, `MsUploadHooks` loads the `ext.FilePermissions.msupload` module on edit pages. This adds a permission-level dropdown to the MsUpload interface. If MsUpload is not installed, the hook handler is a silent no-op.
+When the MsUpload extension is detected, `DisplayHooks` loads the `ext.FilePermissions.msupload` module on edit pages (via the `EditPage::showEditForm:initial` hook). This adds a permission-level dropdown to the MsUpload interface. If MsUpload is not installed, the hook handler is a silent no-op.
 
 ### VisualEditor
 
-When VisualEditor is detected, `VisualEditorHooks` loads the `ext.FilePermissions.visualeditor` module on pages where VE is active. The module monkey-patches `mw.ForeignStructuredUpload.BookletLayout` to inject a dropdown into the upload dialog and intercepts the publish-from-stash XHR to include the selected level. If VisualEditor is not installed, the hook handler is a silent no-op.
+When VisualEditor is detected, `DisplayHooks` loads the `ext.FilePermissions.visualeditor` module on pages where VE is active (via the `BeforePageDisplay` hook). The module monkey-patches `mw.ForeignStructuredUpload.BookletLayout` to inject a dropdown into the upload dialog and intercepts the publish-from-stash XHR to include the selected level. If VisualEditor is not installed, the hook handler is a silent no-op.
 
 ## Storage
 
@@ -254,6 +305,19 @@ Permission levels are stored in a dedicated `fileperm_levels` table with columns
 The table is created automatically by `php maintenance/run.php update`.
 
 On upload, storage is deferred via `DeferredUpdates` to ensure the file page exists before writing the level.
+
+### Schema
+
+| Column | Type | Description |
+|---|---|---|
+| `fpl_page` | `INT UNSIGNED NOT NULL` (PK) | References `page.page_id` |
+| `fpl_level` | `VARBINARY(255) NOT NULL` | The assigned permission level |
+
+Schema files by database type:
+
+- `sql/mysql/tables-generated.sql`
+- `sql/postgres/tables-generated.sql`
+- `sql/sqlite/tables-generated.sql`
 
 ## Permissions
 
@@ -274,6 +338,56 @@ All permission level changes are logged to `Special:Log/fileperm`. Log entries i
 - **Performer** -- The user who made the change
 - **Target** -- The file page
 - **Parameters** -- Old level and new level
+
+## Maintenance
+
+### ValidatePermissions.php
+
+Detects and repairs orphaned permission levels -- rows in `fileperm_levels` whose level value is no longer in `$wgFilePermLevels` (e.g. after renaming or removing a level).
+
+**Dry-run** (report only):
+
+```bash
+php maintenance/run.php extensions/FilePermissions/maintenance/ValidatePermissions.php
+```
+
+**Fix** (replace an old level with a new one):
+
+```bash
+php maintenance/run.php extensions/FilePermissions/maintenance/ValidatePermissions.php \
+    --fix old_level:new_level
+```
+
+The script reports all mismatched rows before applying any changes.
+
+## Troubleshooting
+
+### Files accessible despite permissions
+
+Verify all three prerequisites are in place:
+
+1. **Anonymous read is disabled:** `$wgGroupPermissions['*']['read'] = false;`
+2. **Upload path routes through img_auth.php:** `$wgUploadPath = "{$wgScriptPath}/img_auth.php";`
+3. **Web server blocks the upload directory:** Direct requests to `/images/` must return 403 (see Installation step 5).
+
+If any of these are missing, `img_auth.php` will not enforce permission hooks.
+
+### Fail-closed / all access denied
+
+If all file access is denied regardless of group membership, check the debug log for configuration validation errors. The extension sets `$wgFilePermInvalidConfig = true` when validation fails, which causes all permission checks to deny access.
+
+```php
+$wgDebugLogGroups['FilePermissions'] = '/tmp/fileperm-debug.log';
+```
+
+Common causes: an empty `$wgFilePermLevels` array, or a `$wgFilePermGroupGrants` entry referencing a level not in `$wgFilePermLevels`.
+
+### Permission not saved on upload
+
+On Special:Upload, permission storage is deferred via `DeferredUpdates` to run after the file page transaction commits. If storage appears to fail:
+
+- Check the `FilePermissions` debug log for errors in the deferred callback.
+- API uploads (`action=upload`) that do not include a `wpFilePermLevel` parameter will not have a level set unless `$wgFilePermDefaultLevel` or `$wgFilePermNamespaceDefaults` provides a default.
 
 ## License
 

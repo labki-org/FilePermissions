@@ -6,7 +6,7 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:FilePermissions",
 	"type": "other",
-	"license-name": "GPL-2.0-or-later",
+	"license-name": "GPL-3.0-or-later",
 	"description": "Group-based file permission system",
 	"descriptionmsg": "filepermissions-desc",
 	"requires": {
