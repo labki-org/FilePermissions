@@ -38,16 +38,14 @@
 			action: 'query',
 			titles: 'File:' + filename,
 			prop: 'fileperm'
-		} ).then( function ( data ) {
-			var pages, pageId, page;
-
+		} ).then( ( data ) => {
 			if ( !data.query || !data.query.pages ) {
 				return;
 			}
 
-			pages = data.query.pages;
-			for ( pageId in pages ) {
-				page = pages[ pageId ];
+			const pages = data.query.pages;
+			for ( const pageId of Object.keys( pages ) ) {
+				const page = pages[ pageId ];
 				if ( !page.fileperm_level ) {
 					mw.notify(
 						mw.msg( errorMsgKey, filename ),
@@ -60,7 +58,7 @@
 
 	// --- Callback registry for upload XHR interception ---
 
-	var uploadCallbacks = [];
+	const uploadCallbacks = [];
 
 	/**
 	 * Register a callback to be invoked when an upload XHR send() is detected.
@@ -76,10 +74,10 @@
 	};
 
 	// SEC-03: Use WeakMap to avoid exposing state on XHR instances
-	var xhrState = new WeakMap();
+	const xhrState = new WeakMap();
 
 	// CQ-08: Detect if another script already patched XHR prototypes
-	var origOpen = XMLHttpRequest.prototype.open;
+	const origOpen = XMLHttpRequest.prototype.open;
 	if ( origOpen.toString().indexOf( '[native code]' ) === -1 ) {
 		mw.log.warn(
 			'FilePermissions: XMLHttpRequest.prototype.open already patched ' +
@@ -87,7 +85,7 @@
 		);
 	}
 
-	var origSend = XMLHttpRequest.prototype.send;
+	const origSend = XMLHttpRequest.prototype.send;
 	if ( origSend.toString().indexOf( '[native code]' ) === -1 ) {
 		mw.log.warn(
 			'FilePermissions: XMLHttpRequest.prototype.send already patched ' +
@@ -100,7 +98,7 @@
 		if ( method === 'POST' && url ) {
 			// CQ-08: Use URL parser for tighter pathname matching
 			try {
-				var parsed = new URL( url, location.origin );
+				const parsed = new URL( url, location.origin );
 				if ( parsed.pathname.endsWith( 'api.php' ) ) {
 					xhrState.set( this, { isApiPost: true } );
 				}
@@ -114,9 +112,9 @@
 	// Patch XMLHttpRequest.prototype.send once to detect action=upload
 	// in both FormData and string bodies, then invoke all registered callbacks.
 	XMLHttpRequest.prototype.send = function ( body ) {
-		var state = xhrState.get( this );
+		const state = xhrState.get( this );
 		if ( state && state.isApiPost ) {
-			var isUpload = false;
+			let isUpload = false;
 
 			if ( body instanceof FormData ) {
 				isUpload = ( typeof body.get === 'function' ) &&
@@ -124,7 +122,7 @@
 			} else if ( typeof body === 'string' ) {
 				// CQ-08: Use URLSearchParams for safer string body parsing
 				try {
-					var params = new URLSearchParams( body );
+					const params = new URLSearchParams( body );
 					isUpload = params.get( 'action' ) === 'upload';
 				} catch ( e ) {
 					isUpload = false;
@@ -132,8 +130,8 @@
 			}
 
 			if ( isUpload ) {
-				for ( var i = 0; i < uploadCallbacks.length; i++ ) {
-					var result = uploadCallbacks[ i ]( this, body );
+				for ( const callback of uploadCallbacks ) {
+					const result = callback( this, body );
 					if ( typeof result === 'string' ) {
 						body = result;
 					}

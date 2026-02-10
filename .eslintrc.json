@@ -1,0 +1,12 @@
+{
+	"root": true,
+	"extends": "wikimedia/client",
+	"globals": {
+		"mw": "readonly",
+		"OO": "readonly",
+		"$": "readonly"
+	},
+	"rules": {
+		"es-x/no-string-prototype-endswith": "off"
+	}
+}

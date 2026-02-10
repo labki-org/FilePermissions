@@ -15,11 +15,11 @@
 	'use strict';
 
 	// Wait for DOM ready — RL packageFiles modules may execute before body is parsed
-	$( function () {
-		var currentLevel = mw.config.get( 'wgFilePermCurrentLevel' );
-		var pageTitle = mw.config.get( 'wgFilePermPageTitle' );
-		var $dropdownEl = $( '#fileperm-edit-dropdown' );
-		var $saveBtnEl = $( '#fileperm-edit-save' );
+	$( () => {
+		let currentLevel = mw.config.get( 'wgFilePermCurrentLevel' );
+		const pageTitle = mw.config.get( 'wgFilePermPageTitle' );
+		const $dropdownEl = $( '#fileperm-edit-dropdown' );
+		const $saveBtnEl = $( '#fileperm-edit-save' );
 
 		// Guard: edit controls not rendered (user lacks permission)
 		if ( !$saveBtnEl.length ) {
@@ -29,11 +29,11 @@
 		// Infuse server-rendered OOUI widgets to make them interactive.
 		// DropdownInputWidget hides the native <select> and uses a
 		// DropdownWidget overlay that only works after infusion.
-		var dropdown = OO.ui.infuse( $dropdownEl );
-		var saveBtn = OO.ui.infuse( $saveBtnEl );
+		const dropdown = OO.ui.infuse( $dropdownEl );
+		const saveBtn = OO.ui.infuse( $saveBtnEl );
 
-		saveBtn.on( 'click', function () {
-			var newLevel = dropdown.getValue();
+		saveBtn.on( 'click', () => {
+			const newLevel = dropdown.getValue();
 
 			if ( !newLevel || newLevel === currentLevel ) {
 				return;
@@ -42,17 +42,17 @@
 			// Disable save button to prevent double-submit
 			saveBtn.setDisabled( true );
 
-			var api = new mw.Api();
+			const api = new mw.Api();
 			api.postWithToken( 'csrf', {
 				action: 'fileperm-set-level',
 				title: pageTitle,
 				level: newLevel
-			} ).then( function () {
+			} ).then( () => {
 				mw.notify( mw.msg( 'filepermissions-edit-success' ), { type: 'success' } );
 				$( '#fileperm-level-badge' ).text( newLevel );
 				currentLevel = newLevel;
 				saveBtn.setDisabled( false );
-			}, function () {
+			}, () => {
 				mw.notify( mw.msg( 'filepermissions-edit-error' ), { type: 'error' } );
 				saveBtn.setDisabled( false );
 			} );

@@ -6,8 +6,8 @@ namespace FilePermissions;
 
 use InvalidArgumentException;
 use MediaWiki\Title\Title;
-use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserIdentity;
 use Wikimedia\Rdbms\IConnectionProvider;
 
 /**

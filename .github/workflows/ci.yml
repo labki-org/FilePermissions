@@ -23,6 +23,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run phpcs
+        run: composer phpcs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run eslint
+        run: npm run lint
+
   test:
     name: Unit, Integration & E2E Tests
     runs-on: ubuntu-latest
