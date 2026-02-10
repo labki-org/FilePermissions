@@ -176,27 +176,57 @@ class EnforcementHooks implements
 	 *
 	 * Creates a non-clickable placeholder that:
 	 * - Matches requested dimensions to preserve page layout
-	 * - Shows a minimal grayscale lock icon
+	 * - Shows a refined lock icon with "Access restricted" label
 	 * - Uses inline SVG data URI to avoid extra HTTP request
+	 * - Scales icon and text proportionally with placeholder size
+	 *
+	 * Must remain fully inline (no external CSS) because this HTML is
+	 * embedded in parser output on arbitrary wiki pages.
 	 *
 	 * @param int $width Width in pixels
 	 * @param int $height Height in pixels
 	 * @return string HTML for the placeholder
 	 */
 	private function generatePlaceholderHtml( int $width, int $height ): string {
-		// Lock icon SVG - minimal grayscale design
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#999">'
-			. '<path d="M12 17a2 2 0 002-2v-2a2 2 0 00-4 0v2a2 2 0 002 2zm6-7V8a6 6 0 10-12 0v2'
-			. 'a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2z"/></svg>';
+		$minDim = min( $width, $height );
+		$iconSize = max( 16, (int)( $minDim * 0.3 ) );
+
+		// Lock icon SVG — two-part design (shackle + body), WikimediaUI color
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#72777d">'
+			. '<rect x="3" y="11" width="18" height="11" rx="2"/>'
+			. '<path d="M7 11V7a5 5 0 0110 0v4" fill="none" stroke="#72777d"'
+			. ' stroke-width="2" stroke-linecap="round"/></svg>';
 
 		// Base64-encode SVG to avoid HTML attribute escaping issues
 		$dataUri = 'data:image/svg+xml;base64,' . base64_encode( $svg );
 
+		$escapedWidth = htmlspecialchars( (string)$width );
+		$escapedHeight = htmlspecialchars( (string)$height );
+
+		// Show text label only when placeholder is large enough
+		$textHtml = '';
+		if ( $minDim >= 80 ) {
+			$fontSize = max( 10, (int)( $minDim * 0.07 ) );
+			$textMargin = max( 2, (int)( $iconSize * 0.15 ) );
+			$label = htmlspecialchars(
+				wfMessage( 'filepermissions-access-denied-short' )->text()
+			);
+			$textHtml = '<span style="font-size:' . $fontSize . 'px;color:#72777d;'
+				. 'margin-top:' . $textMargin . 'px;font-family:sans-serif;">'
+				. $label . '</span>';
+		}
+
 		// Non-clickable placeholder - no link wrapper, dead end
-		return '<span class="fileperm-placeholder" style="display:inline-block;'
-			. 'width:' . htmlspecialchars( (string)$width ) . 'px;'
-			. 'height:' . htmlspecialchars( (string)$height ) . 'px;'
-			. 'background:url(' . htmlspecialchars( $dataUri ) . ') center/50% no-repeat #f5f5f5;'
-			. 'border:1px solid #ddd;"></span>';
+		return '<span class="fileperm-placeholder" style="display:inline-flex;'
+			. 'align-items:center;justify-content:center;flex-direction:column;'
+			. 'width:' . $escapedWidth . 'px;'
+			. 'height:' . $escapedHeight . 'px;'
+			. 'background:radial-gradient(ellipse,#f8f9fa 0%,#eaecf0 100%);'
+			. 'border:1px solid #c8ccd1;border-radius:2px;">'
+			. '<img src="' . htmlspecialchars( $dataUri )
+			. '" alt="" style="width:' . $iconSize . 'px;height:' . $iconSize . 'px;'
+			. 'opacity:0.6;" />'
+			. $textHtml
+			. '</span>';
 	}
 }

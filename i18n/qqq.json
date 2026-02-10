@@ -26,5 +26,6 @@
 	"filepermissions-msupload-error-save": "Warning shown in the MsUpload interface when a file was uploaded but its permission level may not have been saved. Parameters:\n* $1 - file name",
 	"filepermissions-ve-label": "Label for the permission level dropdown injected into the VisualEditor media upload dialog.",
 	"filepermissions-ve-error-nolevels": "Error message shown in the VisualEditor upload dialog when permission levels could not be loaded from the API.",
-	"filepermissions-ve-error-save": "Warning shown in the VisualEditor upload dialog when a file was uploaded but its permission level may not have been saved. Parameters:\n* $1 - file name"
+	"filepermissions-ve-error-save": "Warning shown in the VisualEditor upload dialog when a file was uploaded but its permission level may not have been saved. Parameters:\n* $1 - file name",
+	"filepermissions-access-denied-short": "Short label shown on the placeholder image when a user does not have permission to view an embedded file."
 }
