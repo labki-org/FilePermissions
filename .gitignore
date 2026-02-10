@@ -3,3 +3,7 @@ vendor/
 playwright-report/
 test-results/
 .auth/
+.claude/
+.planning/
+.playwright-mcp/
+composer.lock

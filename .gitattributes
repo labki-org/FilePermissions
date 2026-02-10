@@ -1,9 +1,6 @@
 # Export ignores for release tarballs
 .auth/               export-ignore
-.claude/             export-ignore
 .github/             export-ignore
-.planning/           export-ignore
-.playwright-mcp/     export-ignore
 tests/               export-ignore
 node_modules/        export-ignore
 test-results/        export-ignore
